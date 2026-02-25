@@ -17,8 +17,8 @@ If you want to collaborate with us and be able to modify files, reach out to us 
 A few useful resources:
 
 **Skills & Subagents:**
-- [Skills Library](https://www.skills.sh)
-- [Agents Library](https://subagents.cc/)
+- [Skills Library](https://www.skills.sh) — The original skills platform; browse and download SKILL.md files for Claude Code and other agents
+- [Agents Library](https://subagents.cc/) — Curated collection of ready-to-use subagent definitions you can drop straight into your project
 - [SkillsMP](https://skillsmp.com) — Skills marketplace covering Claude Code, Codex, and ChatGPT
 - [Build with Claude](https://www.buildwithclaude.com/subagents) — Plugin marketplace for Claude Code (subagents, skills, commands, hooks)
 - [Claude Plugins](https://claude-plugins.dev/) — Community registry with CLI installer for Claude Code plugins
@@ -28,7 +28,7 @@ A few useful resources:
 - [MCP Market](https://mcpmarket.com/) — Directory of MCP servers and agent skills for Claude, Cursor, and other AI tools
 
 **AI Coding Agents:**
-- [Claude Code](https://claude.com/product/claude-code)
-- [Gemini-CLI](https://google-gemini.github.io/gemini-cli/)
-- [Codex](https://openai.com/codex/)
-- [GitHub Copilot](https://github.com/features/copilot)
+- [Claude Code](https://claude.com/product/claude-code) — Anthropic's terminal-based AI coding agent, the main tool this repo is built around
+- [Gemini-CLI](https://google-gemini.github.io/gemini-cli/) — Google's open-source terminal agent powered by Gemini, with a generous free tier
+- [Codex](https://openai.com/codex/) — OpenAI's cloud-based coding agent that runs tasks autonomously in a sandboxed environment
+- [GitHub Copilot](https://github.com/features/copilot) — AI coding assistant deeply integrated into VS Code and other IDEs
