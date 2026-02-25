@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IDE &amp; Editor Integration</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #222536;
+      --border: #2e3250;
+      --text: #e2e4f0;
+      --muted: #8b8fa8;
+      --accent: #34d399;
+      --accent-blue: #60a5fa;
+      --accent-purple: #a78bfa;
+      --accent-yellow: #fbbf24;
+      --accent-red: #f87171;
+      --mac: #c084fc;
+      --win: #38bdf8;
+      --code-bg: #0d1117;
+      --radius: 10px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-size: 16px; line-height: 1.7; padding: 2rem 1rem;
+    }
+
+    .container { max-width: 860px; margin: 0 auto; }
+
+    .hero {
+      text-align: center; padding: 3rem 2rem 2rem;
+      background: linear-gradient(135deg, #1a1d27, #0f1f16);
+      border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 2.5rem;
+    }
+    .hero h1 { font-size: 2.2rem; font-weight: 800; margin-bottom: .6rem; }
+    .hero p  { color: var(--muted); max-width: 620px; margin: 0 auto; font-size: 1rem; }
+    .hero .subtitle { margin-top: .5rem; font-size: .9rem; color: var(--accent); }
+
+    .os-toggle-bar {
+      display: flex; align-items: center; gap: .6rem; padding: .7rem 1rem;
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+      margin-bottom: 1.5rem; font-size: .88rem;
+    }
+    .os-toggle-bar span { color: var(--muted); }
+    .os-btn-global {
+      padding: .3rem .9rem; border-radius: 6px; border: 1px solid var(--border);
+      background: var(--surface); color: var(--muted); cursor: pointer;
+      font-size: .82rem; font-weight: 600; transition: all .15s; font-family: inherit;
+    }
+    .os-btn-global.mac-active { background: #2a1240; color: var(--mac); border-color: var(--mac); }
+    .os-btn-global.win-active { background: #0f1e30; color: var(--win); border-color: var(--win); }
+
+    .os-mac { display: block; }
+    .os-win { display: none; }
+    body.win .os-mac { display: none; }
+    body.win .os-win { display: block; }
+
+    tr.os-mac { display: table-row; }
+    tr.os-win { display: none; }
+    body.win tr.os-mac { display: none; }
+    body.win tr.os-win { display: table-row; }
+
+    .toc {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.2rem 1.5rem; margin-bottom: 2rem;
+    }
+    .toc h3 { margin-bottom: .8rem; font-size: .95rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+    .toc ol { padding-left: 1.3rem; }
+    .toc li { margin-bottom: .3rem; }
+    .toc a  { color: var(--accent-blue); text-decoration: none; }
+    .toc a:hover { text-decoration: underline; }
+
+    .section {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.8rem 2rem; margin-bottom: 1.5rem;
+    }
+    .section h2 { font-size: 1.35rem; font-weight: 700; margin-bottom: 1rem; color: var(--accent); }
+    .section h3 { color: var(--muted); text-transform: uppercase; letter-spacing: .05em; font-size: .8rem; font-weight: 600; margin: 1.4rem 0 .5rem; }
+    .section p  { margin-bottom: .75rem; }
+    .section ul, .section ol { padding-left: 1.4rem; margin-bottom: .75rem; }
+    .section li { margin-bottom: .35rem; }
+
+    .code-wrap { position: relative; margin: .75rem 0; }
+    pre {
+      background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px;
+      padding: 1rem 1.2rem; overflow-x: auto;
+      font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+      font-size: .85rem; line-height: 1.6; white-space: pre;
+    }
+    .copy-btn {
+      position: absolute; top: .5rem; right: .5rem; background: var(--surface2);
+      border: 1px solid var(--border); color: var(--muted); border-radius: 6px;
+      padding: .25rem .65rem; font-size: .75rem; cursor: pointer; transition: all .15s; font-family: inherit;
+    }
+    .copy-btn:hover { background: var(--border); color: var(--text); }
+    .copy-btn.copied { color: var(--accent); border-color: var(--accent); }
+
+    .link-copy {
+      display: flex; align-items: center; gap: .6rem; background: var(--code-bg);
+      border: 1px solid var(--border); border-radius: 8px; padding: .65rem 1rem;
+      margin: .5rem 0; font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: .85rem; word-break: break-all;
+    }
+    .link-copy span { flex: 1; color: var(--accent-blue); }
+    .link-copy button {
+      flex-shrink: 0; background: var(--surface2); border: 1px solid var(--border);
+      color: var(--muted); border-radius: 6px; padding: .2rem .6rem; font-size: .75rem;
+      cursor: pointer; transition: all .15s; font-family: inherit;
+    }
+    .link-copy button:hover { background: var(--border); color: var(--text); }
+    .link-copy button.copied { color: var(--accent); border-color: var(--accent); }
+
+    code {
+      font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: .85em;
+      background: #161b22; padding: .15em .4em; border-radius: 4px; color: #c9d1d9;
+    }
+
+    .callout {
+      border-left: 3px solid var(--accent-yellow); background: #1f1c10;
+      padding: .75rem 1.1rem; border-radius: 0 8px 8px 0; margin: 1rem 0; font-size: .9rem;
+    }
+    .callout.tip    { border-color: var(--accent); background: #0f1f18; }
+    .callout.info   { border-color: var(--accent-blue); background: #0f1826; }
+    .callout.fun    { border-color: var(--accent-purple); background: #1a1530; }
+    .callout.danger { border-color: var(--accent-red); background: #1f0f0f; }
+
+    /* editor cards */
+    .editor-header {
+      display: flex; align-items: center; gap: .75rem; margin-bottom: 1rem;
+    }
+    .editor-logo { font-size: 1.8rem; }
+    .editor-header h2 { margin: 0; }
+
+    /* keybinding table */
+    kbd {
+      display: inline-block; background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 4px; padding: .1rem .45rem; font-family: 'JetBrains Mono', monospace;
+      font-size: .78rem; color: var(--text); box-shadow: 0 1px 0 var(--border);
+    }
+
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: .88rem; }
+    th { background: var(--surface2); padding: .6rem .9rem; text-align: left; font-weight: 600; color: var(--muted); font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; }
+    td { padding: .6rem .9rem; border-top: 1px solid var(--border); vertical-align: top; }
+    tr:hover td { background: #1d2030; }
+    td code { font-size: .8rem; }
+
+    .c-cmt { color: var(--muted); font-style: italic; }
+    .c-str { color: #a5d6ff; }
+    .c-key { color: var(--accent-yellow); }
+
+    a { color: var(--accent-blue); }
+    strong { font-weight: 600; }
+    footer { text-align: center; color: var(--muted); font-size: .85rem; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <div class="hero">
+    <h1>🖥️ IDE &amp; Editor Integration</h1>
+    <p>
+      Claude Code lives in the terminal. But you live in your editor. Here's how to wire them together
+      so the AI works alongside your IDE instead of making you constantly switch contexts.
+    </p>
+    <div class="subtitle">Your terminal and your editor, finally on speaking terms.</div>
+  </div>
+
+  <div class="os-toggle-bar">
+    <span>I'm on</span>
+    <button class="os-btn-global mac-active" id="btnMac" onclick="setOS('mac')">🍎 macOS</button>
+    <button class="os-btn-global" id="btnWin" onclick="setOS('win')">🪟 Windows</button>
+    <span style="margin-left:auto; font-size:.78rem;">— shortcuts and paths update automatically</span>
+  </div>
+
+  <div class="toc">
+    <h3>📋 Contents</h3>
+    <ol>
+      <li><a href="#vscode">VS Code — official extension</a></li>
+      <li><a href="#jetbrains">JetBrains IDEs</a></li>
+      <li><a href="#neovim">Neovim / Vim</a></li>
+      <li><a href="#terminal-setup">Terminal setup inside your IDE</a></li>
+      <li><a href="#workflow">Side-by-side workflow tips</a></li>
+      <li><a href="#keybindings">Global keybindings</a></li>
+    </ol>
+  </div>
+
+  <!-- VS CODE -->
+  <div class="section" id="vscode">
+    <div class="editor-header">
+      <div class="editor-logo">🔵</div>
+      <h2>VS Code — Official Extension</h2>
+    </div>
+    <p>
+      Anthropic ships an official Claude Code extension for VS Code that embeds the full Claude Code
+      CLI experience directly in the editor's sidebar. No terminal switching needed.
+    </p>
+
+    <h3>Install the extension</h3>
+    <p>Search in VS Code Extensions (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>X</kbd>):</p>
+    <div class="link-copy">
+      <span>Claude Code (by Anthropic)</span>
+      <button onclick="copyLink(this, 'Claude Code')">Copy</button>
+    </div>
+    <p>Or install from the marketplace page:</p>
+    <div class="link-copy">
+      <span>https://marketplace.visualstudio.com/items?itemName=anthropic.claude-code</span>
+      <button onclick="copyLink(this, 'https://marketplace.visualstudio.com/items?itemName=anthropic.claude-code')">Copy</button>
+    </div>
+
+    <h3>What it adds</h3>
+    <ul>
+      <li>🗂️ <strong>Sidebar panel</strong> — Full Claude Code chat interface inside VS Code</li>
+      <li>📂 <strong>Workspace awareness</strong> — Claude automatically knows which workspace is open</li>
+      <li>🔗 <strong>File linking</strong> — Click any file reference in Claude's output to open it</li>
+      <li>⌨️ <strong>Keyboard shortcuts</strong> — Open/focus Claude without leaving the keyboard</li>
+      <li>🔄 <strong>Diff view</strong> — Claude's proposed changes shown as VS Code diffs</li>
+    </ul>
+
+    <h3>Key keyboard shortcuts (VS Code)</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Action</th>
+          <th class="os-mac">🍎 macOS</th>
+          <th class="os-win">🪟 Windows</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Open Claude sidebar</td>
+          <td class="os-mac"><kbd>⌘</kbd>+<kbd>Shift</kbd>+<kbd>A</kbd></td>
+          <td class="os-win"><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>A</kbd></td>
+        </tr>
+        <tr>
+          <td>Send selected code to Claude</td>
+          <td class="os-mac"><kbd>⌘</kbd>+<kbd>L</kbd></td>
+          <td class="os-win"><kbd>Ctrl</kbd>+<kbd>L</kbd></td>
+        </tr>
+        <tr>
+          <td>New Claude conversation</td>
+          <td class="os-mac"><kbd>⌘</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd></td>
+          <td class="os-win"><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd></td>
+        </tr>
+        <tr>
+          <td>Focus integrated terminal</td>
+          <td class="os-mac"><kbd>⌃</kbd>+<kbd>`</kbd></td>
+          <td class="os-win"><kbd>Ctrl</kbd>+<kbd>`</kbd></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Recommended VS Code settings for Claude Code</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt">// settings.json — add these for a better Claude Code experience</span>
+{
+  <span class="c-cmt">// Keep terminal open alongside code</span>
+  <span class="c-key">"terminal.integrated.defaultLocation"</span>: <span class="c-str">"editor"</span>,
+
+  <span class="c-cmt">// Larger font in terminal for readability</span>
+  <span class="c-key">"terminal.integrated.fontSize"</span>: 14,
+
+  <span class="c-cmt">// Auto-save so Claude always sees the latest file state</span>
+  <span class="c-key">"files.autoSave"</span>: <span class="c-str">"afterDelay"</span>,
+  <span class="c-key">"files.autoSaveDelay"</span>: 500,
+
+  <span class="c-cmt">// Show git diff in gutter so you can see Claude's changes</span>
+  <span class="c-key">"scm.diffDecorations"</span>: <span class="c-str">"guttterOnly"</span>
+}</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <div class="callout fun">
+      🎭 The VS Code extension means you can have Claude explain code on the left while the code is on the right. This is the dream that every "pair programming" blog post from 2015 was trying to describe and couldn't, because the AI part wasn't ready.
+    </div>
+  </div>
+
+  <!-- JETBRAINS -->
+  <div class="section" id="jetbrains">
+    <div class="editor-header">
+      <div class="editor-logo">🟠</div>
+      <h2>JetBrains IDEs</h2>
+    </div>
+    <p>
+      JetBrains IDEs (IntelliJ, WebStorm, PyCharm, GoLand, etc.) have a Claude Code plugin
+      that provides a similar sidebar experience to the VS Code extension.
+    </p>
+
+    <h3>Install the plugin</h3>
+    <p>In any JetBrains IDE: <strong>Settings → Plugins → Marketplace</strong> and search for:</p>
+    <div class="link-copy">
+      <span>Claude Code</span>
+      <button onclick="copyLink(this, 'Claude Code')">Copy</button>
+    </div>
+    <p>Or from the JetBrains marketplace:</p>
+    <div class="link-copy">
+      <span>https://plugins.jetbrains.com/plugin/claude-code</span>
+      <button onclick="copyLink(this, 'https://plugins.jetbrains.com/plugin/claude-code')">Copy</button>
+    </div>
+
+    <h3>What it adds</h3>
+    <ul>
+      <li>💬 <strong>Tool window</strong> — Claude Code panel in the IDE's tool windows</li>
+      <li>📌 <strong>Context menu</strong> — Right-click any file or selection → "Ask Claude"</li>
+      <li>🔄 <strong>Change tracking</strong> — Claude's file edits show in the VCS (Version Control) diff view</li>
+    </ul>
+
+    <h3>Key shortcuts (JetBrains)</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Action</th>
+          <th class="os-mac">🍎 macOS</th>
+          <th class="os-win">🪟 Windows / Linux</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Open Claude panel</td>
+          <td class="os-mac"><kbd>⌘</kbd>+<kbd>Shift</kbd>+<kbd>A</kbd> → Claude</td>
+          <td class="os-win"><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>A</kbd> → Claude</td>
+        </tr>
+        <tr>
+          <td>Open terminal</td>
+          <td class="os-mac"><kbd>⌥</kbd>+<kbd>F12</kbd></td>
+          <td class="os-win"><kbd>Alt</kbd>+<kbd>F12</kbd></td>
+        </tr>
+        <tr>
+          <td>Show VCS diff</td>
+          <td class="os-mac"><kbd>⌘</kbd>+<kbd>D</kbd></td>
+          <td class="os-win"><kbd>Ctrl</kbd>+<kbd>D</kbd></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout tip">
+      ✅ <strong>Use the integrated terminal.</strong> Run <code>claude</code> in JetBrains' built-in terminal (Alt+F12). The IDE's file watcher will automatically reload files as Claude edits them — no manual refresh needed.
+    </div>
+  </div>
+
+  <!-- NEOVIM -->
+  <div class="section" id="neovim">
+    <div class="editor-header">
+      <div class="editor-logo">🟢</div>
+      <h2>Neovim / Vim</h2>
+    </div>
+    <p>
+      If you're a Vim/Neovim user, you already live in the terminal. Claude Code is
+      a perfect fit — run it in a split terminal pane right next to your editor buffer.
+    </p>
+
+    <h3>The simplest setup: tmux split panes</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># In tmux: split horizontally, run Claude on the right</span>
+<span class="c-cmt"># Default prefix is Ctrl+B</span>
+Ctrl+B  %         <span class="c-cmt"># vertical split</span>
+Ctrl+B  "         <span class="c-cmt"># horizontal split</span>
+                  <span class="c-cmt"># then start claude in the new pane</span>
+claude</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Neovim terminal split (no tmux needed)</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt">" In Neovim — open Claude in a vertical terminal split</span>
+:vsplit | terminal claude
+
+<span class="c-cmt">" Or bind it to a leader key in init.lua:</span>
+vim.keymap.set('n', '<leader>ai', function()
+  vim.cmd('vsplit | terminal claude')
+end, { desc = 'Open Claude Code' })</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Recommended .tmux.conf additions</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># .tmux.conf — quick Claude pane</span>
+<span class="c-cmt"># Prefix + C opens Claude in a right split</span>
+bind-key C split-window -h "claude"
+
+<span class="c-cmt"># Larger right pane for Claude (60/40 split)</span>
+bind-key C split-window -h -p 40 "claude"</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Plugin options for Neovim</h3>
+    <p>Several community plugins integrate Claude Code more deeply into Neovim:</p>
+    <div class="link-copy">
+      <span>https://github.com/greggh/claude-code.nvim</span>
+      <button onclick="copyLink(this, 'https://github.com/greggh/claude-code.nvim')">Copy</button>
+    </div>
+    <div class="link-copy">
+      <span>https://github.com/coder/claudecode.nvim</span>
+      <button onclick="copyLink(this, 'https://github.com/coder/claudecode.nvim')">Copy</button>
+    </div>
+
+    <h3>Install a Neovim plugin (lazy.nvim)</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt">-- In your lazy.nvim plugins config</span>
+{
+  <span class="c-str">"greggh/claude-code.nvim"</span>,
+  dependencies = { <span class="c-str">"nvim-lua/plenary.nvim"</span> },
+  config = function()
+    require(<span class="c-str">"claude-code"</span>).setup({
+      window = {
+        position = <span class="c-str">"vertical"</span>,  <span class="c-cmt">-- "vertical" | "horizontal" | "float"</span>
+        size = 0.4,               <span class="c-cmt">-- 40% of screen</span>
+      }
+    })
+    <span class="c-cmt">-- Toggle Claude with &lt;leader&gt;ac</span>
+    vim.keymap.set(<span class="c-str">"n"</span>, <span class="c-str">"&lt;leader&gt;ac"</span>, <span class="c-str">"&lt;cmd&gt;ClaudeCode&lt;cr&gt;"</span>)
+  end,
+}</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+  </div>
+
+  <!-- TERMINAL SETUP -->
+  <div class="section" id="terminal-setup">
+    <h2>💻 Terminal Setup Inside Your IDE</h2>
+    <p>
+      Whatever IDE you use, you'll get the best experience by running Claude Code in an
+      integrated terminal panel rather than switching to a separate terminal app.
+      Here's how to configure the integrated terminal for Claude Code.
+    </p>
+
+    <h3>Use your preferred shell</h3>
+    <div class="os-mac">
+      <div class="code-wrap">
+        <pre><span class="c-cmt"># VS Code settings.json — set default shell</span>
+{
+  <span class="c-key">"terminal.integrated.defaultProfile.osx"</span>: <span class="c-str">"zsh"</span>
+}</pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+    </div>
+    <div class="os-win">
+      <div class="code-wrap">
+        <pre><span class="c-cmt">// VS Code settings.json — set default shell</span>
+{
+  <span class="c-key">"terminal.integrated.defaultProfile.windows"</span>: <span class="c-str">"PowerShell"</span>
+  <span class="c-cmt">// Or use Git Bash: "Git Bash"</span>
+  <span class="c-cmt">// Or use WSL: "Ubuntu (WSL)"</span>
+}</pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+    </div>
+
+    <h3>Open Claude in a persistent IDE terminal</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Run Claude in interactive mode in your IDE terminal</span>
+claude
+
+<span class="c-cmt"># Or open it in a specific project directory</span>
+claude --project /path/to/project</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Recommended terminal font</h3>
+    <p>
+      Claude Code's output uses Unicode characters for formatting. A Nerd Font renders them properly:
+    </p>
+    <div class="link-copy">
+      <span>https://www.nerdfonts.com/font-downloads</span>
+      <button onclick="copyLink(this, 'https://www.nerdfonts.com/font-downloads')">Copy</button>
+    </div>
+    <div class="code-wrap">
+      <pre><span class="c-cmt">// VS Code — set terminal font to a Nerd Font</span>
+{
+  <span class="c-key">"terminal.integrated.fontFamily"</span>: <span class="c-str">"JetBrainsMono Nerd Font"</span>
+}</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+  </div>
+
+  <!-- WORKFLOW TIPS -->
+  <div class="section" id="workflow">
+    <h2>⚡ Side-by-Side Workflow Tips</h2>
+
+    <h3>1. Let Claude handle the boilerplate; you handle the architecture</h3>
+    <p>
+      Open your code in the editor, open Claude in the terminal. You read the code and make decisions about structure.
+      You tell Claude to implement the pieces. Review its changes as diffs in the editor. Merge what's good.
+    </p>
+
+    <h3>2. Reference files by path in your Claude prompts</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Claude Code reads files in your project automatically</span>
+<span class="c-cmt"># But you can reference specific files explicitly</span>
+Look at src/lib/auth.ts and tell me how the session validation works.
+
+<span class="c-cmt"># Or ask it to look at what's currently open</span>
+Read the file I was just working on (UserCard.tsx) and refactor the avatar logic.</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>3. Use the editor's git diff view to review Claude's changes</h3>
+    <p>
+      After Claude edits files, use your IDE's git panel to see exactly what changed.
+      VS Code's Source Control view (<kbd class="os-mac">⌘</kbd><kbd class="os-win">Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>G</kbd>) shows line-by-line diffs. JetBrains' Local Changes tab does the same.
+      This is much more readable than trying to follow Claude's output in the terminal.
+    </p>
+
+    <h3>4. Auto-save is your friend</h3>
+    <p>
+      Enable auto-save in your IDE so Claude always reads the latest version of files you're editing.
+      Without it, Claude might read a stale version from disk while you have unsaved changes in the editor.
+    </p>
+
+    <h3>5. Keep Claude's working directory correct</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Start Claude from the project root — not a subdirectory</span>
+<span class="c-cmt"># Claude uses the current directory to understand your project</span>
+cd ~/projects/my-app
+claude</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>6. Use multiple terminal tabs</h3>
+    <p>
+      In VS Code and JetBrains, you can have multiple terminal tabs. Keep one running Claude, one for running tests/builds, and one for git. Switching between them is much faster than switching windows.
+    </p>
+
+    <div class="callout fun">
+      🎭 The ideal setup: Claude in the right terminal pane, your code in the editor, and a test runner in the bottom pane. Three panes of information, zero context-switching, and the ambient anxiety of watching an AI edit your codebase in real time. Exciting.
+    </div>
+  </div>
+
+  <!-- KEYBINDINGS -->
+  <div class="section" id="keybindings">
+    <h2>⌨️ Global Keybindings</h2>
+    <p>
+      Claude Code supports custom keybindings that work inside its interactive session.
+      These are configured separately from your IDE's keybindings.
+    </p>
+
+    <h3>Keybindings config location</h3>
+    <div class="os-mac">
+      <div class="link-copy">
+        <span>~/.claude/keybindings.json</span>
+        <button onclick="copyLink(this, '~/.claude/keybindings.json')">Copy</button>
+      </div>
+    </div>
+    <div class="os-win">
+      <div class="link-copy">
+        <span>%USERPROFILE%\.claude\keybindings.json</span>
+        <button onclick="copyLink(this, '%USERPROFILE%\\.claude\\keybindings.json')">Copy</button>
+      </div>
+    </div>
+
+    <h3>Example custom keybindings</h3>
+    <div class="code-wrap">
+      <pre>[
+  {
+    <span class="c-key">"key"</span>: <span class="c-str">"ctrl+shift+e"</span>,
+    <span class="c-key">"command"</span>: <span class="c-str">"workbench.action.terminal.focus"</span>
+  },
+  {
+    <span class="c-key">"key"</span>: <span class="c-str">"escape escape"</span>,    <span class="c-cmt">// chord: press Esc twice to interrupt Claude</span>
+    <span class="c-key">"command"</span>: <span class="c-str">"claude.interrupt"</span>
+  }
+]</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Built-in Claude Code shortcuts (inside the session)</h3>
+    <table>
+      <thead><tr><th>Key</th><th>Action</th></tr></thead>
+      <tbody>
+        <tr><td><kbd>Esc</kbd></td><td>Cancel / interrupt current operation</td></tr>
+        <tr><td><kbd>↑</kbd> / <kbd>↓</kbd></td><td>Navigate prompt history</td></tr>
+        <tr><td><kbd>Ctrl</kbd>+<kbd>C</kbd></td><td>Interrupt and exit</td></tr>
+        <tr>
+          <td class="os-mac"><kbd>⌘</kbd>+<kbd>K</kbd></td>
+          <td class="os-win"><kbd>Ctrl</kbd>+<kbd>K</kbd></td>
+          <td>Clear screen</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout info">
+      ℹ️ To set up custom keybindings in Claude Code, use the <code>/keybindings</code> command inside a Claude Code session, or edit the keybindings.json file directly.
+    </div>
+  </div>
+
+  <footer>
+    <p>🖥️ The best IDE for AI coding is whichever one has a terminal open next to the code.</p>
+    <p style="margin-top:.5rem;">Last updated: February 2026 · Part of the AI CLI Setup series</p>
+  </footer>
+
+</div>
+<script>
+  function copyCode(btn) {
+    const pre = btn.closest('.code-wrap').querySelector('pre');
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+      btn.textContent = '✓ Copied!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    }).catch(() => {
+      const ta = document.createElement('textarea'); ta.value = pre.innerText;
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+      btn.textContent = '✓ Copied!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+  function copyLink(btn, text) {
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = '✓ Copied!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    }).catch(() => {
+      const ta = document.createElement('textarea'); ta.value = text;
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+      btn.textContent = '✓ Copied!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+  function setOS(os) {
+    const btnMac = document.getElementById('btnMac');
+    const btnWin = document.getElementById('btnWin');
+    if (os === 'mac') {
+      document.body.classList.remove('win');
+      btnMac.classList.add('mac-active'); btnMac.classList.remove('win-active');
+      btnWin.classList.remove('mac-active', 'win-active');
+    } else {
+      document.body.classList.add('win');
+      btnWin.classList.add('win-active'); btnWin.classList.remove('mac-active');
+      btnMac.classList.remove('mac-active', 'win-active');
+    }
+  }
+  document.querySelectorAll('.copy-btn').forEach(btn => { btn.textContent = 'Copy'; });
+</script>
+</body>
+</html>

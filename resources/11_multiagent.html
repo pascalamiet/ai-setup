@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Multi-agent &amp; Subagent Workflows</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #222536;
+      --border: #2e3250;
+      --text: #e2e4f0;
+      --muted: #8b8fa8;
+      --accent: #a78bfa;
+      --accent-green: #34d399;
+      --accent-blue: #60a5fa;
+      --accent-yellow: #fbbf24;
+      --accent-red: #f87171;
+      --accent-orange: #f97316;
+      --mac: #c084fc;
+      --win: #38bdf8;
+      --code-bg: #0d1117;
+      --radius: 10px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-size: 16px; line-height: 1.7; padding: 2rem 1rem;
+    }
+
+    .container { max-width: 860px; margin: 0 auto; }
+
+    .hero {
+      text-align: center; padding: 3rem 2rem 2rem;
+      background: linear-gradient(135deg, #1a1d27, #1a1535);
+      border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 2.5rem;
+    }
+    .hero h1 { font-size: 2.2rem; font-weight: 800; margin-bottom: .6rem; }
+    .hero p  { color: var(--muted); max-width: 620px; margin: 0 auto; font-size: 1rem; }
+    .hero .subtitle { margin-top: .5rem; font-size: .9rem; color: var(--accent); }
+
+    .os-toggle-bar {
+      display: flex; align-items: center; gap: .6rem; padding: .7rem 1rem;
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+      margin-bottom: 1.5rem; font-size: .88rem;
+    }
+    .os-toggle-bar span { color: var(--muted); }
+    .os-btn-global {
+      padding: .3rem .9rem; border-radius: 6px; border: 1px solid var(--border);
+      background: var(--surface); color: var(--muted); cursor: pointer;
+      font-size: .82rem; font-weight: 600; transition: all .15s; font-family: inherit;
+    }
+    .os-btn-global.mac-active { background: #2a1240; color: var(--mac); border-color: var(--mac); }
+    .os-btn-global.win-active { background: #0f1e30; color: var(--win); border-color: var(--win); }
+
+    .os-mac { display: block; }
+    .os-win { display: none; }
+    body.win .os-mac { display: none; }
+    body.win .os-win { display: block; }
+
+    tr.os-mac { display: table-row; }
+    tr.os-win { display: none; }
+    body.win tr.os-mac { display: none; }
+    body.win tr.os-win { display: table-row; }
+
+    .toc {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.2rem 1.5rem; margin-bottom: 2rem;
+    }
+    .toc h3 { margin-bottom: .8rem; font-size: .95rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+    .toc ol { padding-left: 1.3rem; }
+    .toc li { margin-bottom: .3rem; }
+    .toc a  { color: var(--accent-blue); text-decoration: none; }
+    .toc a:hover { text-decoration: underline; }
+
+    .section {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.8rem 2rem; margin-bottom: 1.5rem;
+    }
+    .section h2 { font-size: 1.35rem; font-weight: 700; margin-bottom: 1rem; color: var(--accent); }
+    .section h3 { color: var(--muted); text-transform: uppercase; letter-spacing: .05em; font-size: .8rem; font-weight: 600; margin: 1.4rem 0 .5rem; }
+    .section p  { margin-bottom: .75rem; }
+    .section ul, .section ol { padding-left: 1.4rem; margin-bottom: .75rem; }
+    .section li { margin-bottom: .35rem; }
+
+    .code-wrap { position: relative; margin: .75rem 0; }
+    pre {
+      background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px;
+      padding: 1rem 1.2rem; overflow-x: auto;
+      font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+      font-size: .85rem; line-height: 1.6; white-space: pre;
+    }
+    .copy-btn {
+      position: absolute; top: .5rem; right: .5rem; background: var(--surface2);
+      border: 1px solid var(--border); color: var(--muted); border-radius: 6px;
+      padding: .25rem .65rem; font-size: .75rem; cursor: pointer; transition: all .15s; font-family: inherit;
+    }
+    .copy-btn:hover { background: var(--border); color: var(--text); }
+    .copy-btn.copied { color: var(--accent-green); border-color: var(--accent-green); }
+
+    .link-copy {
+      display: flex; align-items: center; gap: .6rem; background: var(--code-bg);
+      border: 1px solid var(--border); border-radius: 8px; padding: .65rem 1rem;
+      margin: .5rem 0; font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: .85rem; word-break: break-all;
+    }
+    .link-copy span { flex: 1; color: var(--accent-blue); }
+    .link-copy button {
+      flex-shrink: 0; background: var(--surface2); border: 1px solid var(--border);
+      color: var(--muted); border-radius: 6px; padding: .2rem .6rem; font-size: .75rem;
+      cursor: pointer; transition: all .15s; font-family: inherit;
+    }
+    .link-copy button:hover { background: var(--border); color: var(--text); }
+    .link-copy button.copied { color: var(--accent-green); border-color: var(--accent-green); }
+
+    code {
+      font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: .85em;
+      background: #161b22; padding: .15em .4em; border-radius: 4px; color: #c9d1d9;
+    }
+
+    .callout {
+      border-left: 3px solid var(--accent-yellow); background: #1f1c10;
+      padding: .75rem 1.1rem; border-radius: 0 8px 8px 0; margin: 1rem 0; font-size: .9rem;
+    }
+    .callout.tip    { border-color: var(--accent-green); background: #0f1f18; }
+    .callout.info   { border-color: var(--accent-blue); background: #0f1826; }
+    .callout.fun    { border-color: var(--accent); background: #1a1530; }
+    .callout.danger { border-color: var(--accent-red); background: #1f0f0f; }
+
+    /* agent diagram */
+    .agent-diagram {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.4rem;
+      margin: 1rem 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .82rem;
+      line-height: 1.9;
+    }
+    .d-orch { color: var(--accent); }
+    .d-sub  { color: var(--accent-blue); }
+    .d-tool { color: var(--accent-green); }
+    .d-line { color: var(--muted); }
+
+    /* parallel vs sequential */
+    .compare-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+    @media (max-width: 600px) { .compare-row { grid-template-columns: 1fr; } }
+    .compare-box {
+      border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.1rem; font-size: .88rem;
+    }
+    .compare-box.parallel { border-color: var(--accent-green); background: #0a1812; }
+    .compare-box.sequential { border-color: var(--accent-blue); background: #0a1320; }
+    .compare-label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; margin-bottom: .5rem; }
+    .compare-box.parallel  .compare-label { color: var(--accent-green); }
+    .compare-box.sequential .compare-label { color: var(--accent-blue); }
+
+    .c-cmt { color: var(--muted); font-style: italic; }
+    .c-str { color: #a5d6ff; }
+    .c-key { color: var(--accent-yellow); }
+    .c-fn  { color: var(--accent); }
+
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: .88rem; }
+    th { background: var(--surface2); padding: .6rem .9rem; text-align: left; font-weight: 600; color: var(--muted); font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; }
+    td { padding: .6rem .9rem; border-top: 1px solid var(--border); vertical-align: top; }
+    tr:hover td { background: #1d2030; }
+    td code { font-size: .8rem; }
+
+    a { color: var(--accent-blue); }
+    strong { font-weight: 600; }
+    footer { text-align: center; color: var(--muted); font-size: .85rem; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <div class="hero">
+    <h1>🤖 Multi-agent &amp; Subagent Workflows</h1>
+    <p>
+      One Claude is good. Multiple Claudes working in parallel on different parts of a problem —
+      each with its own focused context — is something else entirely.
+    </p>
+    <div class="subtitle">Divide and conquer, but with AI. The good kind of outsourcing.</div>
+  </div>
+
+  <div class="os-toggle-bar">
+    <span>I'm on</span>
+    <button class="os-btn-global mac-active" id="btnMac" onclick="setOS('mac')">🍎 macOS</button>
+    <button class="os-btn-global" id="btnWin" onclick="setOS('win')">🪟 Windows</button>
+    <span style="margin-left:auto; font-size:.78rem;">— concepts apply to all platforms</span>
+  </div>
+
+  <div class="toc">
+    <h3>📋 Contents</h3>
+    <ol>
+      <li><a href="#what">What are subagents?</a></li>
+      <li><a href="#why">Why use them?</a></li>
+      <li><a href="#how">How the Task tool works</a></li>
+      <li><a href="#parallel">Parallel vs sequential agents</a></li>
+      <li><a href="#patterns">Practical patterns</a></li>
+      <li><a href="#prompting">Writing good subagent prompts</a></li>
+      <li><a href="#isolation">Context isolation &amp; worktrees</a></li>
+      <li><a href="#limits">Limits &amp; gotchas</a></li>
+    </ol>
+  </div>
+
+  <!-- WHAT -->
+  <div class="section" id="what">
+    <h2>🧠 What Are Subagents?</h2>
+    <p>
+      A <strong>subagent</strong> is a separate Claude instance that the main Claude (the orchestrator)
+      can spin up to handle a specific subtask. The subagent runs autonomously, uses its own tools,
+      and returns a result. The orchestrator collects results and continues.
+    </p>
+
+    <div class="agent-diagram">
+      <div><span class="d-orch">Orchestrator (you)</span></div>
+      <div><span class="d-line">  │</span></div>
+      <div><span class="d-line">  ├──→ </span><span class="d-sub">Subagent A</span><span class="d-line"> — "Research the codebase for X"</span></div>
+      <div><span class="d-line">  │        └→ </span><span class="d-tool">uses: Read, Glob, Grep</span></div>
+      <div><span class="d-line">  │</span></div>
+      <div><span class="d-line">  ├──→ </span><span class="d-sub">Subagent B</span><span class="d-line"> — "Research the codebase for Y"</span></div>
+      <div><span class="d-line">  │        └→ </span><span class="d-tool">uses: Read, Glob, Grep</span></div>
+      <div><span class="d-line">  │</span></div>
+      <div><span class="d-line">  └──→ both results return to orchestrator</span></div>
+      <div><span class="d-line">       orchestrator synthesizes &amp; implements</span></div>
+    </div>
+
+    <p>
+      Claude Code implements this through the <strong>Task tool</strong>. When Claude uses the Task tool,
+      it launches a subagent with a specific prompt and a set of tools, waits for it to finish,
+      and gets the result back as a single message.
+    </p>
+    <div class="callout fun">
+      🎭 One Claude is a very talented contractor. Multiple Claudes are a very talented team of contractors who never argue, never have schedule conflicts, and never invoice you for a "team offsite" in Bali.
+    </div>
+  </div>
+
+  <!-- WHY -->
+  <div class="section" id="why">
+    <h2>🤔 Why Use Subagents?</h2>
+
+    <h3>1. Parallelism</h3>
+    <p>
+      Two subagents doing independent research simultaneously finish in the time it takes one to finish.
+      If you need to search five different parts of a codebase, five parallel agents finish in 1x the time. One agent would take 5x.
+    </p>
+
+    <h3>2. Context isolation</h3>
+    <p>
+      Each subagent gets a fresh context window. A subagent focused on "find all API routes" doesn't have
+      its thinking muddied by 40,000 tokens of other conversation. Focused context = focused results.
+    </p>
+
+    <h3>3. Specialization</h3>
+    <p>
+      Give one subagent access to only read-only tools (research). Give another full write access (implementation).
+      The researcher can't accidentally write files; the implementer doesn't waste context searching.
+    </p>
+
+    <h3>4. Large tasks</h3>
+    <p>
+      Tasks too big for one context window can be split across multiple subagents. One handles the auth module,
+      another handles the API layer, another handles the tests. The orchestrator synthesizes the results.
+    </p>
+  </div>
+
+  <!-- HOW -->
+  <div class="section" id="how">
+    <h2>⚙️ How the Task Tool Works</h2>
+    <p>
+      Inside Claude Code's session, you can instruct Claude to use subagents. Claude does this automatically
+      for complex tasks — but you can also explicitly request it.
+    </p>
+
+    <h3>Asking Claude to use subagents</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Ask Claude to parallelize a research task</span>
+Research two things in parallel using subagents:
+1. How does our authentication system work? (read src/lib/auth/)
+2. How does our API rate limiting work? (read src/middleware/)
+Then summarize both and identify any interactions between them.</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Ask Claude to use a subagent for isolation</span>
+Use a subagent to do the following research without polluting our main conversation context:
+Find every place in the codebase that directly queries the users table (not through the UserService).
+Return a list of file paths and line numbers only.</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Running Claude Code headlessly with subagents</h3>
+    <p>From the terminal, you can chain Claude sessions using the <code>-p</code> flag:</p>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Run a one-shot agent from the CLI</span>
+claude -p "Find all TypeScript files that import from '../utils' and list their paths"
+
+<span class="c-cmt"># Chain outputs between agents using shell pipes</span>
+claude -p "List all API endpoint files" | \
+  xargs -I {} claude -p "Audit the security of this file: {}"</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>What subagents can access</h3>
+    <p>
+      By default, subagents inherit the same permissions as the orchestrator.
+      You can request isolation in your prompt:
+    </p>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Ask for read-only research subagent</span>
+Use a research-only subagent (no file writes, no bash commands) to explore
+how the payment flow works. Just read code and return a summary.</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+  </div>
+
+  <!-- PARALLEL VS SEQUENTIAL -->
+  <div class="section" id="parallel">
+    <h2>⚡ Parallel vs Sequential Agents</h2>
+    <p>
+      Knowing when to run agents in parallel vs sequence is the key skill in multi-agent orchestration.
+      It's the same thinking as async programming — just with AI instead of promises.
+    </p>
+
+    <div class="compare-row">
+      <div class="compare-box parallel">
+        <div class="compare-label">⚡ Parallel — use when independent</div>
+        <p>Tasks that don't depend on each other's results. Research tasks. Auditing different modules. Running tests in different environments.</p>
+      </div>
+      <div class="compare-box sequential">
+        <div class="compare-label">🔗 Sequential — use when dependent</div>
+        <p>Tasks where step 2 needs the output of step 1. Research → implement. Implement → test. Test → fix.</p>
+      </div>
+    </div>
+
+    <h3>Examples of each</h3>
+    <table>
+      <thead><tr><th>Scenario</th><th>Approach</th><th>Reason</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Search for usages of 5 different functions</td>
+          <td>Parallel</td>
+          <td>Each search is independent</td>
+        </tr>
+        <tr>
+          <td>Audit 3 separate modules for security issues</td>
+          <td>Parallel</td>
+          <td>No cross-module dependency</td>
+        </tr>
+        <tr>
+          <td>Research codebase, then write implementation</td>
+          <td>Sequential</td>
+          <td>Implementation needs research results</td>
+        </tr>
+        <tr>
+          <td>Write code, then write tests for it</td>
+          <td>Sequential</td>
+          <td>Tests need to know the final code</td>
+        </tr>
+        <tr>
+          <td>Run tests across 3 environments simultaneously</td>
+          <td>Parallel</td>
+          <td>Each environment is independent</td>
+        </tr>
+        <tr>
+          <td>Plan → implement → review → fix</td>
+          <td>Sequential</td>
+          <td>Each step needs the previous result</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- PATTERNS -->
+  <div class="section" id="patterns">
+    <h2>🚀 Practical Patterns</h2>
+
+    <h3>Pattern 1: Parallel research, then synthesis</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Great for: understanding an unfamiliar codebase quickly</span>
+Do parallel research using subagents on these three areas simultaneously:
+1. Authentication and session management (src/lib/auth/, src/middleware/auth*)
+2. Database layer (src/db/, src/models/)
+3. API routes structure (src/app/api/, src/routes/)
+
+Each subagent should return:
+- A 3-5 bullet summary
+- Key files and their responsibilities
+- Any unusual patterns or potential issues
+
+After all three finish, synthesize into a unified architecture overview.</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Pattern 2: Parallel audit</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Great for: security reviews, code quality checks</span>
+Use parallel subagents to audit the following for SQL injection vulnerabilities:
+- src/api/users/
+- src/api/products/
+- src/api/orders/
+- src/api/payments/
+
+Each subagent should report: file, line number, severity, vulnerable pattern, and suggested fix.
+Consolidate all findings into a single prioritized list.</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Pattern 3: Research → implement → test pipeline</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Great for: adding features to unfamiliar code</span>
+Step 1 (subagent — read only):
+Research how we currently handle user notifications. Find:
+- The notification model/schema
+- How notifications are created
+- How they're delivered (email, in-app, push)
+- Existing tests
+
+Step 2 (main agent — use research results):
+Based on the research, implement a "weekly digest" notification type
+that summarizes a user's activity from the past 7 days.
+Match the existing patterns exactly.
+
+Step 3 (subagent):
+Write tests for the weekly digest feature using the same test patterns
+found in the research phase. Aim for 90% coverage.</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Pattern 4: Divide a large refactor</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Great for: refactors too large for one context window</span>
+We're migrating from Moment.js to date-fns. This affects many files.
+Use parallel subagents to handle each module independently:
+
+Subagent 1: Migrate src/lib/ utilities
+Subagent 2: Migrate src/components/ date display
+Subagent 3: Migrate src/api/ date parsing
+
+Each subagent should:
+1. Find all Moment.js imports in their scope
+2. Replace with equivalent date-fns functions (reference: date-fns.org)
+3. Run the existing tests to confirm nothing broke
+4. Report: files changed, functions replaced, any test failures</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Pattern 5: Multi-environment validation</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Great for: CI-style validation from the terminal</span>
+<span class="c-cmt"># Run the same checks across multiple environments in parallel</span>
+Validate the build in parallel across three scenarios:
+1. NODE_ENV=test: run npm test
+2. NODE_ENV=production: run npm run build and check for errors
+3. Type check: run npx tsc --noEmit
+
+Report: PASS or FAIL for each, with full error output on failures.</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+  </div>
+
+  <!-- PROMPTING SUBAGENTS -->
+  <div class="section" id="prompting">
+    <h2>✍️ Writing Good Subagent Prompts</h2>
+    <p>
+      A subagent starts fresh with no memory of the parent conversation.
+      Your subagent prompt needs to be self-contained and complete.
+    </p>
+
+    <h3>What every subagent prompt needs</h3>
+    <ul>
+      <li>✅ <strong>What to do.</strong> The specific task, not a general direction.</li>
+      <li>✅ <strong>What to look at.</strong> File paths, directories, function names to focus on.</li>
+      <li>✅ <strong>What to return.</strong> The format and content of the expected output.</li>
+      <li>✅ <strong>What NOT to do.</strong> No file writes if it's a research task. Don't modify tests. Don't change public APIs.</li>
+    </ul>
+
+    <h3>Bad vs. Good subagent prompt</h3>
+    <div class="compare-row">
+      <div class="compare-box" style="border-color:#4a1818; background:#1a0f0f;">
+        <div class="compare-label" style="color:var(--accent-red);">❌ Vague</div>
+        <p>Look at the authentication code and tell me what you find.</p>
+      </div>
+      <div class="compare-box" style="border-color:#0f3028; background:#0a1f18;">
+        <div class="compare-label" style="color:var(--accent-green);">✅ Specific</div>
+        <p>Read the files in src/lib/auth/ and src/middleware/auth.ts. List: (1) all exported functions with one-line descriptions, (2) which HTTP routes are protected, (3) the session/token expiry strategy. Return as bullet lists. Do not modify any files.</p>
+      </div>
+    </div>
+
+    <h3>Template for a research subagent</h3>
+    <div class="code-wrap">
+      <pre>You are a focused research agent. Your only job is to gather information.
+Do NOT modify any files.
+
+Task: [describe the specific research goal]
+
+Files/directories to examine: [list paths]
+
+Return your findings as:
+## Summary
+[2-3 sentences on what you found]
+
+## Key files
+- [file]: [what it does]
+
+## Relevant code patterns
+[paste or describe the patterns]
+
+## Potential issues
+[anything that looks wrong or unusual]</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <div class="callout tip">
+      ✅ <strong>Tell the subagent it's a subagent.</strong> Starting with "You are a focused research agent" or "You are a specialist working on one part of a larger task" helps Claude understand it should be narrow and thorough rather than broad and exploratory.
+    </div>
+  </div>
+
+  <!-- ISOLATION -->
+  <div class="section" id="isolation">
+    <h2>🌿 Context Isolation &amp; Worktrees</h2>
+    <p>
+      For subagents that write code (not just research), it's worth considering <strong>git worktrees</strong>
+      for true isolation — each subagent works on its own branch and copy of the repo.
+    </p>
+
+    <h3>What is a git worktree?</h3>
+    <p>
+      A worktree is a separate directory linked to the same git repo, checked out on a different branch.
+      Multiple subagents can work on different branches simultaneously without interfering with each other.
+    </p>
+
+    <h3>Set up worktrees for parallel development</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Create isolated branches + worktrees for parallel subagents</span>
+git worktree add ../project-auth-work feat/auth-refactor
+git worktree add ../project-api-work feat/api-refactor
+git worktree add ../project-db-work feat/db-refactor
+
+<span class="c-cmt"># List worktrees</span>
+git worktree list
+
+<span class="c-cmt"># Run agents in each worktree directory</span>
+cd ../project-auth-work && claude -p "Refactor the auth module..."
+<span class="c-cmt"># (in parallel, from separate terminals)</span></pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Clean up when done</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># After merging branches, remove worktrees</span>
+git worktree remove ../project-auth-work
+git worktree remove ../project-api-work
+git worktree remove ../project-db-work
+
+<span class="c-cmt"># Or prune stale worktrees</span>
+git worktree prune</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <div class="callout info">
+      ℹ️ <strong>Worktrees are the right tool for parallel implementation.</strong> Without them, two subagents writing to the same files will stomp on each other. With worktrees, they're on separate branches — you merge the results when both are done.
+    </div>
+  </div>
+
+  <!-- LIMITS -->
+  <div class="section" id="limits">
+    <h2>⚠️ Limits &amp; Gotchas</h2>
+
+    <h3>1. Each subagent costs tokens</h3>
+    <p>
+      Subagents run full Claude sessions. They consume API tokens. Ten parallel subagents means ten parallel
+      billing meters running. For large research tasks, this adds up. Use subagents where they save time,
+      not just because they exist.
+    </p>
+
+    <h3>2. Subagents have no memory of each other</h3>
+    <p>
+      Subagent A cannot see Subagent B's work mid-flight. They work in isolation and return results only when done.
+      If you need ongoing coordination, that has to happen via the orchestrator (you or the main Claude agent).
+    </p>
+
+    <h3>3. Results must fit in the parent's context</h3>
+    <p>
+      The orchestrator receives each subagent's output as text. If a subagent returns 50,000 tokens of output,
+      that's 50,000 tokens consumed in the parent's context. Ask subagents to be concise and structured.
+    </p>
+
+    <h3>4. File conflicts in parallel writes</h3>
+    <p>
+      If two subagents edit the same file, you'll have conflicts. Use git worktrees (see above) to give each
+      subagent its own isolated copy. Or structure tasks so subagents own different files entirely.
+    </p>
+
+    <h3>5. Sequential chains can be hard to debug</h3>
+    <p>
+      If Subagent A returns bad data and Subagent B builds on it, the error cascades. Build in validation
+      steps between stages. Ask Claude to verify each stage's output before proceeding.
+    </p>
+
+    <div class="callout fun">
+      🎭 Multi-agent workflows are like microservices. Incredibly powerful, solve real problems, and will absolutely find new and creative ways to fail that you didn't anticipate. Start small. One subagent. Then two. Then the distributed AI system you never knew you needed.
+    </div>
+
+    <h3>Quick decision guide</h3>
+    <table>
+      <thead><tr><th>Situation</th><th>Use subagents?</th></tr></thead>
+      <tbody>
+        <tr><td>Need to search 5+ separate codebases/modules</td><td>✅ Yes — parallel</td></tr>
+        <tr><td>Task too large for one context window</td><td>✅ Yes — split it</td></tr>
+        <tr><td>Need isolation between research and implementation</td><td>✅ Yes</td></tr>
+        <tr><td>Simple question about a small file</td><td>❌ No — overkill</td></tr>
+        <tr><td>Linear task: A then B then C</td><td>❌ No — just do it sequentially</td></tr>
+        <tr><td>Budget is tight / token cost matters</td><td>⚠️ Use carefully</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <footer>
+    <p>🤖 Multiple Claudes, one goal. The AI equivalent of a well-run sprint.</p>
+    <p style="margin-top:.5rem;">Last updated: February 2026 · Part of the AI CLI Setup series</p>
+  </footer>
+
+</div>
+<script>
+  function copyCode(btn) {
+    const pre = btn.closest('.code-wrap').querySelector('pre');
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+      btn.textContent = '✓ Copied!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    }).catch(() => {
+      const ta = document.createElement('textarea'); ta.value = pre.innerText;
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+      btn.textContent = '✓ Copied!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+  function copyLink(btn, text) {
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = '✓ Copied!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    }).catch(() => {
+      const ta = document.createElement('textarea'); ta.value = text;
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+      btn.textContent = '✓ Copied!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+  function setOS(os) {
+    const btnMac = document.getElementById('btnMac');
+    const btnWin = document.getElementById('btnWin');
+    if (os === 'mac') {
+      document.body.classList.remove('win');
+      btnMac.classList.add('mac-active'); btnMac.classList.remove('win-active');
+      btnWin.classList.remove('mac-active', 'win-active');
+    } else {
+      document.body.classList.add('win');
+      btnWin.classList.add('win-active'); btnWin.classList.remove('mac-active');
+      btnMac.classList.remove('mac-active', 'win-active');
+    }
+  }
+  document.querySelectorAll('.copy-btn').forEach(btn => { btn.textContent = 'Copy'; });
+</script>
+</body>
+</html>
