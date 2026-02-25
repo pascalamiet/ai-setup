@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Claude Code Hooks — Automate Everything</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #222536;
+      --border: #2e3250;
+      --text: #e2e4f0;
+      --muted: #8b8fa8;
+      --accent: #fbbf24;
+      --accent-green: #34d399;
+      --accent-blue: #60a5fa;
+      --accent-purple: #a78bfa;
+      --accent-red: #f87171;
+      --mac: #c084fc;
+      --win: #38bdf8;
+      --code-bg: #0d1117;
+      --radius: 10px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-size: 16px;
+      line-height: 1.7;
+      padding: 2rem 1rem;
+    }
+
+    .container { max-width: 860px; margin: 0 auto; }
+
+    .hero {
+      text-align: center;
+      padding: 3rem 2rem 2rem;
+      background: linear-gradient(135deg, #1a1d27, #1f1a0f);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 2.5rem;
+    }
+    .hero h1 { font-size: 2.2rem; font-weight: 800; margin-bottom: .6rem; }
+    .hero p  { color: var(--muted); max-width: 620px; margin: 0 auto; font-size: 1rem; }
+    .hero .subtitle { margin-top: .5rem; font-size: .9rem; color: var(--accent); }
+
+    .os-toggle-bar {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      padding: .7rem 1rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      font-size: .88rem;
+    }
+    .os-toggle-bar span { color: var(--muted); }
+    .os-btn-global {
+      padding: .3rem .9rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      cursor: pointer;
+      font-size: .82rem;
+      font-weight: 600;
+      transition: all .15s;
+      font-family: inherit;
+    }
+    .os-btn-global.mac-active { background: #2a1240; color: var(--mac); border-color: var(--mac); }
+    .os-btn-global.win-active { background: #0f1e30; color: var(--win); border-color: var(--win); }
+
+    .os-mac { display: block; }
+    .os-win { display: none; }
+    body.win .os-mac { display: none; }
+    body.win .os-win { display: block; }
+
+    tr.os-mac { display: table-row; }
+    tr.os-win { display: none; }
+    body.win tr.os-mac { display: none; }
+    body.win tr.os-win { display: table-row; }
+
+    .toc {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.2rem 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .toc h3 { margin-bottom: .8rem; font-size: .95rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+    .toc ol { padding-left: 1.3rem; }
+    .toc li { margin-bottom: .3rem; }
+    .toc a  { color: var(--accent-blue); text-decoration: none; }
+    .toc a:hover { text-decoration: underline; }
+
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.8rem 2rem;
+      margin-bottom: 1.5rem;
+    }
+    .section h2 { font-size: 1.35rem; font-weight: 700; margin-bottom: 1rem; color: var(--accent); }
+    .section h3 { color: var(--muted); text-transform: uppercase; letter-spacing: .05em; font-size: .8rem; font-weight: 600; margin: 1.4rem 0 .5rem; }
+    .section p  { margin-bottom: .75rem; }
+    .section ul, .section ol { padding-left: 1.4rem; margin-bottom: .75rem; }
+    .section li { margin-bottom: .35rem; }
+
+    .code-wrap { position: relative; margin: .75rem 0; }
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.2rem;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+      font-size: .85rem;
+      line-height: 1.6;
+      white-space: pre;
+    }
+    .copy-btn {
+      position: absolute;
+      top: .5rem;
+      right: .5rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 6px;
+      padding: .25rem .65rem;
+      font-size: .75rem;
+      cursor: pointer;
+      transition: all .15s;
+      font-family: inherit;
+    }
+    .copy-btn:hover { background: var(--border); color: var(--text); }
+    .copy-btn.copied { color: var(--accent-green); border-color: var(--accent-green); }
+
+    .link-copy {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: .65rem 1rem;
+      margin: .5rem 0;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: .85rem;
+      word-break: break-all;
+    }
+    .link-copy span { flex: 1; color: var(--accent-blue); }
+    .link-copy button {
+      flex-shrink: 0;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 6px;
+      padding: .2rem .6rem;
+      font-size: .75rem;
+      cursor: pointer;
+      transition: all .15s;
+      font-family: inherit;
+    }
+    .link-copy button:hover { background: var(--border); color: var(--text); }
+    .link-copy button.copied { color: var(--accent-green); border-color: var(--accent-green); }
+
+    code {
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: .85em;
+      background: #161b22;
+      padding: .15em .4em;
+      border-radius: 4px;
+      color: #c9d1d9;
+    }
+
+    .callout {
+      border-left: 3px solid var(--accent);
+      background: #1f1c10;
+      padding: .75rem 1.1rem;
+      border-radius: 0 8px 8px 0;
+      margin: 1rem 0;
+      font-size: .9rem;
+    }
+    .callout.tip  { border-color: var(--accent-green); background: #0f1f18; }
+    .callout.info { border-color: var(--accent-blue); background: #0f1826; }
+    .callout.fun  { border-color: var(--accent-purple); background: #1a1530; }
+    .callout.danger { border-color: var(--accent-red); background: #1f0f0f; }
+
+    /* ── Event cards ── */
+    .event-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+    .event-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.1rem;
+    }
+    .event-card .event-name {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .85rem;
+      font-weight: 700;
+      margin-bottom: .35rem;
+    }
+    .event-card p { font-size: .88rem; color: var(--muted); margin: 0; }
+
+    .c-key  { color: var(--accent-yellow, #fbbf24); }
+    .c-val  { color: #a5d6ff; }
+    .c-str  { color: #a5d6ff; }
+    .c-cmt  { color: var(--muted); font-style: italic; }
+    .c-cmd  { color: var(--accent-green); }
+    .c-arg  { color: #fca5a5; }
+    .c-ph   { color: var(--accent-purple); }
+
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: .88rem; }
+    th { background: var(--surface2); padding: .6rem .9rem; text-align: left; font-weight: 600; color: var(--muted); font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; }
+    td { padding: .6rem .9rem; border-top: 1px solid var(--border); vertical-align: top; }
+    tr:hover td { background: #1d2030; }
+    td code { font-size: .8rem; }
+
+    a { color: var(--accent-blue); }
+    strong { font-weight: 600; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+
+    footer { text-align: center; color: var(--muted); font-size: .85rem; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <div class="hero">
+    <h1>🪝 Claude Code Hooks</h1>
+    <p>
+      Shell commands that run automatically when Claude does things.
+      Tests on every file write. Linters before every bash command. Slack pings when the job's done.
+    </p>
+    <div class="subtitle">If Claude touches it, your hook can react to it. Automation, finally.</div>
+  </div>
+
+  <div class="os-toggle-bar">
+    <span>I'm on</span>
+    <button class="os-btn-global mac-active" id="btnMac" onclick="setOS('mac')">🍎 macOS</button>
+    <button class="os-btn-global" id="btnWin" onclick="setOS('win')">🪟 Windows</button>
+    <span style="margin-left:auto; font-size:.78rem;">— paths below will update automatically</span>
+  </div>
+
+  <div class="toc">
+    <h3>📋 Contents</h3>
+    <ol>
+      <li><a href="#what">What are hooks?</a></li>
+      <li><a href="#events">The five hook events</a></li>
+      <li><a href="#config">Configuring hooks</a></li>
+      <li><a href="#matcher">The matcher field</a></li>
+      <li><a href="#examples">Practical examples</a></li>
+      <li><a href="#env">Environment variables in hooks</a></li>
+      <li><a href="#tips">Tips &amp; gotchas</a></li>
+    </ol>
+  </div>
+
+  <!-- ════════════════ WHAT ════════════════ -->
+  <div class="section" id="what">
+    <h2>🧠 What are hooks?</h2>
+    <p>
+      Hooks are <strong>shell commands you configure that Claude Code runs automatically</strong> in response
+      to specific events — before a tool runs, after it finishes, when a session starts, when Claude stops.
+    </p>
+    <p>
+      They're the difference between "Claude wrote some code, I hope it didn't break anything" and
+      "Claude wrote some code and the tests immediately ran and it turns out it did break something but
+      Claude already knows and is fixing it." That second one is considerably better.
+    </p>
+    <ul>
+      <li>🧪 <strong>Run tests</strong> automatically after Claude writes a file</li>
+      <li>🔍 <strong>Lint</strong> before every shell command Claude runs</li>
+      <li>🔔 <strong>Send a notification</strong> when a long task finishes</li>
+      <li>📋 <strong>Log</strong> everything Claude does to a file</li>
+      <li>🛡️ <strong>Block dangerous commands</strong> before they execute</li>
+    </ul>
+    <div class="callout fun">
+      🎭 Hooks are like a micromanager — except they're actually helpful, don't schedule unnecessary meetings,
+      and never ask "can you just make it pop more?"
+    </div>
+  </div>
+
+  <!-- ════════════════ EVENTS ════════════════ -->
+  <div class="section" id="events">
+    <h2>⚡ The Five Hook Events</h2>
+    <p>Claude Code fires hooks at these points in its lifecycle:</p>
+
+    <div class="event-grid">
+      <div class="event-card">
+        <div class="event-name" style="color:#fbbf24;">SessionStart</div>
+        <p>Fires once when a new Claude Code session begins. Good for setup, health checks, loading context.</p>
+      </div>
+      <div class="event-card">
+        <div class="event-name" style="color:#60a5fa;">PreToolUse</div>
+        <p>Fires <em>before</em> Claude calls any tool. Can block the tool if your command exits non-zero.</p>
+      </div>
+      <div class="event-card">
+        <div class="event-name" style="color:#34d399;">PostToolUse</div>
+        <p>Fires <em>after</em> a tool call completes. Great for running tests, linting, or logging.</p>
+      </div>
+      <div class="event-card">
+        <div class="event-name" style="color:#a78bfa;">Notification</div>
+        <p>Fires when Claude sends a notification (e.g. "I'm waiting for your input"). Use for desktop alerts.</p>
+      </div>
+      <div class="event-card">
+        <div class="event-name" style="color:#f87171;">Stop</div>
+        <p>Fires when Claude finishes its turn. Perfect for "job done" notifications or cleanup.</p>
+      </div>
+    </div>
+
+    <div class="callout info">
+      ℹ️ <strong>PreToolUse is the gatekeeper.</strong> If your hook command exits with a non-zero code, Claude Code
+      will <em>block</em> the tool call and show your command's output as the reason. This is how you prevent
+      Claude from doing things you don't want it to do.
+    </div>
+  </div>
+
+  <!-- ════════════════ CONFIGURING ════════════════ -->
+  <div class="section" id="config">
+    <h2>⚙️ Configuring Hooks</h2>
+    <p>Hooks live in your Claude Code settings file. You can have project-level or personal-level hooks.</p>
+
+    <h3>Settings file location</h3>
+    <table>
+      <thead><tr><th>Scope</th><th class="os-mac">🍎 macOS path</th><th class="os-win">🪟 Windows path</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Personal</strong></td>
+          <td class="os-mac"><code>~/.claude/settings.json</code></td>
+          <td class="os-win"><code>%USERPROFILE%\.claude\settings.json</code></td>
+        </tr>
+        <tr>
+          <td><strong>Project</strong></td>
+          <td class="os-mac"><code>.claude/settings.json</code></td>
+          <td class="os-win"><code>.claude\settings.json</code></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>The settings.json structure</h3>
+    <div class="code-wrap">
+      <pre>{
+  <span class="c-key">"hooks"</span>: {
+    <span class="c-key">"PostToolUse"</span>: [
+      {
+        <span class="c-key">"matcher"</span>: <span class="c-str">"Write|Edit"</span>,
+        <span class="c-key">"hooks"</span>: [
+          {
+            <span class="c-key">"type"</span>: <span class="c-str">"command"</span>,
+            <span class="c-key">"command"</span>: <span class="c-str">"npm test --silent"</span>
+          }
+        ]
+      }
+    ],
+    <span class="c-key">"SessionStart"</span>: [
+      {
+        <span class="c-key">"hooks"</span>: [
+          {
+            <span class="c-key">"type"</span>: <span class="c-str">"command"</span>,
+            <span class="c-key">"command"</span>: <span class="c-str">"echo 'Session started' >> ~/.claude-session.log"</span>
+          }
+        ]
+      }
+    ]
+  }
+}</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Hook object fields</h3>
+    <table>
+      <thead><tr><th>Field</th><th>Required?</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>type</code></td><td>✅ Yes</td><td>Always <code>"command"</code> for now</td></tr>
+        <tr><td><code>command</code></td><td>✅ Yes</td><td>The shell command to run</td></tr>
+        <tr><td><code>timeout</code></td><td>No</td><td>Max seconds to wait (default: 60)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ════════════════ MATCHER ════════════════ -->
+  <div class="section" id="matcher">
+    <h2>🎯 The Matcher Field</h2>
+    <p>
+      The <code>matcher</code> field on a hook group is a <strong>regex pattern</strong> matched against
+      the tool name. This lets you target specific tools instead of firing on everything.
+    </p>
+
+    <h3>Available tool names to match</h3>
+    <table>
+      <thead><tr><th>Tool</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td><code>Bash</code></td><td>Runs shell commands</td></tr>
+        <tr><td><code>Write</code></td><td>Creates a new file</td></tr>
+        <tr><td><code>Edit</code></td><td>Edits an existing file</td></tr>
+        <tr><td><code>Read</code></td><td>Reads a file</td></tr>
+        <tr><td><code>Glob</code></td><td>Searches for files by pattern</td></tr>
+        <tr><td><code>Grep</code></td><td>Searches file contents</td></tr>
+        <tr><td><code>Task</code></td><td>Spawns a subagent</td></tr>
+        <tr><td><code>WebFetch</code></td><td>Fetches a URL</td></tr>
+        <tr><td><code>WebSearch</code></td><td>Searches the web</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Matcher examples</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt">// Match only the Write tool</span>
+<span class="c-key">"matcher"</span>: <span class="c-str">"Write"</span>
+
+<span class="c-cmt">// Match Write OR Edit (regex alternation)</span>
+<span class="c-key">"matcher"</span>: <span class="c-str">"Write|Edit"</span>
+
+<span class="c-cmt">// Match any tool (omit matcher entirely, or use ".*")</span>
+<span class="c-key">"matcher"</span>: <span class="c-str">".*"</span>
+
+<span class="c-cmt">// Match only Bash</span>
+<span class="c-key">"matcher"</span>: <span class="c-str">"Bash"</span></pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <div class="callout tip">
+      ✅ <strong>Omit the matcher</strong> for <code>SessionStart</code> and <code>Stop</code> hooks — those don't involve tools, so there's nothing to match against.
+    </div>
+  </div>
+
+  <!-- ════════════════ EXAMPLES ════════════════ -->
+  <div class="section" id="examples">
+    <h2>🚀 Practical Examples</h2>
+
+    <h3>Run tests after every file change</h3>
+    <div class="code-wrap">
+      <pre>{
+  <span class="c-key">"hooks"</span>: {
+    <span class="c-key">"PostToolUse"</span>: [
+      {
+        <span class="c-key">"matcher"</span>: <span class="c-str">"Write|Edit"</span>,
+        <span class="c-key">"hooks"</span>: [{ <span class="c-key">"type"</span>: <span class="c-str">"command"</span>, <span class="c-key">"command"</span>: <span class="c-str">"npm test --silent 2>&1"</span> }]
+      }
+    ]
+  }
+}</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Run a linter before every bash command</h3>
+    <p>This hook runs as <code>PreToolUse</code> — if the linter fails, Claude's command is <em>blocked</em>.</p>
+    <div class="code-wrap">
+      <pre>{
+  <span class="c-key">"hooks"</span>: {
+    <span class="c-key">"PreToolUse"</span>: [
+      {
+        <span class="c-key">"matcher"</span>: <span class="c-str">"Bash"</span>,
+        <span class="c-key">"hooks"</span>: [{ <span class="c-key">"type"</span>: <span class="c-str">"command"</span>, <span class="c-key">"command"</span>: <span class="c-str">"eslint --max-warnings=0 src/ 2>&1"</span> }]
+      }
+    ]
+  }
+}</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Desktop notification when Claude finishes</h3>
+    <div class="os-mac">
+      <div class="code-wrap">
+        <pre>{
+  <span class="c-key">"hooks"</span>: {
+    <span class="c-key">"Stop"</span>: [
+      {
+        <span class="c-key">"hooks"</span>: [{
+          <span class="c-key">"type"</span>: <span class="c-str">"command"</span>,
+          <span class="c-key">"command"</span>: <span class="c-str">"osascript -e 'display notification \"Claude is done\" with title \"Claude Code\"'"</span>
+        }]
+      }
+    ]
+  }
+}</pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+    </div>
+    <div class="os-win">
+      <div class="code-wrap">
+        <pre>{
+  <span class="c-key">"hooks"</span>: {
+    <span class="c-key">"Stop"</span>: [
+      {
+        <span class="c-key">"hooks"</span>: [{
+          <span class="c-key">"type"</span>: <span class="c-str">"command"</span>,
+          <span class="c-key">"command"</span>: <span class="c-str">"powershell -Command \"[System.Windows.MessageBox]::Show('Claude is done!')\""</span>
+        }]
+      }
+    ]
+  }
+}</pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+    </div>
+
+    <h3>Log everything Claude does to a file</h3>
+    <div class="os-mac">
+      <div class="code-wrap">
+        <pre>{
+  <span class="c-key">"hooks"</span>: {
+    <span class="c-key">"PostToolUse"</span>: [
+      {
+        <span class="c-key">"hooks"</span>: [{
+          <span class="c-key">"type"</span>: <span class="c-str">"command"</span>,
+          <span class="c-key">"command"</span>: <span class="c-str">"echo \"$(date): tool used\" >> ~/claude-audit.log"</span>
+        }]
+      }
+    ]
+  }
+}</pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+    </div>
+    <div class="os-win">
+      <div class="code-wrap">
+        <pre>{
+  <span class="c-key">"hooks"</span>: {
+    <span class="c-key">"PostToolUse"</span>: [
+      {
+        <span class="c-key">"hooks"</span>: [{
+          <span class="c-key">"type"</span>: <span class="c-str">"command"</span>,
+          <span class="c-key">"command"</span>: <span class="c-str">"echo %DATE% %TIME% tool used >> %USERPROFILE%\\claude-audit.log"</span>
+        }]
+      }
+    ]
+  }
+}</pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+    </div>
+
+    <h3>SessionStart: ensure dependencies are installed</h3>
+    <div class="code-wrap">
+      <pre>{
+  <span class="c-key">"hooks"</span>: {
+    <span class="c-key">"SessionStart"</span>: [
+      {
+        <span class="c-key">"hooks"</span>: [{
+          <span class="c-key">"type"</span>: <span class="c-str">"command"</span>,
+          <span class="c-key">"command"</span>: <span class="c-str">"npm install --silent"</span>,
+          <span class="c-key">"timeout"</span>: 120
+        }]
+      }
+    ]
+  }
+}</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Block dangerous rm commands (PreToolUse guardian)</h3>
+    <div class="os-mac">
+      <div class="code-wrap">
+        <pre>{
+  <span class="c-key">"hooks"</span>: {
+    <span class="c-key">"PreToolUse"</span>: [
+      {
+        <span class="c-key">"matcher"</span>: <span class="c-str">"Bash"</span>,
+        <span class="c-key">"hooks"</span>: [{
+          <span class="c-key">"type"</span>: <span class="c-str">"command"</span>,
+          <span class="c-cmt">// Exit 1 if command contains 'rm -rf' → blocks the tool call</span>
+          <span class="c-key">"command"</span>: <span class="c-str">"bash -c 'echo \"$CLAUDE_TOOL_INPUT\" | grep -q \"rm -rf\" && exit 1 || exit 0'"</span>
+        }]
+      }
+    ]
+  }
+}</pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+    </div>
+    <div class="os-win">
+      <div class="code-wrap">
+        <pre>{
+  <span class="c-key">"hooks"</span>: {
+    <span class="c-key">"PreToolUse"</span>: [
+      {
+        <span class="c-key">"matcher"</span>: <span class="c-str">"Bash"</span>,
+        <span class="c-key">"hooks"</span>: [{
+          <span class="c-key">"type"</span>: <span class="c-str">"command"</span>,
+          <span class="c-key">"command"</span>: <span class="c-str">"powershell -Command \"if ($env:CLAUDE_TOOL_INPUT -match 'rm -rf') { exit 1 }\""</span>
+        }]
+      }
+    ]
+  }
+}</pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════ ENV VARS ════════════════ -->
+  <div class="section" id="env">
+    <h2>🌍 Environment Variables in Hooks</h2>
+    <p>
+      Claude Code injects context about the current tool call into your hook's environment.
+      Use these to make smart, context-aware hooks.
+    </p>
+
+    <table>
+      <thead><tr><th>Variable</th><th>Contains</th><th>Available in</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>CLAUDE_TOOL_NAME</code></td>
+          <td>Name of the tool being called (e.g. <code>Bash</code>, <code>Write</code>)</td>
+          <td>PreToolUse, PostToolUse</td>
+        </tr>
+        <tr>
+          <td><code>CLAUDE_TOOL_INPUT</code></td>
+          <td>JSON-encoded input to the tool</td>
+          <td>PreToolUse, PostToolUse</td>
+        </tr>
+        <tr>
+          <td><code>CLAUDE_TOOL_OUTPUT</code></td>
+          <td>JSON-encoded output from the tool</td>
+          <td>PostToolUse</td>
+        </tr>
+        <tr>
+          <td><code>CLAUDE_SESSION_ID</code></td>
+          <td>Unique ID for the current session</td>
+          <td>All events</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Example: only run tests on .ts files</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># A smarter hook script: only run tests if a .ts file was changed</span>
+<span class="c-cmt"># Save as: ~/.claude/hooks/smart-test.sh</span>
+#!/bin/bash
+if echo "$CLAUDE_TOOL_INPUT" | grep -q '\.ts"'; then
+  npm test --silent
+fi</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Reference it in settings.json</span>
+{
+  <span class="c-key">"hooks"</span>: {
+    <span class="c-key">"PostToolUse"</span>: [
+      {
+        <span class="c-key">"matcher"</span>: <span class="c-str">"Write|Edit"</span>,
+        <span class="c-key">"hooks"</span>: [{ <span class="c-key">"type"</span>: <span class="c-str">"command"</span>, <span class="c-key">"command"</span>: <span class="c-str">"~/.claude/hooks/smart-test.sh"</span> }]
+      }
+    ]
+  }
+}</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+  </div>
+
+  <!-- ════════════════ TIPS ════════════════ -->
+  <div class="section" id="tips">
+    <h2>💡 Tips &amp; Gotchas</h2>
+
+    <h3>1. Hooks run synchronously</h3>
+    <p>
+      Claude Code waits for your hook to finish before continuing. A slow hook = a slow Claude.
+      If you're running a full test suite, consider using <code>npm test --bail</code> so it stops on first failure
+      instead of running every single test while Claude stares at the ceiling.
+    </p>
+
+    <h3>2. Use timeouts for safety</h3>
+    <div class="code-wrap">
+      <pre>{ <span class="c-key">"type"</span>: <span class="c-str">"command"</span>, <span class="c-key">"command"</span>: <span class="c-str">"npm test"</span>, <span class="c-key">"timeout"</span>: 30 }</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <p>Without a timeout, a hung hook hangs Claude forever. Add timeouts to anything that touches the network or spawns long processes.</p>
+
+    <h3>3. PreToolUse exit code is the veto</h3>
+    <p>
+      Exit <code>0</code> → allow the tool. Exit anything else → block it and show your hook's stdout/stderr
+      as the reason. This is intentional and very useful for safety guardrails.
+    </p>
+
+    <h3>4. Multiple hooks per event</h3>
+    <p>You can have multiple hook entries per event. They run in order, top to bottom. All must pass (exit 0) for a PreToolUse to allow the tool.</p>
+
+    <h3>5. Project hooks are great for team standards</h3>
+    <p>Put your project's <code>.claude/settings.json</code> in git. Now everyone on the team automatically runs the same linters and tests. No "it works on my machine" for AI-generated code.</p>
+
+    <div class="callout danger">
+      ⚠️ <strong>Don't put secrets in settings.json.</strong> If your project settings file is committed to git (which is the point), any API keys or tokens in the <code>command</code> fields are visible to everyone. Use environment variables from your shell profile instead.
+    </div>
+  </div>
+
+  <!-- ════════════════ QUICK REFERENCE ════════════════ -->
+  <div class="section">
+    <h2>🗺️ Quick Reference</h2>
+    <table>
+      <thead><tr><th>Event</th><th>When it fires</th><th>Can block?</th><th>Has TOOL_INPUT?</th></tr></thead>
+      <tbody>
+        <tr><td><code>SessionStart</code></td><td>Session begins</td><td>—</td><td>No</td></tr>
+        <tr><td><code>PreToolUse</code></td><td>Before tool call</td><td>✅ Yes (exit non-zero)</td><td>Yes</td></tr>
+        <tr><td><code>PostToolUse</code></td><td>After tool call</td><td>No</td><td>Yes + OUTPUT</td></tr>
+        <tr><td><code>Notification</code></td><td>Claude sends notification</td><td>No</td><td>No</td></tr>
+        <tr><td><code>Stop</code></td><td>Claude's turn ends</td><td>No</td><td>No</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <footer>
+    <p>🪝 Hooks: your AI assistant, but with consequences for bad behaviour.</p>
+    <p style="margin-top:.5rem;">Last updated: February 2026 · Part of the AI CLI Setup series</p>
+  </footer>
+
+</div>
+
+<script>
+  function copyCode(btn) {
+    const pre = btn.closest('.code-wrap').querySelector('pre');
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+      btn.textContent = '✓ Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    }).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = pre.innerText;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      btn.textContent = '✓ Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  function copyLink(btn, text) {
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = '✓ Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    }).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      btn.textContent = '✓ Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  function setOS(os) {
+    const btnMac = document.getElementById('btnMac');
+    const btnWin = document.getElementById('btnWin');
+    if (os === 'mac') {
+      document.body.classList.remove('win');
+      btnMac.classList.add('mac-active');
+      btnMac.classList.remove('win-active');
+      btnWin.classList.remove('mac-active', 'win-active');
+    } else {
+      document.body.classList.add('win');
+      btnWin.classList.add('win-active');
+      btnWin.classList.remove('mac-active');
+      btnMac.classList.remove('mac-active', 'win-active');
+    }
+  }
+
+  document.querySelectorAll('.copy-btn').forEach(btn => { btn.textContent = 'Copy'; });
+</script>
+</body>
+</html>

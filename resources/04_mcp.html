@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MCP — Model Context Protocol</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #222536;
+      --border: #2e3250;
+      --text: #e2e4f0;
+      --muted: #8b8fa8;
+      --accent: #34d399;
+      --accent-blue: #60a5fa;
+      --accent-purple: #a78bfa;
+      --accent-yellow: #fbbf24;
+      --accent-red: #f87171;
+      --mac: #c084fc;
+      --win: #38bdf8;
+      --code-bg: #0d1117;
+      --radius: 10px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-size: 16px;
+      line-height: 1.7;
+      padding: 2rem 1rem;
+    }
+
+    .container { max-width: 860px; margin: 0 auto; }
+
+    /* ── Hero ── */
+    .hero {
+      text-align: center;
+      padding: 3rem 2rem 2rem;
+      background: linear-gradient(135deg, #1a1d27, #0f1f18);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 2.5rem;
+    }
+    .hero h1 { font-size: 2.2rem; font-weight: 800; margin-bottom: .6rem; }
+    .hero p  { color: var(--muted); max-width: 620px; margin: 0 auto; font-size: 1rem; }
+    .hero .subtitle { margin-top: .5rem; font-size: .9rem; color: var(--accent); }
+
+    /* ── OS toggle ── */
+    .os-toggle-bar {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      padding: .7rem 1rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      font-size: .88rem;
+    }
+    .os-toggle-bar span { color: var(--muted); }
+    .os-btn-global {
+      padding: .3rem .9rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      cursor: pointer;
+      font-size: .82rem;
+      font-weight: 600;
+      transition: all .15s;
+      font-family: inherit;
+    }
+    .os-btn-global.mac-active { background: #2a1240; color: var(--mac); border-color: var(--mac); }
+    .os-btn-global.win-active { background: #0f1e30; color: var(--win); border-color: var(--win); }
+
+    .os-mac { display: block; }
+    .os-win { display: none; }
+    body.win .os-mac { display: none; }
+    body.win .os-win { display: block; }
+
+    tr.os-mac { display: table-row; }
+    tr.os-win { display: none; }
+    body.win tr.os-mac { display: none; }
+    body.win tr.os-win { display: table-row; }
+
+    /* ── TOC ── */
+    .toc {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.2rem 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .toc h3 { margin-bottom: .8rem; font-size: .95rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+    .toc ol { padding-left: 1.3rem; }
+    .toc li { margin-bottom: .3rem; }
+    .toc a  { color: var(--accent-blue); text-decoration: none; }
+    .toc a:hover { text-decoration: underline; }
+
+    /* ── Sections ── */
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.8rem 2rem;
+      margin-bottom: 1.5rem;
+    }
+    .section h2 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: var(--accent);
+    }
+    .section h3 {
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      font-size: .8rem;
+      font-weight: 600;
+      margin: 1.4rem 0 .5rem;
+    }
+    .section p  { margin-bottom: .75rem; }
+    .section ul, .section ol { padding-left: 1.4rem; margin-bottom: .75rem; }
+    .section li { margin-bottom: .35rem; }
+
+    /* ── Code blocks ── */
+    .code-wrap {
+      position: relative;
+      margin: .75rem 0;
+    }
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.2rem;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+      font-size: .85rem;
+      line-height: 1.6;
+      white-space: pre;
+    }
+    .copy-btn {
+      position: absolute;
+      top: .5rem;
+      right: .5rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 6px;
+      padding: .25rem .65rem;
+      font-size: .75rem;
+      cursor: pointer;
+      transition: all .15s;
+      font-family: inherit;
+    }
+    .copy-btn:hover { background: var(--border); color: var(--text); }
+    .copy-btn.copied { color: var(--accent); border-color: var(--accent); }
+
+    /* ── Link copy rows ── */
+    .link-copy {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: .65rem 1rem;
+      margin: .5rem 0;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: .85rem;
+      word-break: break-all;
+    }
+    .link-copy span { flex: 1; color: var(--accent-blue); }
+    .link-copy button {
+      flex-shrink: 0;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 6px;
+      padding: .2rem .6rem;
+      font-size: .75rem;
+      cursor: pointer;
+      transition: all .15s;
+      font-family: inherit;
+    }
+    .link-copy button:hover { background: var(--border); color: var(--text); }
+    .link-copy button.copied { color: var(--accent); border-color: var(--accent); }
+
+    /* ── Inline code ── */
+    code {
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: .85em;
+      background: #161b22;
+      padding: .15em .4em;
+      border-radius: 4px;
+      color: #c9d1d9;
+    }
+
+    /* ── Callout boxes ── */
+    .callout {
+      border-left: 3px solid var(--accent-yellow);
+      background: #1f1c10;
+      padding: .75rem 1.1rem;
+      border-radius: 0 8px 8px 0;
+      margin: 1rem 0;
+      font-size: .9rem;
+    }
+    .callout.tip  { border-color: var(--accent); background: #0f1f18; }
+    .callout.info { border-color: var(--accent-blue); background: #0f1826; }
+    .callout.fun  { border-color: var(--accent-purple); background: #1a1530; }
+
+    /* ── Syntax colors ── */
+    .c-key  { color: var(--accent-yellow); }
+    .c-val  { color: #a5d6ff; }
+    .c-str  { color: #a5d6ff; }
+    .c-cmt  { color: var(--muted); font-style: italic; }
+    .c-cmd  { color: var(--accent); }
+    .c-arg  { color: #fca5a5; }
+    .c-ph   { color: var(--accent-purple); }
+
+    /* ── Table ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: .88rem;
+    }
+    th {
+      background: var(--surface2);
+      padding: .6rem .9rem;
+      text-align: left;
+      font-weight: 600;
+      color: var(--muted);
+      font-size: .78rem;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+    td {
+      padding: .6rem .9rem;
+      border-top: 1px solid var(--border);
+      vertical-align: top;
+    }
+    tr:hover td { background: #1d2030; }
+    td code { font-size: .8rem; }
+
+    /* ── Badges ── */
+    .badge {
+      display: inline-block;
+      padding: .1rem .55rem;
+      border-radius: 999px;
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .03em;
+      vertical-align: middle;
+    }
+    .badge-free  { background: rgba(52,211,153,.12);  color: var(--accent); }
+    .badge-paid  { background: rgba(251,191,36,.12);  color: var(--accent-yellow); }
+    .badge-local { background: rgba(96,165,250,.12);  color: var(--accent-blue); }
+
+    a { color: var(--accent-blue); }
+    strong { font-weight: 600; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+
+    footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: .85rem;
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ════════════════ HERO ════════════════ -->
+  <div class="hero">
+    <h1>🔌 MCP — Model Context Protocol</h1>
+    <p>
+      Your AI can read your code. But can it read your database? Check your GitHub issues?
+      Fetch that API? Yes — if you give it a plug.
+    </p>
+    <div class="subtitle">MCP: because "just paste it into the chat" doesn't scale.</div>
+  </div>
+
+  <!-- ════════════════ GLOBAL OS TOGGLE ════════════════ -->
+  <div class="os-toggle-bar">
+    <span>I'm on</span>
+    <button class="os-btn-global mac-active" id="btnMac" onclick="setOS('mac')">🍎 macOS</button>
+    <button class="os-btn-global" id="btnWin" onclick="setOS('win')">🪟 Windows</button>
+    <span style="margin-left:auto; font-size:.78rem;">— paths below will update automatically</span>
+  </div>
+
+  <!-- ════════════════ TOC ════════════════ -->
+  <div class="toc">
+    <h3>📋 Contents</h3>
+    <ol>
+      <li><a href="#what">What is MCP?</a></li>
+      <li><a href="#why">Why should I care?</a></li>
+      <li><a href="#add">Adding MCP servers to Claude Code</a></li>
+      <li><a href="#popular">Popular MCP servers</a></li>
+      <li><a href="#config">Config file reference</a></li>
+      <li><a href="#codex-gemini">Codex &amp; Gemini CLI</a></li>
+      <li><a href="#build">Building your own MCP server</a></li>
+    </ol>
+  </div>
+
+  <!-- ════════════════ WHAT ════════════════ -->
+  <div class="section" id="what">
+    <h2>🧠 What is MCP?</h2>
+    <p>
+      <strong>Model Context Protocol</strong> is an open standard created by Anthropic that lets AI models
+      talk to external tools, services, and data sources in a structured, secure way. Think of it as
+      a universal adapter between your AI and the rest of the world.
+    </p>
+    <p>
+      Without MCP, your AI assistant knows only what's in the conversation. With MCP, it can
+      query your database, read GitHub issues, search the web, inspect running processes — anything
+      you connect it to.
+    </p>
+
+    <h3>The three pieces</h3>
+    <table>
+      <thead><tr><th>Role</th><th>What it does</th><th>Example</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Host</strong></td>
+          <td>The AI app you're using — it manages connections</td>
+          <td>Claude Code, Claude Desktop</td>
+        </tr>
+        <tr>
+          <td><strong>Client</strong></td>
+          <td>Built into the host — handles the protocol layer</td>
+          <td>Claude's internal MCP client</td>
+        </tr>
+        <tr>
+          <td><strong>Server</strong></td>
+          <td>The thing that exposes tools to the AI</td>
+          <td>A filesystem server, a GitHub server, your custom server</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout info">
+      ℹ️ <strong>Key insight:</strong> MCP servers expose <em>tools</em> (actions like "read file", "create issue")
+      and <em>resources</em> (data like "list of open PRs"). Claude calls these the same way it calls built-in tools.
+      From Claude's perspective, it's all just "things I can do."
+    </div>
+  </div>
+
+  <!-- ════════════════ WHY ════════════════ -->
+  <div class="section" id="why">
+    <h2>🤔 Why should I care?</h2>
+    <p>Because copy-pasting context into a chat window is a job, and you already have one of those.</p>
+    <ul>
+      <li>🗄️ <strong>Live data.</strong> Query your actual database instead of describing the schema from memory (incorrectly).</li>
+      <li>🐙 <strong>GitHub integration.</strong> Claude can read issues, PRs, and comments — and create them — without you leaving the terminal.</li>
+      <li>🌐 <strong>Web access.</strong> Let Claude fetch URLs and search the web without manual pasting.</li>
+      <li>📂 <strong>Extended filesystem access.</strong> Give Claude access to folders outside your project directory.</li>
+      <li>🧠 <strong>Persistent memory.</strong> Some MCP servers give Claude a long-term memory that survives across sessions.</li>
+      <li>🔧 <strong>Custom tools.</strong> Build a server that wraps your internal APIs. Now Claude knows your whole stack.</li>
+    </ul>
+    <div class="callout fun">
+      🎭 <strong>Without MCP:</strong> "Claude, our users table has columns id, email, created_at, is_active, stripe_customer_id, and..." <br/>
+      <strong>With MCP:</strong> "Claude, look at the database."
+    </div>
+  </div>
+
+  <!-- ════════════════ ADDING SERVERS ════════════════ -->
+  <div class="section" id="add">
+    <h2>➕ Adding MCP Servers to Claude Code</h2>
+    <p>
+      Claude Code has a built-in CLI for managing MCP servers. There are two transport types: <strong>stdio</strong>
+      (a local process Claude spawns) and <strong>SSE</strong> (a remote HTTP server).
+    </p>
+
+    <h3>Add a stdio server (most common)</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># The general pattern</span>
+claude mcp add <span class="c-arg">&lt;name&gt;</span> -- <span class="c-arg">&lt;command&gt;</span> <span class="c-arg">[args...]</span>
+
+<span class="c-cmt"># Example: filesystem server with access to your home directory</span>
+claude mcp add filesystem -- npx -y @modelcontextprotocol/server-filesystem <span class="c-arg">~/</span>
+
+<span class="c-cmt"># Example: GitHub server</span>
+claude mcp add github -- npx -y @modelcontextprotocol/server-github</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Add a remote SSE server</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Point Claude at a running HTTP server</span>
+claude mcp add --transport sse <span class="c-arg">&lt;name&gt;</span> <span class="c-arg">&lt;url&gt;</span>
+
+<span class="c-cmt"># Example: a locally running custom server</span>
+claude mcp add --transport sse my-api http://localhost:3000/mcp</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Manage your servers</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># List all configured servers</span>
+claude mcp list
+
+<span class="c-cmt"># Show details for one server</span>
+claude mcp get <span class="c-arg">&lt;name&gt;</span>
+
+<span class="c-cmt"># Remove a server</span>
+claude mcp remove <span class="c-arg">&lt;name&gt;</span></pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Scoping: project vs. personal</h3>
+    <p>
+      By default, servers are added to your personal config and available everywhere.
+      Use <code>--scope project</code> to save to the current project only (great for team-shared servers):
+    </p>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Save to project config (committed to git, shared with team)</span>
+claude mcp add --scope project filesystem -- npx -y @modelcontextprotocol/server-filesystem .
+
+<span class="c-cmt"># Save to personal config (default — available in all projects)</span>
+claude mcp add --scope user filesystem -- npx -y @modelcontextprotocol/server-filesystem ~/</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <div class="callout tip">
+      ✅ <strong>Rule of thumb:</strong> Servers that make sense for everyone on the project (like a project-specific DB or API) go in <code>--scope project</code>. Servers for personal preference (like your global web search) go in <code>--scope user</code>.
+    </div>
+  </div>
+
+  <!-- ════════════════ POPULAR SERVERS ════════════════ -->
+  <div class="section" id="popular">
+    <h2>⭐ Popular MCP Servers</h2>
+    <p>These are the greatest hits. All available via <code>npx -y ...</code> — no separate install needed.</p>
+
+    <h3>Filesystem — read/write files anywhere</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Give Claude access to specific directories</span>
+claude mcp add filesystem -- npx -y @modelcontextprotocol/server-filesystem <span class="c-arg">/path/to/dir</span></pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <p>Package:</p>
+    <div class="link-copy">
+      <span>@modelcontextprotocol/server-filesystem</span>
+      <button onclick="copyLink(this, '@modelcontextprotocol/server-filesystem')">Copy</button>
+    </div>
+
+    <h3>GitHub — issues, PRs, repos</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Requires GITHUB_TOKEN env var</span>
+claude mcp add github -- npx -y @modelcontextprotocol/server-github</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Set your token first (add to ~/.zshrc or ~/.bashrc)</span>
+<span class="c-key">export</span> GITHUB_TOKEN=<span class="c-str">"ghp_your_token_here"</span></pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Fetch — let Claude browse URLs</h3>
+    <div class="code-wrap">
+      <pre>claude mcp add fetch -- npx -y @modelcontextprotocol/server-fetch</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>SQLite — query a local database</h3>
+    <div class="code-wrap">
+      <pre>claude mcp add sqlite -- npx -y @modelcontextprotocol/server-sqlite <span class="c-arg">./my-database.db</span></pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Memory — persistent knowledge graph</h3>
+    <p>Gives Claude a long-term memory that survives across sessions. It remembers things you've told it.</p>
+    <div class="code-wrap">
+      <pre>claude mcp add memory -- npx -y @modelcontextprotocol/server-memory</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Brave Search — web search</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Requires BRAVE_API_KEY</span>
+claude mcp add brave-search -- npx -y @modelcontextprotocol/server-brave-search</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <div class="callout info">
+      ℹ️ The full catalog of community and official MCP servers lives here:
+      <div style="margin-top:.4rem;">
+        <div class="link-copy">
+          <span>https://github.com/modelcontextprotocol/servers</span>
+          <button onclick="copyLink(this, 'https://github.com/modelcontextprotocol/servers')">Copy</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════ CONFIG FILE ════════════════ -->
+  <div class="section" id="config">
+    <h2>🗂️ Config File Reference</h2>
+    <p>
+      Behind the scenes, <code>claude mcp add</code> writes to a JSON config file.
+      You can also edit it directly — sometimes it's faster.
+    </p>
+
+    <h3>Where the config lives</h3>
+    <table>
+      <thead><tr><th>Scope</th><th class="os-mac">🍎 macOS path</th><th class="os-win">🪟 Windows path</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Personal</strong></td>
+          <td class="os-mac"><code>~/.claude.json</code></td>
+          <td class="os-win"><code>%USERPROFILE%\.claude.json</code></td>
+        </tr>
+        <tr>
+          <td><strong>Project</strong></td>
+          <td class="os-mac"><code>.claude/settings.json</code></td>
+          <td class="os-win"><code>.claude\settings.json</code></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>What the JSON looks like</h3>
+    <div class="code-wrap">
+      <pre>{
+  <span class="c-key">"mcpServers"</span>: {
+    <span class="c-key">"filesystem"</span>: {
+      <span class="c-key">"command"</span>: <span class="c-str">"npx"</span>,
+      <span class="c-key">"args"</span>: [<span class="c-str">"-y"</span>, <span class="c-str">"@modelcontextprotocol/server-filesystem"</span>, <span class="c-str">"/Users/you/projects"</span>]
+    },
+    <span class="c-key">"github"</span>: {
+      <span class="c-key">"command"</span>: <span class="c-str">"npx"</span>,
+      <span class="c-key">"args"</span>: [<span class="c-str">"-y"</span>, <span class="c-str">"@modelcontextprotocol/server-github"</span>],
+      <span class="c-key">"env"</span>: {
+        <span class="c-key">"GITHUB_TOKEN"</span>: <span class="c-str">"ghp_your_token_here"</span>
+      }
+    },
+    <span class="c-key">"my-api"</span>: {
+      <span class="c-key">"transport"</span>: <span class="c-str">"sse"</span>,
+      <span class="c-key">"url"</span>: <span class="c-str">"http://localhost:3000/mcp"</span>
+    }
+  }
+}</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <div class="callout">
+      ⚠️ <strong>Don't commit API keys.</strong> If your project-scoped settings file contains secrets, add <code>.claude/settings.json</code> to <code>.gitignore</code>. Or use environment variables and reference them in your shell profile instead.
+    </div>
+  </div>
+
+  <!-- ════════════════ CODEX + GEMINI ════════════════ -->
+  <div class="section" id="codex-gemini">
+    <h2>🟢🔵 Codex &amp; Gemini CLI</h2>
+    <p>
+      Both Codex CLI and Gemini CLI also support MCP — they just configure it differently.
+    </p>
+
+    <h3>Codex CLI</h3>
+    <p>Add MCP servers via your <code>codex.json</code> config file:</p>
+    <div class="os-mac">
+      <div class="link-copy">
+        <span>~/.codex/config.json</span>
+        <button onclick="copyLink(this, '~/.codex/config.json')">Copy</button>
+      </div>
+    </div>
+    <div class="os-win">
+      <div class="link-copy">
+        <span>%USERPROFILE%\.codex\config.json</span>
+        <button onclick="copyLink(this, '%USERPROFILE%\\.codex\\config.json')">Copy</button>
+      </div>
+    </div>
+    <div class="code-wrap">
+      <pre>{
+  <span class="c-key">"mcpServers"</span>: {
+    <span class="c-key">"filesystem"</span>: {
+      <span class="c-key">"command"</span>: <span class="c-str">"npx"</span>,
+      <span class="c-key">"args"</span>: [<span class="c-str">"-y"</span>, <span class="c-str">"@modelcontextprotocol/server-filesystem"</span>, <span class="c-str">"."</span>]
+    }
+  }
+}</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Gemini CLI</h3>
+    <p>Add MCP servers via your <code>settings.json</code>:</p>
+    <div class="os-mac">
+      <div class="link-copy">
+        <span>~/.gemini/settings.json</span>
+        <button onclick="copyLink(this, '~/.gemini/settings.json')">Copy</button>
+      </div>
+    </div>
+    <div class="os-win">
+      <div class="link-copy">
+        <span>%USERPROFILE%\.gemini\settings.json</span>
+        <button onclick="copyLink(this, '%USERPROFILE%\\.gemini\\settings.json')">Copy</button>
+      </div>
+    </div>
+    <div class="code-wrap">
+      <pre>{
+  <span class="c-key">"mcpServers"</span>: {
+    <span class="c-key">"filesystem"</span>: {
+      <span class="c-key">"command"</span>: <span class="c-str">"npx"</span>,
+      <span class="c-key">"args"</span>: [<span class="c-str">"-y"</span>, <span class="c-str">"@modelcontextprotocol/server-filesystem"</span>, <span class="c-str">"."</span>]
+    }
+  }
+}</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <div class="callout fun">
+      🎭 All three tools use the same <code>mcpServers</code> JSON key. Somewhere, an engineer is very proud of that decision. They should be.
+    </div>
+  </div>
+
+  <!-- ════════════════ BUILDING YOUR OWN ════════════════ -->
+  <div class="section" id="build">
+    <h2>🔨 Building Your Own MCP Server</h2>
+    <p>
+      If an existing server doesn't scratch your itch, you can build your own in about 30 lines of code.
+      The SDK handles all the protocol-level plumbing.
+    </p>
+
+    <h3>Quick-start with the TypeScript SDK</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Install the SDK</span>
+npm install @modelcontextprotocol/sdk</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Minimal server example</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt">// server.ts — a minimal MCP server with one tool</span>
+import { Server } from <span class="c-str">"@modelcontextprotocol/sdk/server/index.js"</span>;
+import { StdioServerTransport } from <span class="c-str">"@modelcontextprotocol/sdk/server/stdio.js"</span>;
+
+const server = new Server(
+  { name: <span class="c-str">"my-server"</span>, version: <span class="c-str">"1.0.0"</span> },
+  { capabilities: { tools: {} } }
+);
+
+<span class="c-cmt">// Register a tool</span>
+server.setRequestHandler(<span class="c-str">"tools/list"</span>, async () => ({
+  tools: [{
+    name: <span class="c-str">"greet"</span>,
+    description: <span class="c-str">"Say hello to a person"</span>,
+    inputSchema: {
+      type: <span class="c-str">"object"</span>,
+      properties: { name: { type: <span class="c-str">"string"</span> } },
+      required: [<span class="c-str">"name"</span>]
+    }
+  }]
+}));
+
+server.setRequestHandler(<span class="c-str">"tools/call"</span>, async (req) => ({
+  content: [{ type: <span class="c-str">"text"</span>, text: <span class="c-str">`Hello, ${req.params.arguments.name}!`</span> }]
+}));
+
+await server.connect(new StdioServerTransport());</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Connect it to Claude Code</h3>
+    <div class="code-wrap">
+      <pre>claude mcp add my-server -- npx ts-node server.ts</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <p>SDK documentation and more examples:</p>
+    <div class="link-copy">
+      <span>https://modelcontextprotocol.io/docs</span>
+      <button onclick="copyLink(this, 'https://modelcontextprotocol.io/docs')">Copy</button>
+    </div>
+
+    <div class="callout tip">
+      ✅ <strong>Best use case for custom servers:</strong> Wrapping internal APIs your team has built. If you have a REST API for your data, wrapping it in an MCP server means Claude can use your live data without anyone having to paste anything ever again.
+    </div>
+  </div>
+
+  <!-- ════════════════ QUICK REFERENCE ════════════════ -->
+  <div class="section">
+    <h2>🗺️ Quick Reference</h2>
+    <table>
+      <thead><tr><th>Command</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td><code>claude mcp add &lt;name&gt; -- &lt;cmd&gt;</code></td><td>Add a stdio MCP server</td></tr>
+        <tr><td><code>claude mcp add --transport sse &lt;name&gt; &lt;url&gt;</code></td><td>Add a remote SSE server</td></tr>
+        <tr><td><code>claude mcp add --scope project ...</code></td><td>Save to project config (git-shareable)</td></tr>
+        <tr><td><code>claude mcp list</code></td><td>List all configured servers</td></tr>
+        <tr><td><code>claude mcp get &lt;name&gt;</code></td><td>Inspect a specific server</td></tr>
+        <tr><td><code>claude mcp remove &lt;name&gt;</code></td><td>Remove a server</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <footer>
+    <p>🔌 MCP: the universal adapter your AI has been waiting for.</p>
+    <p style="margin-top:.5rem;">Last updated: February 2026 · Part of the AI CLI Setup series</p>
+  </footer>
+
+</div>
+
+<script>
+  function copyCode(btn) {
+    const pre = btn.closest('.code-wrap').querySelector('pre');
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+      btn.textContent = '✓ Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    }).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = pre.innerText;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      btn.textContent = '✓ Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  function copyLink(btn, text) {
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = '✓ Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    }).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      btn.textContent = '✓ Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  function setOS(os) {
+    const btnMac = document.getElementById('btnMac');
+    const btnWin = document.getElementById('btnWin');
+    if (os === 'mac') {
+      document.body.classList.remove('win');
+      btnMac.classList.add('mac-active');
+      btnMac.classList.remove('win-active');
+      btnWin.classList.remove('mac-active', 'win-active');
+    } else {
+      document.body.classList.add('win');
+      btnWin.classList.add('win-active');
+      btnWin.classList.remove('mac-active');
+      btnMac.classList.remove('mac-active', 'win-active');
+    }
+  }
+
+  document.querySelectorAll('.copy-btn').forEach(btn => { btn.textContent = 'Copy'; });
+</script>
+</body>
+</html>
