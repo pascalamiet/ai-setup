@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CLAUDE.md — Give Your AI a Memory</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #222536;
+      --border: #2e3250;
+      --text: #e2e4f0;
+      --muted: #8b8fa8;
+      --accent: #a78bfa;
+      --accent-green: #34d399;
+      --accent-blue: #60a5fa;
+      --accent-yellow: #fbbf24;
+      --accent-red: #f87171;
+      --mac: #c084fc;
+      --win: #38bdf8;
+      --code-bg: #0d1117;
+      --radius: 10px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-size: 16px;
+      line-height: 1.7;
+      padding: 2rem 1rem;
+    }
+
+    .container { max-width: 860px; margin: 0 auto; }
+
+    .hero {
+      text-align: center;
+      padding: 3rem 2rem 2rem;
+      background: linear-gradient(135deg, #1a1d27, #1a1535);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 2.5rem;
+    }
+    .hero h1 { font-size: 2.2rem; font-weight: 800; margin-bottom: .6rem; }
+    .hero p  { color: var(--muted); max-width: 620px; margin: 0 auto; font-size: 1rem; }
+    .hero .subtitle { margin-top: .5rem; font-size: .9rem; color: var(--accent); }
+
+    .os-toggle-bar {
+      display: flex; align-items: center; gap: .6rem;
+      padding: .7rem 1rem; background: var(--surface2);
+      border: 1px solid var(--border); border-radius: 8px;
+      margin-bottom: 1.5rem; font-size: .88rem;
+    }
+    .os-toggle-bar span { color: var(--muted); }
+    .os-btn-global {
+      padding: .3rem .9rem; border-radius: 6px; border: 1px solid var(--border);
+      background: var(--surface); color: var(--muted); cursor: pointer;
+      font-size: .82rem; font-weight: 600; transition: all .15s; font-family: inherit;
+    }
+    .os-btn-global.mac-active { background: #2a1240; color: var(--mac); border-color: var(--mac); }
+    .os-btn-global.win-active { background: #0f1e30; color: var(--win); border-color: var(--win); }
+
+    .os-mac { display: block; }
+    .os-win { display: none; }
+    body.win .os-mac { display: none; }
+    body.win .os-win { display: block; }
+
+    tr.os-mac { display: table-row; }
+    tr.os-win { display: none; }
+    body.win tr.os-mac { display: none; }
+    body.win tr.os-win { display: table-row; }
+
+    .toc {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.2rem 1.5rem; margin-bottom: 2rem;
+    }
+    .toc h3 { margin-bottom: .8rem; font-size: .95rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+    .toc ol { padding-left: 1.3rem; }
+    .toc li { margin-bottom: .3rem; }
+    .toc a  { color: var(--accent-blue); text-decoration: none; }
+    .toc a:hover { text-decoration: underline; }
+
+    .section {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.8rem 2rem; margin-bottom: 1.5rem;
+    }
+    .section h2 { font-size: 1.35rem; font-weight: 700; margin-bottom: 1rem; color: var(--accent); }
+    .section h3 { color: var(--muted); text-transform: uppercase; letter-spacing: .05em; font-size: .8rem; font-weight: 600; margin: 1.4rem 0 .5rem; }
+    .section p  { margin-bottom: .75rem; }
+    .section ul, .section ol { padding-left: 1.4rem; margin-bottom: .75rem; }
+    .section li { margin-bottom: .35rem; }
+
+    .code-wrap { position: relative; margin: .75rem 0; }
+    pre {
+      background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px;
+      padding: 1rem 1.2rem; overflow-x: auto;
+      font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+      font-size: .85rem; line-height: 1.6; white-space: pre;
+    }
+    .copy-btn {
+      position: absolute; top: .5rem; right: .5rem; background: var(--surface2);
+      border: 1px solid var(--border); color: var(--muted); border-radius: 6px;
+      padding: .25rem .65rem; font-size: .75rem; cursor: pointer; transition: all .15s; font-family: inherit;
+    }
+    .copy-btn:hover { background: var(--border); color: var(--text); }
+    .copy-btn.copied { color: var(--accent-green); border-color: var(--accent-green); }
+
+    .link-copy {
+      display: flex; align-items: center; gap: .6rem; background: var(--code-bg);
+      border: 1px solid var(--border); border-radius: 8px; padding: .65rem 1rem;
+      margin: .5rem 0; font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: .85rem; word-break: break-all;
+    }
+    .link-copy span { flex: 1; color: var(--accent-blue); }
+    .link-copy button {
+      flex-shrink: 0; background: var(--surface2); border: 1px solid var(--border);
+      color: var(--muted); border-radius: 6px; padding: .2rem .6rem; font-size: .75rem;
+      cursor: pointer; transition: all .15s; font-family: inherit;
+    }
+    .link-copy button:hover { background: var(--border); color: var(--text); }
+    .link-copy button.copied { color: var(--accent-green); border-color: var(--accent-green); }
+
+    code {
+      font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: .85em;
+      background: #161b22; padding: .15em .4em; border-radius: 4px; color: #c9d1d9;
+    }
+
+    .callout {
+      border-left: 3px solid var(--accent-yellow); background: #1f1c10;
+      padding: .75rem 1.1rem; border-radius: 0 8px 8px 0; margin: 1rem 0; font-size: .9rem;
+    }
+    .callout.tip  { border-color: var(--accent-green); background: #0f1f18; }
+    .callout.info { border-color: var(--accent-blue); background: #0f1826; }
+    .callout.fun  { border-color: var(--accent); background: #1a1530; }
+
+    .c-cmt  { color: var(--muted); font-style: italic; }
+    .c-key  { color: var(--accent-yellow); }
+    .c-str  { color: #a5d6ff; }
+    .c-cmd  { color: var(--accent-green); }
+    .c-h1   { color: var(--accent); font-weight: bold; }
+    .c-h2   { color: var(--accent-blue); font-weight: bold; }
+
+    /* ── Scope ladder ── */
+    .scope-ladder {
+      display: flex;
+      flex-direction: column;
+      gap: .5rem;
+      margin: 1rem 0;
+    }
+    .scope-rung {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: .75rem 1rem;
+    }
+    .scope-rung .scope-label {
+      font-size: .75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      min-width: 70px;
+    }
+    .scope-rung .scope-path {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .82rem;
+      color: var(--accent-blue);
+      flex: 1;
+    }
+    .scope-rung .scope-note {
+      font-size: .78rem;
+      color: var(--muted);
+    }
+
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: .88rem; }
+    th { background: var(--surface2); padding: .6rem .9rem; text-align: left; font-weight: 600; color: var(--muted); font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; }
+    td { padding: .6rem .9rem; border-top: 1px solid var(--border); vertical-align: top; }
+    tr:hover td { background: #1d2030; }
+    td code { font-size: .8rem; }
+
+    a { color: var(--accent-blue); }
+    strong { font-weight: 600; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+    footer { text-align: center; color: var(--muted); font-size: .85rem; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <div class="hero">
+    <h1>🧠 CLAUDE.md — Give Your AI a Memory</h1>
+    <p>
+      Claude starts every session knowing nothing about your project.
+      CLAUDE.md is the antidote: a persistent cheat sheet that Claude reads before it does anything.
+    </p>
+    <div class="subtitle">Written once. Saves you explaining the same thing for the 47th time.</div>
+  </div>
+
+  <div class="os-toggle-bar">
+    <span>I'm on</span>
+    <button class="os-btn-global mac-active" id="btnMac" onclick="setOS('mac')">🍎 macOS</button>
+    <button class="os-btn-global" id="btnWin" onclick="setOS('win')">🪟 Windows</button>
+    <span style="margin-left:auto; font-size:.78rem;">— paths below will update automatically</span>
+  </div>
+
+  <div class="toc">
+    <h3>📋 Contents</h3>
+    <ol>
+      <li><a href="#what">What is CLAUDE.md?</a></li>
+      <li><a href="#scope">Where to put it (scope hierarchy)</a></li>
+      <li><a href="#what-to-write">What to write in it</a></li>
+      <li><a href="#template">Full template</a></li>
+      <li><a href="#remember">The #remember command</a></li>
+      <li><a href="#codex-gemini">Codex &amp; Gemini CLI equivalents</a></li>
+      <li><a href="#tips">Tips for writing good context files</a></li>
+    </ol>
+  </div>
+
+  <!-- WHAT -->
+  <div class="section" id="what">
+    <h2>🧠 What is CLAUDE.md?</h2>
+    <p>
+      <code>CLAUDE.md</code> is a Markdown file that Claude Code automatically reads at the start of
+      every session. It's your project's briefing document — the context that Claude would otherwise
+      have to rediscover by reading through your entire codebase every time.
+    </p>
+    <p>
+      Think of it as the onboarding doc you wish you'd written for your last new hire,
+      except this one actually gets read.
+    </p>
+    <ul>
+      <li>📋 <strong>Project conventions.</strong> "We use snake_case. We never abbreviate variable names. Tabs, not spaces." (Or spaces, not tabs. We won't judge.)</li>
+      <li>⌨️ <strong>Commands to know.</strong> "Run tests with <code>npm test</code>. Build with <code>npm run build</code>. Deploy requires 2FA."</li>
+      <li>🗺️ <strong>Architecture overview.</strong> What the folders mean. What the main modules do. Where the scary code lives.</li>
+      <li>🚫 <strong>Things Claude must never do.</strong> "Never edit the generated/ folder. Never commit directly to main."</li>
+    </ul>
+    <div class="callout fun">
+      🎭 Without CLAUDE.md: "Claude, as I've mentioned before, we use Prisma, not raw SQL, and our API routes are all in src/api/v2, not v1, which is deprecated but still exists for legacy reasons and—"<br/><br/>
+      With CLAUDE.md: Claude already knows all of that before you type a single word.
+    </div>
+  </div>
+
+  <!-- SCOPE -->
+  <div class="section" id="scope">
+    <h2>🗂️ Where to Put It</h2>
+    <p>
+      CLAUDE.md files are read in layers — from broadest to most specific. More specific files
+      <strong>add to</strong> (rather than replace) the broader ones, so you can compose context across levels.
+    </p>
+
+    <h3>The scope hierarchy</h3>
+    <div class="scope-ladder">
+      <div class="scope-rung">
+        <div class="scope-label" style="color:var(--muted);">Global</div>
+        <div class="scope-path os-mac">~/.claude/CLAUDE.md</div>
+        <div class="scope-path os-win">%USERPROFILE%\.claude\CLAUDE.md</div>
+        <div class="scope-note">Personal preferences. Available in every project, everywhere.</div>
+      </div>
+      <div class="scope-rung">
+        <div class="scope-label" style="color:var(--accent-blue);">Project</div>
+        <div class="scope-path">CLAUDE.md</div>
+        <div class="scope-note">Project root. Commit to git. Your whole team gets it.</div>
+      </div>
+      <div class="scope-rung">
+        <div class="scope-label" style="color:var(--accent-green);">Subfolder</div>
+        <div class="scope-path">src/api/CLAUDE.md</div>
+        <div class="scope-note">Module-specific context. Loaded when Claude works in that folder.</div>
+      </div>
+    </div>
+
+    <h3>Create the files</h3>
+    <div class="os-mac">
+      <div class="code-wrap">
+        <pre><span class="c-cmt"># Project-level (most important — commit this)</span>
+touch CLAUDE.md
+
+<span class="c-cmt"># Personal/global (your preferences across all projects)</span>
+mkdir -p ~/.claude && touch ~/.claude/CLAUDE.md
+
+<span class="c-cmt"># Subfolder (for module-specific context)</span>
+touch src/api/CLAUDE.md</pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+    </div>
+    <div class="os-win">
+      <div class="code-wrap">
+        <pre><span class="c-cmt"># Project-level (most important — commit this)</span>
+New-Item -ItemType File CLAUDE.md
+
+<span class="c-cmt"># Personal/global (your preferences across all projects)</span>
+New-Item -ItemType Directory -Force "$env:USERPROFILE\.claude"
+New-Item -ItemType File "$env:USERPROFILE\.claude\CLAUDE.md"
+
+<span class="c-cmt"># Subfolder (for module-specific context)</span>
+New-Item -ItemType File src\api\CLAUDE.md</pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+    </div>
+
+    <div class="callout tip">
+      ✅ <strong>Start with one file.</strong> Put a <code>CLAUDE.md</code> in the project root and commit it. That's it. You don't need global files or subfolder files until you feel the need for them. Premature context-splitting is a real thing.
+    </div>
+  </div>
+
+  <!-- WHAT TO WRITE -->
+  <div class="section" id="what-to-write">
+    <h2>✍️ What to Write In It</h2>
+    <p>
+      Here are the categories that consistently pay off. Not all projects need all of them —
+      start with what's bitten you before.
+    </p>
+
+    <h3>Project overview</h3>
+    <p>One paragraph. What the project does, what stack it's on, and what makes it unusual. If someone brand new to your codebase asked "what is this?", answer that.</p>
+
+    <h3>Essential commands</h3>
+    <p>The commands Claude will want to run: test, build, lint, migrate DB, start dev server. No hunting around for them.</p>
+
+    <h3>Architecture overview</h3>
+    <p>How folders map to concepts. What <code>src/</code> contains vs <code>lib/</code>. Whether you have a monorepo. What <code>shared/</code> means. A 5-bullet list goes further than you'd think.</p>
+
+    <h3>Coding conventions</h3>
+    <p>Naming conventions, file structure rules, whether you use types everywhere, error handling patterns. Anything that code review would otherwise catch.</p>
+
+    <h3>Do not touch list</h3>
+    <p>Things Claude should never, ever do. Generated files. Legacy modules. Specific branches. Anything that has caused pain before.</p>
+
+    <h3>Key environment notes</h3>
+    <p>What env vars are needed. Where <code>.env.example</code> is. How to get credentials for dev.</p>
+  </div>
+
+  <!-- TEMPLATE -->
+  <div class="section" id="template">
+    <h2>📋 Full Template</h2>
+    <p>Copy this and fill in the blanks. Delete the sections you don't need.</p>
+    <div class="code-wrap">
+      <pre><span class="c-h1"># Project: [Your Project Name]</span>
+
+<span class="c-h2">## Overview</span>
+[One paragraph: what this does, what stack it's on, what makes it notable.]
+
+<span class="c-h2">## Essential Commands</span>
+- Install dependencies: `npm install`
+- Run tests:           `npm test`
+- Run tests (watch):   `npm run test:watch`
+- Build:               `npm run build`
+- Start dev server:    `npm run dev`
+- Lint:                `npm run lint`
+- Database migrate:    `npx prisma migrate dev`
+
+<span class="c-h2">## Architecture</span>
+- `src/app/`      — Next.js app router pages and layouts
+- `src/lib/`      — Shared utilities and helper functions
+- `src/api/`      — API route handlers (REST, all v2)
+- `src/db/`       — Prisma schema and database helpers
+- `src/components/` — Reusable React components
+- `generated/`    — Auto-generated files, do NOT edit manually
+
+<span class="c-h2">## Coding Conventions</span>
+- TypeScript everywhere. No `any` types without a comment explaining why.
+- Use Prisma for all database access. No raw SQL.
+- API routes follow REST conventions. Document with JSDoc.
+- Component files: PascalCase. Utility files: camelCase.
+- Prefer named exports over default exports.
+- Error handling: use our custom `AppError` class in `src/lib/errors.ts`.
+
+<span class="c-h2">## Environment Setup</span>
+- Copy `.env.example` to `.env.local` for local development.
+- The DATABASE_URL should point to the local Postgres instance.
+- Ask a teammate for STRIPE_SECRET_KEY for payments work.
+
+<span class="c-h2">## Do NOT</span>
+- Edit anything in `generated/` — it is auto-generated by Prisma and will be overwritten.
+- Commit directly to `main` — always use a feature branch and PR.
+- Use `console.log` in production code — use the logger at `src/lib/logger.ts`.
+- Remove the `v1/` API routes — they are deprecated but still serve active clients.
+
+<span class="c-h2">## Testing</span>
+- Tests are in `__tests__/` next to source files, or in `tests/` for integration tests.
+- We use Vitest. Run `npm test` to run all tests.
+- Snapshot tests exist in `tests/snapshots/` — update with `npm run test:update-snapshots`.</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+  </div>
+
+  <!-- REMEMBER -->
+  <div class="section" id="remember">
+    <h2>💬 The #remember Command</h2>
+    <p>
+      During a session, you can ask Claude to remember something for next time —
+      and it will write it to your CLAUDE.md automatically.
+    </p>
+
+    <h3>How to use it</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># In the Claude Code chat, just say:</span>
+Please remember that we use Zod for all API input validation.
+
+<span class="c-cmt"># Or more explicitly:</span>
+Add to CLAUDE.md: we always use the logger at src/lib/logger.ts, never console.log</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <p>
+      Claude will add the note to the appropriate <code>CLAUDE.md</code> file so it's available in future sessions.
+      It's the closest thing to genuine AI learning that doesn't require a PhD to understand.
+    </p>
+
+    <div class="callout info">
+      ℹ️ Claude writes to the most specific applicable CLAUDE.md — if you're in a project that has one, it writes there. If not, it falls back to your global one. Commit the file afterward if you want it to stick for your team.
+    </div>
+  </div>
+
+  <!-- CODEX + GEMINI -->
+  <div class="section" id="codex-gemini">
+    <h2>🟢🔵 Codex &amp; Gemini CLI Equivalents</h2>
+    <p>Both tools have the same concept under different names:</p>
+
+    <table>
+      <thead><tr><th>Tool</th><th>File name</th><th>Location</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Claude Code</strong></td>
+          <td><code>CLAUDE.md</code></td>
+          <td>Project root, or <span class="os-mac"><code>~/.claude/</code></span><span class="os-win"><code>%USERPROFILE%\.claude\</code></span></td>
+        </tr>
+        <tr>
+          <td><strong>Codex CLI</strong></td>
+          <td><code>AGENTS.md</code></td>
+          <td>Project root, or <span class="os-mac"><code>~/.codex/</code></span><span class="os-win"><code>%USERPROFILE%\.codex\</code></span></td>
+        </tr>
+        <tr>
+          <td><strong>Gemini CLI</strong></td>
+          <td><code>GEMINI.md</code></td>
+          <td>Project root, or <span class="os-mac"><code>~/.gemini/</code></span><span class="os-win"><code>%USERPROFILE%\.gemini\</code></span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>
+      Same idea, same file format, different file names. If you use all three tools, you can maintain three files —
+      or keep a single source of truth and symlink it:
+    </p>
+    <div class="os-mac">
+      <div class="code-wrap">
+        <pre><span class="c-cmt"># Write once in CLAUDE.md, symlink for the others</span>
+ln -s CLAUDE.md AGENTS.md
+ln -s CLAUDE.md GEMINI.md</pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+    </div>
+    <div class="os-win">
+      <div class="code-wrap">
+        <pre><span class="c-cmt"># PowerShell — create symbolic links (run as Administrator if needed)</span>
+New-Item -ItemType SymbolicLink -Name "AGENTS.md" -Target "CLAUDE.md"
+New-Item -ItemType SymbolicLink -Name "GEMINI.md" -Target "CLAUDE.md"</pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+    </div>
+    <div class="callout fun">
+      🎭 Three AI tools, three context file names. The people who named them are very good at programming and somewhat less good at coordination. But symlinks fix everything.
+    </div>
+  </div>
+
+  <!-- TIPS -->
+  <div class="section" id="tips">
+    <h2>💡 Tips for Writing Good Context Files</h2>
+
+    <h3>1. Write it for a competent stranger</h3>
+    <p>
+      Don't explain what a database is. Do explain why you're using Prisma instead of Drizzle,
+      what <code>AppError</code> is, and why there are two API versions.
+      Claude is smart — it just doesn't know <em>your</em> stuff.
+    </p>
+
+    <h3>2. Commands beat descriptions</h3>
+    <p>"Use the logger module" is worse than "Use <code>import { log } from '@/lib/logger'</code> — never use console.log". Specifics stick.</p>
+
+    <h3>3. The Do Not list is the most important section</h3>
+    <p>Pain is a great teacher. Every time Claude does something that makes you flinch, add it to the Do Not list. This file should grow over time.</p>
+
+    <h3>4. Keep it concise</h3>
+    <p>
+      A 500-line CLAUDE.md is not better than a 50-line one. Context that's buried in noise doesn't get applied.
+      If every line feels important, that's a sign some lines aren't.
+    </p>
+
+    <h3>5. Commit it</h3>
+    <div class="code-wrap">
+      <pre>git add CLAUDE.md AGENTS.md GEMINI.md
+git commit -m "docs: add AI context files for Claude, Codex, and Gemini"</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <p>Your teammates will thank you. New team members who use AI tools will <em>really</em> thank you.</p>
+
+    <h3>6. Global file: your preferences, not your project's</h3>
+    <p>
+      Your global CLAUDE.md is for personal preferences that apply everywhere:
+      "I prefer functional programming patterns", "always explain your reasoning before writing code",
+      "never suggest switching to a different framework than the one already in use."
+      Keep it to things that are about <em>you</em>, not about a specific project.
+    </p>
+  </div>
+
+  <footer>
+    <p>🧠 CLAUDE.md: the onboarding doc that actually gets read.</p>
+    <p style="margin-top:.5rem;">Last updated: February 2026 · Part of the AI CLI Setup series</p>
+  </footer>
+
+</div>
+
+<script>
+  function copyCode(btn) {
+    const pre = btn.closest('.code-wrap').querySelector('pre');
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+      btn.textContent = '✓ Copied!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    }).catch(() => {
+      const ta = document.createElement('textarea'); ta.value = pre.innerText;
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+      btn.textContent = '✓ Copied!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  function copyLink(btn, text) {
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = '✓ Copied!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    }).catch(() => {
+      const ta = document.createElement('textarea'); ta.value = text;
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+      btn.textContent = '✓ Copied!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  function setOS(os) {
+    const btnMac = document.getElementById('btnMac');
+    const btnWin = document.getElementById('btnWin');
+    if (os === 'mac') {
+      document.body.classList.remove('win');
+      btnMac.classList.add('mac-active'); btnMac.classList.remove('win-active');
+      btnWin.classList.remove('mac-active', 'win-active');
+    } else {
+      document.body.classList.add('win');
+      btnWin.classList.add('win-active'); btnWin.classList.remove('mac-active');
+      btnMac.classList.remove('mac-active', 'win-active');
+    }
+  }
+
+  document.querySelectorAll('.copy-btn').forEach(btn => { btn.textContent = 'Copy'; });
+</script>
+</body>
+</html>

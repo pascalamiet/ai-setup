@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI-Assisted Git Workflows</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #222536;
+      --border: #2e3250;
+      --text: #e2e4f0;
+      --muted: #8b8fa8;
+      --accent: #f97316;
+      --accent-green: #34d399;
+      --accent-blue: #60a5fa;
+      --accent-purple: #a78bfa;
+      --accent-yellow: #fbbf24;
+      --accent-red: #f87171;
+      --mac: #c084fc;
+      --win: #38bdf8;
+      --code-bg: #0d1117;
+      --radius: 10px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-size: 16px; line-height: 1.7; padding: 2rem 1rem;
+    }
+
+    .container { max-width: 860px; margin: 0 auto; }
+
+    .hero {
+      text-align: center; padding: 3rem 2rem 2rem;
+      background: linear-gradient(135deg, #1a1d27, #1f1510);
+      border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 2.5rem;
+    }
+    .hero h1 { font-size: 2.2rem; font-weight: 800; margin-bottom: .6rem; }
+    .hero p  { color: var(--muted); max-width: 620px; margin: 0 auto; font-size: 1rem; }
+    .hero .subtitle { margin-top: .5rem; font-size: .9rem; color: var(--accent); }
+
+    .os-toggle-bar {
+      display: flex; align-items: center; gap: .6rem; padding: .7rem 1rem;
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+      margin-bottom: 1.5rem; font-size: .88rem;
+    }
+    .os-toggle-bar span { color: var(--muted); }
+    .os-btn-global {
+      padding: .3rem .9rem; border-radius: 6px; border: 1px solid var(--border);
+      background: var(--surface); color: var(--muted); cursor: pointer;
+      font-size: .82rem; font-weight: 600; transition: all .15s; font-family: inherit;
+    }
+    .os-btn-global.mac-active { background: #2a1240; color: var(--mac); border-color: var(--mac); }
+    .os-btn-global.win-active { background: #0f1e30; color: var(--win); border-color: var(--win); }
+
+    .os-mac { display: block; }
+    .os-win { display: none; }
+    body.win .os-mac { display: none; }
+    body.win .os-win { display: block; }
+
+    .toc {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.2rem 1.5rem; margin-bottom: 2rem;
+    }
+    .toc h3 { margin-bottom: .8rem; font-size: .95rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+    .toc ol { padding-left: 1.3rem; }
+    .toc li { margin-bottom: .3rem; }
+    .toc a  { color: var(--accent-blue); text-decoration: none; }
+    .toc a:hover { text-decoration: underline; }
+
+    .section {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.8rem 2rem; margin-bottom: 1.5rem;
+    }
+    .section h2 { font-size: 1.35rem; font-weight: 700; margin-bottom: 1rem; color: var(--accent); }
+    .section h3 { color: var(--muted); text-transform: uppercase; letter-spacing: .05em; font-size: .8rem; font-weight: 600; margin: 1.4rem 0 .5rem; }
+    .section p  { margin-bottom: .75rem; }
+    .section ul, .section ol { padding-left: 1.4rem; margin-bottom: .75rem; }
+    .section li { margin-bottom: .35rem; }
+
+    .code-wrap { position: relative; margin: .75rem 0; }
+    pre {
+      background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px;
+      padding: 1rem 1.2rem; overflow-x: auto;
+      font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+      font-size: .85rem; line-height: 1.6; white-space: pre;
+    }
+    .copy-btn {
+      position: absolute; top: .5rem; right: .5rem; background: var(--surface2);
+      border: 1px solid var(--border); color: var(--muted); border-radius: 6px;
+      padding: .25rem .65rem; font-size: .75rem; cursor: pointer; transition: all .15s; font-family: inherit;
+    }
+    .copy-btn:hover { background: var(--border); color: var(--text); }
+    .copy-btn.copied { color: var(--accent-green); border-color: var(--accent-green); }
+
+    .link-copy {
+      display: flex; align-items: center; gap: .6rem; background: var(--code-bg);
+      border: 1px solid var(--border); border-radius: 8px; padding: .65rem 1rem;
+      margin: .5rem 0; font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: .85rem; word-break: break-all;
+    }
+    .link-copy span { flex: 1; color: var(--accent-blue); }
+    .link-copy button {
+      flex-shrink: 0; background: var(--surface2); border: 1px solid var(--border);
+      color: var(--muted); border-radius: 6px; padding: .2rem .6rem; font-size: .75rem;
+      cursor: pointer; transition: all .15s; font-family: inherit;
+    }
+    .link-copy button:hover { background: var(--border); color: var(--text); }
+    .link-copy button.copied { color: var(--accent-green); border-color: var(--accent-green); }
+
+    code {
+      font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: .85em;
+      background: #161b22; padding: .15em .4em; border-radius: 4px; color: #c9d1d9;
+    }
+
+    .callout {
+      border-left: 3px solid var(--accent-yellow); background: #1f1c10;
+      padding: .75rem 1.1rem; border-radius: 0 8px 8px 0; margin: 1rem 0; font-size: .9rem;
+    }
+    .callout.tip  { border-color: var(--accent-green); background: #0f1f18; }
+    .callout.info { border-color: var(--accent-blue); background: #0f1826; }
+    .callout.fun  { border-color: var(--accent-purple); background: #1a1530; }
+    .callout.danger { border-color: var(--accent-red); background: #1f0f0f; }
+
+    /* workflow steps */
+    .workflow {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin: 1rem 0;
+    }
+    .wf-step {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+    .wf-step-connector {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .wf-num {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--surface2); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .78rem; font-weight: 700; color: var(--accent); flex-shrink: 0;
+    }
+    .wf-line {
+      width: 1px; background: var(--border); flex: 1; min-height: 16px; margin: 4px 0;
+    }
+    .wf-content { flex: 1; padding-bottom: 1rem; }
+    .wf-content strong { color: var(--text); }
+    .wf-content p { color: var(--muted); font-size: .9rem; margin: .2rem 0 0; }
+
+    .c-cmt  { color: var(--muted); font-style: italic; }
+    .c-cmd  { color: var(--accent-green); }
+    .c-str  { color: #a5d6ff; }
+    .c-key  { color: var(--accent-yellow); }
+    .c-arg  { color: #fca5a5; }
+
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: .88rem; }
+    th { background: var(--surface2); padding: .6rem .9rem; text-align: left; font-weight: 600; color: var(--muted); font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; }
+    td { padding: .6rem .9rem; border-top: 1px solid var(--border); vertical-align: top; }
+    tr:hover td { background: #1d2030; }
+    td code { font-size: .8rem; }
+
+    a { color: var(--accent-blue); }
+    strong { font-weight: 600; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+    footer { text-align: center; color: var(--muted); font-size: .85rem; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <div class="hero">
+    <h1>🌿 AI-Assisted Git Workflows</h1>
+    <p>
+      Commit messages that explain the <em>why</em>. PR descriptions that get reviewed instead of skimmed.
+      Code reviews that actually catch things. All without the part where you stare at a blank text field.
+    </p>
+    <div class="subtitle">Git: now with fewer "fix stuff" commits.</div>
+  </div>
+
+  <div class="os-toggle-bar">
+    <span>I'm on</span>
+    <button class="os-btn-global mac-active" id="btnMac" onclick="setOS('mac')">🍎 macOS</button>
+    <button class="os-btn-global" id="btnWin" onclick="setOS('win')">🪟 Windows</button>
+    <span style="margin-left:auto; font-size:.78rem;">— paths below will update automatically</span>
+  </div>
+
+  <div class="toc">
+    <h3>📋 Contents</h3>
+    <ol>
+      <li><a href="#commits">Commit messages</a></li>
+      <li><a href="#prs">Pull request descriptions</a></li>
+      <li><a href="#review">Code review with AI</a></li>
+      <li><a href="#skills">Git skills to create</a></li>
+      <li><a href="#hooks-git">Hooks for git automation</a></li>
+      <li><a href="#standup">Daily standup from git log</a></li>
+    </ol>
+  </div>
+
+  <!-- COMMITS -->
+  <div class="section" id="commits">
+    <h2>📝 Commit Messages</h2>
+    <p>
+      The average developer's commit history is a fossil record of bad decisions and optimism.
+      "fix", "wip", "asdf", "finally". AI changes this —
+      not by being creative, but by actually reading what changed.
+    </p>
+
+    <h3>Ask Claude to write the message</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Stage your changes, then ask Claude:</span>
+Please write a git commit message for my staged changes.
+Follow conventional commits format (feat/fix/refactor/docs/etc).
+Focus on the WHY, not just the what.</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Or use the /commit skill (built into Claude Code)</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Claude Code ships with a built-in /commit skill</span>
+/commit</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <p>This runs <code>git status</code>, <code>git diff</code>, and the recent log, then writes and commits with an appropriate message.</p>
+
+    <h3>Conventional commits cheat sheet</h3>
+    <table>
+      <thead><tr><th>Prefix</th><th>Use for</th><th>Example</th></tr></thead>
+      <tbody>
+        <tr><td><code>feat:</code></td><td>New features</td><td><code>feat: add OAuth login with Google</code></td></tr>
+        <tr><td><code>fix:</code></td><td>Bug fixes</td><td><code>fix: prevent double-submit on payment form</code></td></tr>
+        <tr><td><code>refactor:</code></td><td>Code changes, no behaviour change</td><td><code>refactor: extract auth logic into useAuth hook</code></td></tr>
+        <tr><td><code>docs:</code></td><td>Documentation only</td><td><code>docs: add MCP setup instructions to README</code></td></tr>
+        <tr><td><code>test:</code></td><td>Tests only</td><td><code>test: add coverage for payment edge cases</code></td></tr>
+        <tr><td><code>chore:</code></td><td>Build, deps, tooling</td><td><code>chore: upgrade Prisma to 5.10</code></td></tr>
+        <tr><td><code>perf:</code></td><td>Performance improvements</td><td><code>perf: cache user lookups in Redis</code></td></tr>
+      </tbody>
+    </table>
+
+    <h3>Custom commit skill</h3>
+    <p>Create a skill that enforces your team's commit message style every time:</p>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># .claude/skills/commit/SKILL.md</span>
+---
+name: commit
+description: >
+  Use when the user asks to commit staged changes.
+  Writes a conventional-commit message and commits.
+  Do NOT use for general git questions.
+---
+
+Write and execute a git commit for the currently staged changes.
+
+Steps:
+1. Run `git diff --cached` to see what's staged
+2. Run `git log --oneline -5` to match recent commit style
+3. Write a message following Conventional Commits:
+   - Format: `type(scope): short description`
+   - Types: feat, fix, refactor, docs, test, chore, perf
+   - Body: explain the WHY, not just the what
+   - Max 72 chars for the subject line
+4. Run `git commit -m "..."` with the message
+5. Confirm success</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+  </div>
+
+  <!-- PRS -->
+  <div class="section" id="prs">
+    <h2>🔀 Pull Request Descriptions</h2>
+    <p>
+      A good PR description is the gift that keeps on giving: faster reviews, easier blame archaeology,
+      and a searchable record of decisions. They're also the thing nobody writes because "the code speaks for itself."
+      (It doesn't. It whispers cryptically and lies.)
+    </p>
+
+    <h3>Ask Claude to write the PR body</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Give Claude the context it needs</span>
+Write a PR description for the changes in this branch vs main.
+Include: what changed, why it changed, how to test it, and any screenshots if relevant.
+Format it in Markdown with ## Summary, ## Changes, and ## Testing sections.</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Create a PR directly with gh CLI</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Claude can run this for you — just ask</span>
+gh pr create --title <span class="c-str">"feat: add OAuth login"</span> --body <span class="c-str">"$(cat pr-body.md)"</span></pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>A PR description template to put in CLAUDE.md</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Add this to your CLAUDE.md so Claude always uses your team's format:</span>
+When writing PR descriptions, always use this structure:
+
+## Summary
+- One sentence: what this PR does and why
+
+## Changes
+- Bullet list of notable changes
+
+## Testing
+- How to verify this works locally
+- Any automated tests added/updated
+
+## Screenshots (if UI changes)
+[Before/After if applicable]</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <div class="callout tip">
+      ✅ Ask Claude to write the PR description <em>before</em> you push. It has the full context of what it changed and why. By the time you're writing the description manually, you've already moved on mentally and are writing "<em>updates stuff</em>".
+    </div>
+  </div>
+
+  <!-- CODE REVIEW -->
+  <div class="section" id="review">
+    <h2>🔍 Code Review with AI</h2>
+    <p>
+      AI code review isn't a replacement for human review — it's the filter that catches the obvious things
+      so your human reviewers can focus on the interesting things.
+      Like whether this architecture makes sense. Or why there's a sleep(1000) on line 47.
+    </p>
+
+    <h3>Review before pushing</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Review your own diff before anyone else sees it</span>
+Review the staged changes in this PR for:
+- Correctness and obvious bugs
+- Security issues (injection, exposed secrets, missing validation)
+- Performance concerns
+- Missing error handling
+- Anything that would fail code review</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Review a PR from GitHub</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Fetch and review a specific PR</span>
+gh pr diff <span class="c-arg">123</span> | claude -p <span class="c-str">"Review this diff for bugs, security issues, and style problems. Be specific and cite line numbers."</span></pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Review-PR skill</h3>
+    <p>Claude Code ships with a <code>/review-pr</code> skill for reviewing pull requests:</p>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Review a PR by number</span>
+/review-pr 123</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>A thorough review skill</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Save as .claude/skills/deep-review/SKILL.md</span>
+---
+name: deep-review
+description: >
+  Use when user asks for a thorough code review of staged changes or a specific file.
+  More comprehensive than /review-pr.
+  Do NOT use for general questions about code quality.
+---
+
+Do a thorough code review of $ARGUMENTS (or staged changes if no argument given).
+
+## Review checklist
+
+**Correctness**
+- Does the code do what it claims?
+- Are there off-by-one errors, null pointer risks, race conditions?
+
+**Security**
+- SQL injection, XSS, CSRF, path traversal
+- Hardcoded secrets or API keys
+- Missing input validation
+- Insecure direct object references
+
+**Performance**
+- N+1 queries
+- Missing pagination on list endpoints
+- Unnecessary re-renders or recomputation
+
+**Maintainability**
+- Is this readable in 6 months?
+- Are edge cases handled and documented?
+
+## Output format
+- Overall risk score: 🟢 Low / 🟡 Medium / 🔴 High
+- List each issue: file:line | severity | description | suggested fix
+- End with: "Ready to merge" or "Needs changes before merging"</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+  </div>
+
+  <!-- SKILLS -->
+  <div class="section" id="skills">
+    <h2>🪄 Git Skills Worth Creating</h2>
+    <p>Here are some ready-to-use skill templates for common git tasks:</p>
+
+    <h3>/standup — write today's standup from your commits</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># ~/.claude/skills/standup/SKILL.md</span>
+---
+name: standup
+description: >
+  Use when user asks for a standup summary, daily update, or status report.
+---
+
+Generate a standup update from recent git activity.
+
+Steps:
+1. Run: `git log --since="yesterday" --oneline --author="$(git config user.name)"`
+2. If nothing since yesterday, try: `git log --since="3 days ago" --oneline`
+3. Summarize the commits into plain English:
+   - What was completed
+   - What is in progress
+   - Any blockers (infer from WIP commits or incomplete features)
+
+Format as bullet points. No jargon. Write it like you're telling a teammate, not writing a report.</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>/changelog — summarize changes for a release</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># .claude/skills/changelog/SKILL.md</span>
+---
+name: changelog
+description: >
+  Use when user asks for a changelog, release notes, or version summary.
+  Takes a git tag or commit range as argument.
+---
+
+Generate a changelog for $ARGUMENTS (or since last tag if no argument).
+
+1. Run: `git log --oneline [tag]..HEAD` (or `git log --oneline $(git describe --tags --abbrev=0)..HEAD`)
+2. Group commits by type (feat, fix, refactor, etc.)
+3. Write user-facing descriptions — not "refactor auth module" but "Login is now faster"
+4. Format as Keep a Changelog format:
+   ### Added
+   ### Changed
+   ### Fixed
+   ### Removed</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>/branch — create a well-named branch</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># ~/.claude/skills/branch/SKILL.md</span>
+---
+name: branch
+description: >
+  Use when user wants to create a new git branch with a good name.
+  Argument is a description of what the branch is for.
+---
+
+Create a new git branch based on: $ARGUMENTS
+
+Branch naming rules:
+- Format: type/short-description (e.g. feat/oauth-login, fix/double-submit-bug)
+- Lowercase, hyphens not underscores, max 40 chars
+- Types: feat, fix, refactor, docs, chore
+
+Steps:
+1. Propose 3 branch name options
+2. Ask the user to confirm or choose
+3. Run: `git checkout -b [chosen-name]`
+4. Confirm creation</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+  </div>
+
+  <!-- HOOKS FOR GIT -->
+  <div class="section" id="hooks-git">
+    <h2>🪝 Hooks for Git Automation</h2>
+    <p>Combine Claude Code hooks with git for a fully automated quality gate:</p>
+
+    <h3>Run tests before every commit (pre-commit equivalent)</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># In .claude/settings.json</span>
+{
+  <span class="c-key">"hooks"</span>: {
+    <span class="c-key">"PreToolUse"</span>: [
+      {
+        <span class="c-key">"matcher"</span>: <span class="c-str">"Bash"</span>,
+        <span class="c-key">"hooks"</span>: [{
+          <span class="c-key">"type"</span>: <span class="c-str">"command"</span>,
+          <span class="c-cmt">// Block git commit if tests fail</span>
+          <span class="c-key">"command"</span>: <span class="c-str">"bash -c 'echo \"$CLAUDE_TOOL_INPUT\" | grep -q \"git commit\" && npm test --bail || true'"</span>
+        }]
+      }
+    ]
+  }
+}</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Auto-lint after file edits, before commit</h3>
+    <div class="code-wrap">
+      <pre>{
+  <span class="c-key">"hooks"</span>: {
+    <span class="c-key">"PostToolUse"</span>: [
+      {
+        <span class="c-key">"matcher"</span>: <span class="c-str">"Write|Edit"</span>,
+        <span class="c-key">"hooks"</span>: [{ <span class="c-key">"type"</span>: <span class="c-str">"command"</span>, <span class="c-key">"command"</span>: <span class="c-str">"npm run lint --silent 2>&1 | head -20"</span> }]
+      }
+    ]
+  }
+}</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <div class="callout fun">
+      🎭 Traditional pre-commit hook: runs once at commit time, you remember to commit after five hours of flow state.<br/>
+      Claude Code hook: runs every time Claude edits a file, catches problems immediately while Claude is still mid-task and can fix them. This is better.
+    </div>
+  </div>
+
+  <!-- STANDUP -->
+  <div class="section" id="standup">
+    <h2>☀️ Daily Standup from Git Log</h2>
+    <p>
+      You've been coding for 8 hours and now someone wants a standup summary.
+      Your git log is the most honest record of what you actually did. Use it.
+    </p>
+
+    <h3>Quick one-liner</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Ask Claude directly in the terminal</span>
+claude <span class="c-str">"Summarize my git activity from the last 24 hours as a standup. Run git log to find out what I did."</span></pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>The standup skill (from the skills section above)</h3>
+    <div class="code-wrap">
+      <pre>/standup</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>What good AI standup output looks like</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Example output from /standup:</span>
+
+Yesterday:
+- Completed OAuth login flow with Google — auth tokens now stored in httpOnly cookies
+- Fixed the double-submit bug on the payment form (was missing disabled state during request)
+- Added unit tests for the auth middleware (14 new tests, all green)
+
+Today:
+- Continuing on the user profile page
+- Need to connect the avatar upload to S3 (bucket config still pending from DevOps)
+
+Blockers:
+- Waiting on S3 bucket credentials from DevOps (#slack-devops)</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+  </div>
+
+  <!-- QUICK REF -->
+  <div class="section">
+    <h2>🗺️ Quick Reference</h2>
+    <table>
+      <thead><tr><th>Task</th><th>How to do it with AI</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Commit message</strong></td><td><code>/commit</code> or "write a commit message for staged changes"</td></tr>
+        <tr><td><strong>PR description</strong></td><td>"Write a PR description for changes vs main" + <code>gh pr create</code></td></tr>
+        <tr><td><strong>Code review</strong></td><td><code>/review-pr [number]</code> or <code>/deep-review</code></td></tr>
+        <tr><td><strong>Standup</strong></td><td><code>/standup</code></td></tr>
+        <tr><td><strong>Changelog</strong></td><td><code>/changelog [tag]</code></td></tr>
+        <tr><td><strong>Branch name</strong></td><td><code>/branch [description]</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <footer>
+    <p>🌿 Git: where every commit message is "fix" until you meet AI.</p>
+    <p style="margin-top:.5rem;">Last updated: February 2026 · Part of the AI CLI Setup series</p>
+  </footer>
+
+</div>
+
+<script>
+  function copyCode(btn) {
+    const pre = btn.closest('.code-wrap').querySelector('pre');
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+      btn.textContent = '✓ Copied!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    }).catch(() => {
+      const ta = document.createElement('textarea'); ta.value = pre.innerText;
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+      btn.textContent = '✓ Copied!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  function copyLink(btn, text) {
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = '✓ Copied!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    }).catch(() => {
+      const ta = document.createElement('textarea'); ta.value = text;
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+      btn.textContent = '✓ Copied!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  function setOS(os) {
+    const btnMac = document.getElementById('btnMac');
+    const btnWin = document.getElementById('btnWin');
+    if (os === 'mac') {
+      document.body.classList.remove('win');
+      btnMac.classList.add('mac-active'); btnMac.classList.remove('win-active');
+      btnWin.classList.remove('mac-active', 'win-active');
+    } else {
+      document.body.classList.add('win');
+      btnWin.classList.add('win-active'); btnWin.classList.remove('mac-active');
+      btnMac.classList.remove('mac-active', 'win-active');
+    }
+  }
+
+  document.querySelectorAll('.copy-btn').forEach(btn => { btn.textContent = 'Copy'; });
+</script>
+</body>
+</html>

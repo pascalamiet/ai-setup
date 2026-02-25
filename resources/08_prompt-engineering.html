@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prompt Engineering for Developers</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #222536;
+      --border: #2e3250;
+      --text: #e2e4f0;
+      --muted: #8b8fa8;
+      --accent: #60a5fa;
+      --accent-green: #34d399;
+      --accent-purple: #a78bfa;
+      --accent-yellow: #fbbf24;
+      --accent-red: #f87171;
+      --mac: #c084fc;
+      --win: #38bdf8;
+      --code-bg: #0d1117;
+      --radius: 10px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-size: 16px; line-height: 1.7; padding: 2rem 1rem;
+    }
+
+    .container { max-width: 860px; margin: 0 auto; }
+
+    .hero {
+      text-align: center; padding: 3rem 2rem 2rem;
+      background: linear-gradient(135deg, #1a1d27, #0f1826);
+      border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 2.5rem;
+    }
+    .hero h1 { font-size: 2.2rem; font-weight: 800; margin-bottom: .6rem; }
+    .hero p  { color: var(--muted); max-width: 620px; margin: 0 auto; font-size: 1rem; }
+    .hero .subtitle { margin-top: .5rem; font-size: .9rem; color: var(--accent); }
+
+    .os-toggle-bar {
+      display: flex; align-items: center; gap: .6rem; padding: .7rem 1rem;
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+      margin-bottom: 1.5rem; font-size: .88rem;
+    }
+    .os-toggle-bar span { color: var(--muted); }
+    .os-btn-global {
+      padding: .3rem .9rem; border-radius: 6px; border: 1px solid var(--border);
+      background: var(--surface); color: var(--muted); cursor: pointer;
+      font-size: .82rem; font-weight: 600; transition: all .15s; font-family: inherit;
+    }
+    .os-btn-global.mac-active { background: #2a1240; color: var(--mac); border-color: var(--mac); }
+    .os-btn-global.win-active { background: #0f1e30; color: var(--win); border-color: var(--win); }
+
+    .os-mac { display: block; }
+    .os-win { display: none; }
+    body.win .os-mac { display: none; }
+    body.win .os-win { display: block; }
+
+    .toc {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.2rem 1.5rem; margin-bottom: 2rem;
+    }
+    .toc h3 { margin-bottom: .8rem; font-size: .95rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+    .toc ol { padding-left: 1.3rem; }
+    .toc li { margin-bottom: .3rem; }
+    .toc a  { color: var(--accent); text-decoration: none; }
+    .toc a:hover { text-decoration: underline; }
+
+    .section {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.8rem 2rem; margin-bottom: 1.5rem;
+    }
+    .section h2 { font-size: 1.35rem; font-weight: 700; margin-bottom: 1rem; color: var(--accent); }
+    .section h3 { color: var(--muted); text-transform: uppercase; letter-spacing: .05em; font-size: .8rem; font-weight: 600; margin: 1.4rem 0 .5rem; }
+    .section p  { margin-bottom: .75rem; }
+    .section ul, .section ol { padding-left: 1.4rem; margin-bottom: .75rem; }
+    .section li { margin-bottom: .35rem; }
+
+    .code-wrap { position: relative; margin: .75rem 0; }
+    pre {
+      background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px;
+      padding: 1rem 1.2rem; overflow-x: auto;
+      font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+      font-size: .85rem; line-height: 1.6; white-space: pre;
+    }
+    .copy-btn {
+      position: absolute; top: .5rem; right: .5rem; background: var(--surface2);
+      border: 1px solid var(--border); color: var(--muted); border-radius: 6px;
+      padding: .25rem .65rem; font-size: .75rem; cursor: pointer; transition: all .15s; font-family: inherit;
+    }
+    .copy-btn:hover { background: var(--border); color: var(--text); }
+    .copy-btn.copied { color: var(--accent-green); border-color: var(--accent-green); }
+
+    .link-copy {
+      display: flex; align-items: center; gap: .6rem; background: var(--code-bg);
+      border: 1px solid var(--border); border-radius: 8px; padding: .65rem 1rem;
+      margin: .5rem 0; font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: .85rem; word-break: break-all;
+    }
+    .link-copy span { flex: 1; color: var(--accent); }
+    .link-copy button {
+      flex-shrink: 0; background: var(--surface2); border: 1px solid var(--border);
+      color: var(--muted); border-radius: 6px; padding: .2rem .6rem; font-size: .75rem;
+      cursor: pointer; transition: all .15s; font-family: inherit;
+    }
+    .link-copy button:hover { background: var(--border); color: var(--text); }
+    .link-copy button.copied { color: var(--accent-green); border-color: var(--accent-green); }
+
+    code {
+      font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: .85em;
+      background: #161b22; padding: .15em .4em; border-radius: 4px; color: #c9d1d9;
+    }
+
+    .callout {
+      border-left: 3px solid var(--accent-yellow); background: #1f1c10;
+      padding: .75rem 1.1rem; border-radius: 0 8px 8px 0; margin: 1rem 0; font-size: .9rem;
+    }
+    .callout.tip  { border-color: var(--accent-green); background: #0f1f18; }
+    .callout.info { border-color: var(--accent); background: #0f1826; }
+    .callout.fun  { border-color: var(--accent-purple); background: #1a1530; }
+    .callout.danger { border-color: var(--accent-red); background: #1f0f0f; }
+
+    /* Before / After comparison */
+    .compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+    @media (max-width: 600px) {
+      .compare { grid-template-columns: 1fr; }
+    }
+    .compare-box {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.1rem;
+      font-size: .88rem;
+    }
+    .compare-box.bad  { border-color: #4a1818; background: #1a0f0f; }
+    .compare-box.good { border-color: #0f3028; background: #0a1f18; }
+    .compare-label {
+      font-size: .72rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .06em; margin-bottom: .5rem;
+    }
+    .compare-box.bad  .compare-label { color: var(--accent-red); }
+    .compare-box.good .compare-label { color: var(--accent-green); }
+    .compare-box p { color: var(--text); line-height: 1.5; margin: 0; }
+
+    /* principle cards */
+    .principles {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: .75rem;
+      margin: 1rem 0;
+    }
+    .principle-card {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 8px; padding: .9rem 1rem;
+    }
+    .principle-card .icon { font-size: 1.4rem; margin-bottom: .3rem; }
+    .principle-card strong { display: block; font-size: .9rem; margin-bottom: .2rem; }
+    .principle-card p { font-size: .82rem; color: var(--muted); margin: 0; }
+
+    .c-cmt { color: var(--muted); font-style: italic; }
+    .c-good { color: var(--accent-green); }
+    .c-bad  { color: var(--accent-red); }
+    .c-ph   { color: var(--accent-purple); }
+
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: .88rem; }
+    th { background: var(--surface2); padding: .6rem .9rem; text-align: left; font-weight: 600; color: var(--muted); font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; }
+    td { padding: .6rem .9rem; border-top: 1px solid var(--border); vertical-align: top; }
+    tr:hover td { background: #1d2030; }
+    td code { font-size: .8rem; }
+
+    a { color: var(--accent); }
+    strong { font-weight: 600; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+    footer { text-align: center; color: var(--muted); font-size: .85rem; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <div class="hero">
+    <h1>🎯 Prompt Engineering for Developers</h1>
+    <p>
+      You've got a powerful AI model. Are you feeding it great prompts or politely shouting at a brick wall?
+      Here's how to get consistently excellent results without a prompt engineering certification.
+    </p>
+    <div class="subtitle">The difference between "write me code" and code that actually works.</div>
+  </div>
+
+  <div class="os-toggle-bar">
+    <span>I'm on</span>
+    <button class="os-btn-global mac-active" id="btnMac" onclick="setOS('mac')">🍎 macOS</button>
+    <button class="os-btn-global" id="btnWin" onclick="setOS('win')">🪟 Windows</button>
+    <span style="margin-left:auto; font-size:.78rem;">— examples below apply to all platforms</span>
+  </div>
+
+  <div class="toc">
+    <h3>📋 Contents</h3>
+    <ol>
+      <li><a href="#principles">The core principles</a></li>
+      <li><a href="#context">Give context, not commands</a></li>
+      <li><a href="#output">Control the output format</a></li>
+      <li><a href="#persona">Use personas and roles</a></li>
+      <li><a href="#chain">Chain your prompts</a></li>
+      <li><a href="#debugging">Prompts for debugging</a></li>
+      <li><a href="#anti-patterns">Anti-patterns to avoid</a></li>
+      <li><a href="#cheatsheet">Cheat sheet of reusable prompts</a></li>
+    </ol>
+  </div>
+
+  <!-- PRINCIPLES -->
+  <div class="section" id="principles">
+    <h2>🧱 The Core Principles</h2>
+    <p>Everything else in this guide is a variation of these six ideas:</p>
+
+    <div class="principles">
+      <div class="principle-card">
+        <div class="icon">🎯</div>
+        <strong>Be specific</strong>
+        <p>Vague in, vague out. Name the file, the function, the constraint.</p>
+      </div>
+      <div class="principle-card">
+        <div class="icon">🗺️</div>
+        <strong>Give context</strong>
+        <p>What's the tech stack? What already exists? What have you tried?</p>
+      </div>
+      <div class="principle-card">
+        <div class="icon">📐</div>
+        <strong>Define the output</strong>
+        <p>What format? What length? What should it include and exclude?</p>
+      </div>
+      <div class="principle-card">
+        <div class="icon">🚫</div>
+        <strong>State constraints</strong>
+        <p>"Without changing the public API." "No new dependencies." "TypeScript only."</p>
+      </div>
+      <div class="principle-card">
+        <div class="icon">🔢</div>
+        <strong>Break it down</strong>
+        <p>Multiple small precise prompts beat one massive vague mega-prompt.</p>
+      </div>
+      <div class="principle-card">
+        <div class="icon">🔄</div>
+        <strong>Iterate</strong>
+        <p>First response is a draft. Refine it. "Good, but now make it handle the null case."</p>
+      </div>
+    </div>
+
+    <div class="callout fun">
+      🎭 Prompting an AI is like briefing a contractor. "Make the website better" is not a brief.
+      "Update the hero section on the homepage to use the new brand colours (#1a1d27 background, #60a5fa text)
+      without touching the navigation" — that's a brief.
+    </div>
+  </div>
+
+  <!-- CONTEXT -->
+  <div class="section" id="context">
+    <h2>🗺️ Give Context, Not Just Commands</h2>
+    <p>
+      The single biggest upgrade to prompt quality is adding context.
+      AI models don't know your stack, your constraints, or your codebase's weird history.
+      Tell them.
+    </p>
+
+    <h3>Bad vs. Good: adding context</h3>
+    <div class="compare">
+      <div class="compare-box bad">
+        <div class="compare-label">❌ Too vague</div>
+        <p>Write a function to get users from the database.</p>
+      </div>
+      <div class="compare-box good">
+        <div class="compare-label">✅ With context</div>
+        <p>Write a TypeScript function that fetches users from a Prisma PostgreSQL database. It should accept optional filters for `isActive` and `createdAfter`. Return an array of `User` objects (the Prisma type). Use async/await. No raw SQL.</p>
+      </div>
+    </div>
+
+    <div class="compare">
+      <div class="compare-box bad">
+        <div class="compare-label">❌ No constraints</div>
+        <p>Refactor this component.</p>
+      </div>
+      <div class="compare-box good">
+        <div class="compare-label">✅ With constraints</div>
+        <p>Refactor `UserCard.tsx` to split the avatar logic into a separate `Avatar` component. Keep the same props interface. Don't change the CSS classes. Add JSDoc comments to the new component.</p>
+      </div>
+    </div>
+
+    <h3>The context checklist</h3>
+    <p>For any non-trivial coding request, consider including:</p>
+    <ul>
+      <li><strong>Language &amp; framework.</strong> "TypeScript in a Next.js 14 app router project."</li>
+      <li><strong>Libraries in use.</strong> "We use Prisma, not raw SQL. Zod for validation."</li>
+      <li><strong>File paths.</strong> "In <code>src/lib/auth.ts</code>."</li>
+      <li><strong>What exists already.</strong> "There's already a <code>getUser(id)</code> function at line 42."</li>
+      <li><strong>What NOT to do.</strong> "Don't add new dependencies. Don't change the public API."</li>
+      <li><strong>Why you're doing this.</strong> "We're migrating from JWT to session-based auth because..."</li>
+    </ul>
+
+    <div class="callout tip">
+      ✅ <strong>CLAUDE.md does this for you automatically.</strong> If your project's conventions are in CLAUDE.md, Claude already knows the stack, the style, and the constraints before you say a word. See <a href="06_memory.html">06_memory.html</a>.
+    </div>
+  </div>
+
+  <!-- OUTPUT FORMAT -->
+  <div class="section" id="output">
+    <h2>📐 Control the Output Format</h2>
+    <p>
+      Unformatted AI output is like getting IKEA furniture instructions as a wall of unbroken prose.
+      A few words of direction yield dramatically different (better) results.
+    </p>
+
+    <h3>Request specific formats</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Ask for structured output</span>
+Review this code and give me:
+1. A score out of 10 with one sentence of justification
+2. Critical issues (file:line, severity, fix)
+3. Minor suggestions (optional, mark clearly)
+No padding. No intro paragraph. Start with the score.</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Ask for just the code, no explanation</span>
+Write the TypeScript function. Return only the code. No explanation needed.</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Ask for explanation first, then code</span>
+First explain the approach you'll take in 2-3 sentences.
+Then write the implementation.
+Then list any assumptions you made.</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Format modifiers that actually work</h3>
+    <table>
+      <thead><tr><th>Add to your prompt</th><th>Effect</th></tr></thead>
+      <tbody>
+        <tr><td><code>Be concise.</code></td><td>Removes unnecessary padding and repetition</td></tr>
+        <tr><td><code>No explanation needed.</code></td><td>Returns just the code, nothing else</td></tr>
+        <tr><td><code>Explain your reasoning.</code></td><td>Shows the thought process before the answer</td></tr>
+        <tr><td><code>Use a table.</code></td><td>Structures comparisons into a readable grid</td></tr>
+        <tr><td><code>Use bullet points.</code></td><td>Breaks down lists instead of prose paragraphs</td></tr>
+        <tr><td><code>Return only the changed lines.</code></td><td>Avoids returning the entire file for small edits</td></tr>
+        <tr><td><code>Include line numbers in your output.</code></td><td>Makes it easy to find where changes apply</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- PERSONAS -->
+  <div class="section" id="persona">
+    <h2>🎭 Use Personas and Roles</h2>
+    <p>
+      Telling an AI to take on a role is not a magic trick — it's a shortcut for providing a lot of
+      context all at once. "You are a senior security engineer" isn't roleplay, it's a configuration command.
+    </p>
+
+    <h3>Useful role prompts for developers</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># For security-focused review</span>
+You are a senior application security engineer. Review this code for vulnerabilities.
+Be thorough. Cite OWASP categories where applicable. Assume the worst about user input.</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># For performance optimization</span>
+You are a database performance specialist. Analyze these queries.
+Focus on: missing indexes, N+1 patterns, and full table scans.
+Suggest specific fixes with estimated improvement.</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># For code review as a skeptic</span>
+You are a skeptical senior engineer doing code review.
+Your job is to find the edge cases and failure modes that the author missed.
+Don't be encouraging. Just find the problems.</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># For architecture decisions</span>
+You are a staff engineer who has seen many systems fail at scale.
+Evaluate this architecture. What are the failure modes?
+What will cause pain in 2 years? What would you do differently?</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <div class="callout fun">
+      🎭 "You are an expert" — technically every AI prompt is already this. But naming the specific domain ("security engineer", "database performance specialist") narrows the focus in a way that consistently improves output quality. It's cargo-cult prompting that happens to work.
+    </div>
+  </div>
+
+  <!-- CHAIN -->
+  <div class="section" id="chain">
+    <h2>⛓️ Chain Your Prompts</h2>
+    <p>
+      One long prompt that tries to do everything is like one meeting that tries to do everything.
+      Everyone leaves confused and nothing gets done.
+    </p>
+    <p>
+      Break complex tasks into a sequence of focused prompts. Each one builds on the last.
+    </p>
+
+    <h3>Example: building a feature step by step</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Step 1: Plan</span>
+"I want to add a rate limiter to our API. We use Express and Redis.
+What's the architecture? Describe the approach — don't write code yet."
+
+<span class="c-cmt"># Step 2: Implement the core</span>
+"Good. Now implement the rate limiter middleware based on that plan.
+Use the `ioredis` client we already have at src/lib/redis.ts."
+
+<span class="c-cmt"># Step 3: Add tests</span>
+"Now write unit tests for the middleware using Vitest.
+Mock the Redis calls. Cover: allowed request, rate-limited request, Redis failure fallback."
+
+<span class="c-cmt"># Step 4: Integrate</span>
+"Apply the middleware to all routes in src/app/api/. Use a limit of 100 requests/minute."
+
+<span class="c-cmt"># Step 5: Review</span>
+"Review everything you've written. Are there any edge cases or security issues?"</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>The three-phase pattern</h3>
+    <table>
+      <thead><tr><th>Phase</th><th>Prompt</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Plan</strong></td>
+          <td>"Describe the approach. Don't write code yet."</td>
+          <td>Catch misunderstandings before code is written</td>
+        </tr>
+        <tr>
+          <td><strong>Implement</strong></td>
+          <td>"Good. Now implement it based on that plan."</td>
+          <td>Code with aligned expectations</td>
+        </tr>
+        <tr>
+          <td><strong>Review</strong></td>
+          <td>"Review what you wrote. Any problems?"</td>
+          <td>Catch issues while the context is hot</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout tip">
+      ✅ <strong>"Don't write code yet"</strong> is one of the most powerful phrases in prompt engineering. It forces the AI to think before acting, and lets you correct the direction before you have a full implementation to undo.
+    </div>
+  </div>
+
+  <!-- DEBUGGING -->
+  <div class="section" id="debugging">
+    <h2>🐛 Prompts for Debugging</h2>
+    <p>
+      The secret to effective AI debugging isn't asking "why is it broken?" —
+      it's giving enough information that the AI can actually figure it out.
+    </p>
+
+    <h3>The complete bug report template</h3>
+    <div class="code-wrap">
+      <pre>I have a bug. Here's everything:
+
+**What I expected:** [describe expected behaviour]
+**What actually happens:** [describe the bug, including exact error messages]
+**Relevant code:** [paste the function/file]
+**Steps to reproduce:** [what triggers it]
+**What I've already tried:** [list your failed attempts]
+**Environment:** [Node version, OS, library versions if relevant]
+
+Please:
+1. Identify the root cause
+2. Suggest a fix
+3. Explain why it was happening</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>For "it works on my machine" bugs</h3>
+    <div class="code-wrap">
+      <pre>This works locally but fails in production/CI. Help me identify the environmental difference.
+
+**Local:** [Node 22, macOS, .env has X=foo]
+**Production:** [Node 20, Linux, environment variable X is not set]
+**Error:** [paste the stack trace]
+
+What could cause this discrepancy?</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>For silent failures</h3>
+    <div class="code-wrap">
+      <pre>This code runs without errors but produces the wrong output.
+
+Input: [paste example input]
+Expected output: [what it should return]
+Actual output: [what it actually returns]
+Code: [paste the function]
+
+Walk through the execution step by step and find where it diverges.</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <div class="callout info">
+      ℹ️ <strong>Paste the actual error message.</strong> Not "I'm getting an error." Not "it throws something." The exact message, the exact stack trace. AI models are extremely good at reading stack traces — but only if they can see them.
+    </div>
+  </div>
+
+  <!-- ANTI-PATTERNS -->
+  <div class="section" id="anti-patterns">
+    <h2>🚫 Anti-patterns to Avoid</h2>
+
+    <h3>The vague mega-request</h3>
+    <div class="compare">
+      <div class="compare-box bad">
+        <div class="compare-label">❌ Anti-pattern</div>
+        <p>Build me a full authentication system with login, registration, password reset, email verification, OAuth with Google and GitHub, rate limiting, and session management.</p>
+      </div>
+      <div class="compare-box good">
+        <div class="compare-label">✅ Better</div>
+        <p>Let's build auth step by step. Start with email/password login only. We'll add OAuth and other features after the core is solid. First: what's your recommended approach for our Next.js + Prisma stack?</p>
+      </div>
+    </div>
+
+    <h3>Accepting the first response</h3>
+    <div class="compare">
+      <div class="compare-box bad">
+        <div class="compare-label">❌ Anti-pattern</div>
+        <p>[Copy-pastes AI code without reading it]</p>
+      </div>
+      <div class="compare-box good">
+        <div class="compare-label">✅ Better</div>
+        <p>"Good. Now review what you just wrote. Is there a null pointer risk in the loop? Does this handle an empty array?"</p>
+      </div>
+    </div>
+
+    <h3>Not reading the code</h3>
+    <p>
+      AI code is not tested until you test it. It will look correct. It will often be correct.
+      It will occasionally be subtly wrong in a way that only shows up in production at 2am.
+      Read it. Run it. Review it.
+    </p>
+
+    <h3>Over-specifying the solution</h3>
+    <div class="compare">
+      <div class="compare-box bad">
+        <div class="compare-label">❌ Anti-pattern</div>
+        <p>"Write a for loop that iterates from 0 to array.length, checks if array[i] is greater than 10, and if so pushes it to a new array named result."</p>
+      </div>
+      <div class="compare-box good">
+        <div class="compare-label">✅ Better</div>
+        <p>"Filter this array to only include values greater than 10."</p>
+      </div>
+    </div>
+    <p>State the goal, not the implementation. You'll get cleaner code and might learn a better approach.</p>
+
+    <h3>Asking for too much at once</h3>
+    <p>
+      Each prompt should have one clear goal. "Write the function, add tests, update the docs, and refactor the related code" is four tasks. The AI will attempt all four, do each one shallowly, and you'll spend more time reviewing than if you'd done it yourself.
+    </p>
+  </div>
+
+  <!-- CHEAT SHEET -->
+  <div class="section" id="cheatsheet">
+    <h2>📋 Reusable Prompt Starters</h2>
+    <p>Copy these, customize, use immediately.</p>
+
+    <h3>Code generation</h3>
+    <div class="code-wrap">
+      <pre>Write a [TypeScript/Python/etc] function that [does X].
+Context: [stack, libraries, file location].
+Constraints: [no new deps / match existing style / don't change public API].
+Return only the code.</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Code review</h3>
+    <div class="code-wrap">
+      <pre>Review this code. Check for: correctness, security (injection/XSS/secrets),
+performance (N+1/unnecessary work), and readability.
+Score it 1-10. List issues with file:line and severity.</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Explain unfamiliar code</h3>
+    <div class="code-wrap">
+      <pre>Explain this code to me.
+Assume I know [language] but not [specific library/pattern].
+Use plain English. Point out anything unusual or non-obvious.</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Add tests</h3>
+    <div class="code-wrap">
+      <pre>Write tests for this function using [Vitest/Jest/pytest].
+Cover: happy path, edge cases (empty input, null, large values), and error cases.
+Use the same patterns as existing tests in the codebase.</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Refactor</h3>
+    <div class="code-wrap">
+      <pre>Refactor this code to [be more readable / remove duplication / separate concerns].
+Constraints: same public API, no new dependencies, TypeScript only.
+Explain each change you make and why.</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Architecture decision</h3>
+    <div class="code-wrap">
+      <pre>I need to decide between [option A] and [option B] for [problem].
+Context: [stack, scale, team size, constraints].
+Give me a pros/cons table, your recommendation, and one risk I might be underestimating.</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Rubber duck debugging</h3>
+    <div class="code-wrap">
+      <pre>I'm going to explain a problem. Don't solve it yet — just ask me clarifying questions
+until we've diagnosed the root cause together.</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+  </div>
+
+  <footer>
+    <p>🎯 Great prompts are a skill. Bad prompts are just typing.</p>
+    <p style="margin-top:.5rem;">Last updated: February 2026 · Part of the AI CLI Setup series</p>
+  </footer>
+
+</div>
+
+<script>
+  function copyCode(btn) {
+    const pre = btn.closest('.code-wrap').querySelector('pre');
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+      btn.textContent = '✓ Copied!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    }).catch(() => {
+      const ta = document.createElement('textarea'); ta.value = pre.innerText;
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+      btn.textContent = '✓ Copied!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  function copyLink(btn, text) {
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = '✓ Copied!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    }).catch(() => {
+      const ta = document.createElement('textarea'); ta.value = text;
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+      btn.textContent = '✓ Copied!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  function setOS(os) {
+    const btnMac = document.getElementById('btnMac');
+    const btnWin = document.getElementById('btnWin');
+    if (os === 'mac') {
+      document.body.classList.remove('win');
+      btnMac.classList.add('mac-active'); btnMac.classList.remove('win-active');
+      btnWin.classList.remove('mac-active', 'win-active');
+    } else {
+      document.body.classList.add('win');
+      btnWin.classList.add('win-active'); btnWin.classList.remove('mac-active');
+      btnMac.classList.remove('mac-active', 'win-active');
+    }
+  }
+
+  document.querySelectorAll('.copy-btn').forEach(btn => { btn.textContent = 'Copy'; });
+</script>
+</body>
+</html>
