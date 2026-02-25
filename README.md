@@ -14,6 +14,7 @@ If you want to collaborate with us and be able to modify files, reach out to us 
 
 ## 📦 Resources 
 
+A few useful resources:
 - [Skills Library](www.skills.sh)
 - [Agents Library](https://subagents.cc/)
 - [Claude Code](https://claude.com/product/claude-code)
