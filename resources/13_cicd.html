@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CI/CD Integration — AI in Your Pipeline</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #222536;
+      --border: #2e3250;
+      --text: #e2e4f0;
+      --muted: #8b8fa8;
+      --accent: #34d399;
+      --accent-blue: #60a5fa;
+      --accent-purple: #a78bfa;
+      --accent-yellow: #fbbf24;
+      --accent-red: #f87171;
+      --accent-orange: #f97316;
+      --mac: #c084fc;
+      --win: #38bdf8;
+      --code-bg: #0d1117;
+      --radius: 10px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-size: 16px; line-height: 1.7; padding: 2rem 1rem;
+    }
+
+    .container { max-width: 860px; margin: 0 auto; }
+
+    .hero {
+      text-align: center; padding: 3rem 2rem 2rem;
+      background: linear-gradient(135deg, #1a1d27, #0f1f16);
+      border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 2.5rem;
+    }
+    .hero h1 { font-size: 2.2rem; font-weight: 800; margin-bottom: .6rem; }
+    .hero p  { color: var(--muted); max-width: 620px; margin: 0 auto; font-size: 1rem; }
+    .hero .subtitle { margin-top: .5rem; font-size: .9rem; color: var(--accent); }
+
+    .os-toggle-bar {
+      display: flex; align-items: center; gap: .6rem; padding: .7rem 1rem;
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+      margin-bottom: 1.5rem; font-size: .88rem;
+    }
+    .os-toggle-bar span { color: var(--muted); }
+    .os-btn-global {
+      padding: .3rem .9rem; border-radius: 6px; border: 1px solid var(--border);
+      background: var(--surface); color: var(--muted); cursor: pointer;
+      font-size: .82rem; font-weight: 600; transition: all .15s; font-family: inherit;
+    }
+    .os-btn-global.mac-active { background: #2a1240; color: var(--mac); border-color: var(--mac); }
+    .os-btn-global.win-active { background: #0f1e30; color: var(--win); border-color: var(--win); }
+
+    .os-mac { display: block; }
+    .os-win { display: none; }
+    body.win .os-mac { display: none; }
+    body.win .os-win { display: block; }
+
+    .toc {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.2rem 1.5rem; margin-bottom: 2rem;
+    }
+    .toc h3 { margin-bottom: .8rem; font-size: .95rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+    .toc ol { padding-left: 1.3rem; }
+    .toc li { margin-bottom: .3rem; }
+    .toc a  { color: var(--accent-blue); text-decoration: none; }
+    .toc a:hover { text-decoration: underline; }
+
+    .section {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.8rem 2rem; margin-bottom: 1.5rem;
+    }
+    .section h2 { font-size: 1.35rem; font-weight: 700; margin-bottom: 1rem; color: var(--accent); }
+    .section h3 { color: var(--muted); text-transform: uppercase; letter-spacing: .05em; font-size: .8rem; font-weight: 600; margin: 1.4rem 0 .5rem; }
+    .section p  { margin-bottom: .75rem; }
+    .section ul, .section ol { padding-left: 1.4rem; margin-bottom: .75rem; }
+    .section li { margin-bottom: .35rem; }
+
+    .code-wrap { position: relative; margin: .75rem 0; }
+    pre {
+      background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px;
+      padding: 1rem 1.2rem; overflow-x: auto;
+      font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+      font-size: .85rem; line-height: 1.6; white-space: pre;
+    }
+    .copy-btn {
+      position: absolute; top: .5rem; right: .5rem; background: var(--surface2);
+      border: 1px solid var(--border); color: var(--muted); border-radius: 6px;
+      padding: .25rem .65rem; font-size: .75rem; cursor: pointer; transition: all .15s; font-family: inherit;
+    }
+    .copy-btn:hover { background: var(--border); color: var(--text); }
+    .copy-btn.copied { color: var(--accent); border-color: var(--accent); }
+
+    .link-copy {
+      display: flex; align-items: center; gap: .6rem; background: var(--code-bg);
+      border: 1px solid var(--border); border-radius: 8px; padding: .65rem 1rem;
+      margin: .5rem 0; font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: .85rem; word-break: break-all;
+    }
+    .link-copy span { flex: 1; color: var(--accent-blue); }
+    .link-copy button {
+      flex-shrink: 0; background: var(--surface2); border: 1px solid var(--border);
+      color: var(--muted); border-radius: 6px; padding: .2rem .6rem; font-size: .75rem;
+      cursor: pointer; transition: all .15s; font-family: inherit;
+    }
+    .link-copy button:hover { background: var(--border); color: var(--text); }
+    .link-copy button.copied { color: var(--accent); border-color: var(--accent); }
+
+    code {
+      font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: .85em;
+      background: #161b22; padding: .15em .4em; border-radius: 4px; color: #c9d1d9;
+    }
+
+    .callout {
+      border-left: 3px solid var(--accent-yellow); background: #1f1c10;
+      padding: .75rem 1.1rem; border-radius: 0 8px 8px 0; margin: 1rem 0; font-size: .9rem;
+    }
+    .callout.tip    { border-color: var(--accent); background: #0f1f18; }
+    .callout.info   { border-color: var(--accent-blue); background: #0f1826; }
+    .callout.fun    { border-color: var(--accent-purple); background: #1a1530; }
+    .callout.danger { border-color: var(--accent-red); background: #1f0f0f; }
+
+    /* pipeline use-case grid */
+    .use-case-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: .75rem; margin: 1rem 0;
+    }
+    .use-case-card {
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: .9rem 1rem;
+    }
+    .use-case-card .icon { font-size: 1.3rem; margin-bottom: .3rem; }
+    .use-case-card strong { display: block; font-size: .9rem; margin-bottom: .2rem; }
+    .use-case-card p { font-size: .82rem; color: var(--muted); margin: 0; }
+
+    /* pipeline stage diagram */
+    .pipeline {
+      display: flex; align-items: center; gap: 0;
+      overflow-x: auto; padding: 1rem 0; margin: 1rem 0;
+    }
+    .pipe-stage {
+      flex-shrink: 0; background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 8px; padding: .7rem .9rem; text-align: center; min-width: 90px;
+    }
+    .pipe-stage .ps-icon { font-size: 1.2rem; margin-bottom: .2rem; }
+    .pipe-stage .ps-name { font-size: .72rem; font-weight: 700; color: var(--text); }
+    .pipe-stage .ps-sub  { font-size: .65rem; color: var(--muted); margin-top: .1rem; }
+    .pipe-stage.ai-stage { border-color: var(--accent); background: #0f1f18; }
+    .pipe-stage.ai-stage .ps-name { color: var(--accent); }
+    .pipe-arrow {
+      flex-shrink: 0; color: var(--muted); font-size: .9rem; padding: 0 .3rem;
+    }
+
+    .c-cmt   { color: var(--muted); font-style: italic; }
+    .c-str   { color: #a5d6ff; }
+    .c-key   { color: var(--accent-yellow); }
+    .c-green { color: var(--accent); }
+    .c-blue  { color: var(--accent-blue); }
+    .c-yel   { color: var(--accent-yellow); }
+
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: .88rem; }
+    th { background: var(--surface2); padding: .6rem .9rem; text-align: left; font-weight: 600; color: var(--muted); font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; }
+    td { padding: .6rem .9rem; border-top: 1px solid var(--border); vertical-align: top; }
+    tr:hover td { background: #1d2030; }
+    td code { font-size: .8rem; }
+
+    a { color: var(--accent-blue); }
+    strong { font-weight: 600; }
+    footer { text-align: center; color: var(--muted); font-size: .85rem; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <div class="hero">
+    <h1>🏗️ CI/CD Integration</h1>
+    <p>
+      Your CI pipeline already runs your tests. What if it also fixed the failures?
+      Wrote the release notes? Reviewed the PR before any human had to?
+      That's not a fantasy — it's a YAML file away.
+    </p>
+    <div class="subtitle">Automate the parts of code review that don't require judgment. (There are more than you think.)</div>
+  </div>
+
+  <div class="os-toggle-bar">
+    <span>I'm on</span>
+    <button class="os-btn-global mac-active" id="btnMac" onclick="setOS('mac')">🍎 macOS</button>
+    <button class="os-btn-global" id="btnWin" onclick="setOS('win')">🪟 Windows</button>
+    <span style="margin-left:auto; font-size:.78rem;">— YAML examples work on all platforms</span>
+  </div>
+
+  <div class="toc">
+    <h3>📋 Contents</h3>
+    <ol>
+      <li><a href="#what">What AI can do in CI/CD</a></li>
+      <li><a href="#setup">Essential setup</a></li>
+      <li><a href="#github-actions">GitHub Actions examples</a></li>
+      <li><a href="#gitlab-ci">GitLab CI examples</a></li>
+      <li><a href="#pr-review">Automated PR review</a></li>
+      <li><a href="#test-fix">Auto test-fixer</a></li>
+      <li><a href="#release-notes">Release notes generation</a></li>
+      <li><a href="#safety">Safety &amp; cost controls</a></li>
+    </ol>
+  </div>
+
+  <!-- WHAT -->
+  <div class="section" id="what">
+    <h2>🤖 What AI Can Do in CI/CD</h2>
+    <p>
+      The most effective uses of AI in a pipeline are <strong>narrow, well-defined, and deterministic enough to automate</strong>.
+      Broad open-ended tasks ("make this code better") belong in a developer session, not a pipeline.
+    </p>
+
+    <div class="use-case-grid">
+      <div class="use-case-card">
+        <div class="icon">🔍</div>
+        <strong>PR review</strong>
+        <p>Automated first-pass review on every PR. Catches common issues before human reviewers.</p>
+      </div>
+      <div class="use-case-card">
+        <div class="icon">🧪</div>
+        <strong>Fix failing tests</strong>
+        <p>When tests fail, Claude reads the failure, finds the cause, and submits a fix commit.</p>
+      </div>
+      <div class="use-case-card">
+        <div class="icon">📋</div>
+        <strong>Release notes</strong>
+        <p>Generate human-readable release notes from commit history on every tag.</p>
+      </div>
+      <div class="use-case-card">
+        <div class="icon">🛡️</div>
+        <strong>Security scanning</strong>
+        <p>AI-powered audit of every diff for injection, secrets, and OWASP issues.</p>
+      </div>
+      <div class="use-case-card">
+        <div class="icon">📝</div>
+        <strong>Doc generation</strong>
+        <p>Keep docs in sync — generate or update documentation when code changes.</p>
+      </div>
+      <div class="use-case-card">
+        <div class="icon">✅</div>
+        <strong>Coverage gaps</strong>
+        <p>Detect untested code paths in a diff and generate missing tests automatically.</p>
+      </div>
+    </div>
+
+    <h3>Where AI fits in the pipeline</h3>
+    <div class="pipeline">
+      <div class="pipe-stage"><div class="ps-icon">📤</div><div class="ps-name">Push</div><div class="ps-sub">trigger</div></div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-stage ai-stage"><div class="ps-icon">🔍</div><div class="ps-name">AI Review</div><div class="ps-sub">on PR open</div></div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-stage"><div class="ps-icon">🧪</div><div class="ps-name">Tests</div><div class="ps-sub">run suite</div></div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-stage ai-stage"><div class="ps-icon">🔧</div><div class="ps-name">AI Fix</div><div class="ps-sub">if failing</div></div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-stage"><div class="ps-icon">🏷️</div><div class="ps-name">Release</div><div class="ps-sub">tag/merge</div></div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-stage ai-stage"><div class="ps-icon">📋</div><div class="ps-name">AI Notes</div><div class="ps-sub">changelog</div></div>
+    </div>
+
+    <div class="callout fun">
+      🎭 Traditional CI: runs tests, fails, sends you an email at 2am, you fix it at 9am.<br/>
+      AI CI: runs tests, fails, fixes the failing test, commits the fix, sends you a Slack message saying it handled it. You wake up to a green build. This is meaningfully better.
+    </div>
+  </div>
+
+  <!-- SETUP -->
+  <div class="section" id="setup">
+    <h2>⚙️ Essential Setup</h2>
+    <p>
+      All three CLI tools can run non-interactively in CI. The key requirements are:
+    </p>
+    <ul>
+      <li>🔑 <strong>API key as a secret.</strong> Never hardcode it in YAML.</li>
+      <li>🤖 <strong>Non-interactive flag.</strong> Skip permission prompts so the pipeline doesn't hang.</li>
+      <li>📦 <strong>Install step.</strong> The CLI must be available in the runner.</li>
+      <li>🎯 <strong>Scoped task.</strong> Narrow, specific prompts produce reliable CI results.</li>
+    </ul>
+
+    <h3>Install each CLI in a runner</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Claude Code</span>
+npm install -g @anthropic-ai/claude-code
+
+<span class="c-cmt"># Codex CLI</span>
+npm install -g @openai/codex
+
+<span class="c-cmt"># Gemini CLI</span>
+npm install -g @google/gemini-cli</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Non-interactive flags</h3>
+    <table>
+      <thead><tr><th>Tool</th><th>Non-interactive mode</th><th>One-shot prompt flag</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Claude Code</td>
+          <td><code>--dangerously-skip-permissions</code></td>
+          <td><code>-p "your prompt"</code></td>
+        </tr>
+        <tr>
+          <td>Codex CLI</td>
+          <td><code>--full-auto</code></td>
+          <td><code>codex "your prompt"</code></td>
+        </tr>
+        <tr>
+          <td>Gemini CLI</td>
+          <td><code>--yes</code> / <code>-y</code></td>
+          <td><code>gemini -p "your prompt"</code></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Secrets — where to set your API keys</h3>
+    <table>
+      <thead><tr><th>Platform</th><th>Where to add</th><th>Variable name</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>GitHub Actions</td>
+          <td>Settings → Secrets → Actions</td>
+          <td><code>ANTHROPIC_API_KEY</code></td>
+        </tr>
+        <tr>
+          <td>GitLab CI</td>
+          <td>Settings → CI/CD → Variables</td>
+          <td><code>ANTHROPIC_API_KEY</code></td>
+        </tr>
+        <tr>
+          <td>CircleCI</td>
+          <td>Project Settings → Environment Variables</td>
+          <td><code>ANTHROPIC_API_KEY</code></td>
+        </tr>
+        <tr>
+          <td>Bitbucket Pipelines</td>
+          <td>Repository Settings → Repository Variables</td>
+          <td><code>ANTHROPIC_API_KEY</code></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- GITHUB ACTIONS -->
+  <div class="section" id="github-actions">
+    <h2>🐙 GitHub Actions Examples</h2>
+
+    <h3>Skeleton: run Claude on any event</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># .github/workflows/ai-task.yml</span>
+name: AI Task
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  ai:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write       <span class="c-cmt"># allow commits back to the branch</span>
+      pull-requests: write  <span class="c-cmt"># allow PR comments</span>
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  <span class="c-cmt"># full history for git log / diff</span>
+
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+
+      - name: Install project deps
+        run: npm ci
+
+      - name: Install Claude Code
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Run AI task
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          claude --dangerously-skip-permissions -p \
+            "Your specific task here"</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Auto PR review on every PR</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># .github/workflows/ai-pr-review.yml</span>
+name: AI PR Review
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - run: npm install -g @anthropic-ai/claude-code
+
+      - name: Get diff
+        run: git diff origin/${{ github.base_ref }}...HEAD > /tmp/pr.diff
+
+      - name: AI review
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          REVIEW=$(claude --dangerously-skip-permissions -p "
+          Review this git diff for: bugs, security issues (injection/secrets),
+          missing error handling, and style violations.
+          Be specific: cite file:line for each issue.
+          Format as Markdown with ## Issues and ## Suggestions sections.
+          If the diff looks good, say so briefly.
+          $(cat /tmp/pr.diff)
+          ")
+
+          gh pr comment ${{ github.event.pull_request.number }} \
+            --body "## 🤖 AI Review
+
+          $REVIEW
+
+          ---
+          *Generated by Claude. Human review still required.*"</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Auto test-fixer on test failure</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># .github/workflows/ai-test-fix.yml</span>
+name: AI Test Fixer
+on:
+  push:
+    branches: [main, develop]
+
+jobs:
+  test-and-fix:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+
+      - run: npm ci
+      - run: npm install -g @anthropic-ai/claude-code
+
+      - name: Run tests
+        id: tests
+        run: npm test 2>&1 | tee /tmp/test-output.txt
+        continue-on-error: true  <span class="c-cmt"># don't fail the job — let AI try to fix it</span>
+
+      - name: AI fix (only if tests failed)
+        if: steps.tests.outcome == 'failure'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          claude --dangerously-skip-permissions -p "
+          The test suite just failed. Here is the output:
+          $(cat /tmp/test-output.txt)
+
+          Fix the failing tests by editing the source files (not the test files).
+          Do not modify test expectations.
+          After fixing, run npm test to verify.
+          If all tests pass, commit with message: 'fix: auto-fix failing tests [ci]'
+          If you cannot fix them, explain why and exit without committing."
+
+      - name: Push fix if committed
+        if: steps.tests.outcome == 'failure'
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git push origin HEAD</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Release notes on new tag</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># .github/workflows/release-notes.yml</span>
+name: Generate Release Notes
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  release-notes:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - run: npm install -g @anthropic-ai/claude-code
+
+      - name: Generate notes
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          if [ -z "$PREV_TAG" ]; then
+            COMMITS=$(git log --oneline)
+          else
+            COMMITS=$(git log --oneline ${PREV_TAG}..HEAD)
+          fi
+
+          NOTES=$(claude --dangerously-skip-permissions -p "
+          Generate release notes for version ${{ github.ref_name }}.
+
+          Commits since last release:
+          $COMMITS
+
+          Format using Keep a Changelog:
+          ## What's New (user-facing language, not commit jargon)
+          ## Bug Fixes
+          ## Internal Changes (optional — only include if significant)
+
+          Be concise. Write for users, not developers.")
+
+          gh release create ${{ github.ref_name }} \
+            --title "${{ github.ref_name }}" \
+            --notes "$NOTES"</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+  </div>
+
+  <!-- GITLAB -->
+  <div class="section" id="gitlab-ci">
+    <h2>🦊 GitLab CI Examples</h2>
+
+    <h3>AI PR review on merge request</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># .gitlab-ci.yml</span>
+ai-review:
+  stage: review
+  image: node:22
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  script:
+    - npm install -g @anthropic-ai/claude-code
+    - git fetch origin $CI_MERGE_REQUEST_TARGET_BRANCH_NAME
+    - git diff origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME...HEAD > /tmp/pr.diff
+    - |
+      REVIEW=$(claude --dangerously-skip-permissions -p "
+      Review this diff for bugs, security issues, and style problems.
+      Cite file:line for each issue. Be concise.
+      $(cat /tmp/pr.diff)
+      ")
+    - |
+      curl --request POST \
+        --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
+        --header "Content-Type: application/json" \
+        --data "{\"body\": \"## 🤖 AI Review\n\n${REVIEW}\"}" \
+        "$CI_API_V4_URL/projects/$CI_PROJECT_ID/merge_requests/$CI_MERGE_REQUEST_IID/notes"
+  variables:
+    ANTHROPIC_API_KEY: $ANTHROPIC_API_KEY  <span class="c-cmt"># set in CI/CD settings</span>
+    GITLAB_TOKEN: $GITLAB_TOKEN</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Auto test-fixer on pipeline failure</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># .gitlab-ci.yml</span>
+test:
+  stage: test
+  script:
+    - npm ci
+    - npm test 2>&1 | tee test-output.txt
+  artifacts:
+    paths: [test-output.txt]
+    when: always
+
+ai-fix-tests:
+  stage: fix
+  needs: [test]
+  when: on_failure  <span class="c-cmt"># only runs if test job failed</span>
+  image: node:22
+  script:
+    - npm install -g @anthropic-ai/claude-code
+    - npm ci
+    - |
+      claude --dangerously-skip-permissions -p "
+      Tests failed. Output:
+      $(cat test-output.txt)
+      Fix the implementation (not the tests). Run npm test after.
+      Commit fixes with: 'fix: auto-fix failing tests [ci]'"
+    - git config user.email "ci@example.com"
+    - git config user.name  "CI Bot"
+    - git push origin HEAD:$CI_COMMIT_REF_NAME
+  variables:
+    ANTHROPIC_API_KEY: $ANTHROPIC_API_KEY</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+  </div>
+
+  <!-- PR REVIEW -->
+  <div class="section" id="pr-review">
+    <h2>🔍 Automated PR Review — Deep Dive</h2>
+    <p>
+      A well-crafted PR review prompt is the difference between "this looks fine"
+      and catching an actual security bug before it merges.
+    </p>
+
+    <h3>The review prompt that actually finds things</h3>
+    <div class="code-wrap">
+      <pre>Review this git diff as a senior engineer. Be specific and opinionated.
+
+## Check for:
+
+**Bugs**
+- Off-by-one errors, null/undefined access, wrong types
+- Race conditions, missing await, unhandled promise rejections
+- Logic errors (off conditions, wrong comparisons)
+
+**Security**
+- SQL/NoSQL injection (including ORM misuse)
+- XSS — unescaped user input in HTML/templates
+- Exposed secrets or credentials
+- Missing authentication/authorization checks
+- Insecure direct object references
+
+**Error handling**
+- Uncaught exceptions
+- Silent failures (empty catch blocks)
+- Missing validation on user input or external data
+
+**Style**
+- Violations of the project's established patterns
+- Overly complex code that could be simplified
+
+## Output format:
+For each issue:
+  [SEVERITY: CRITICAL/HIGH/MEDIUM/LOW] file.ts:42 — description — suggested fix
+
+If there are no issues: "✅ No significant issues found."
+
+## The diff:
+[paste diff here]</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <div class="callout tip">
+      ✅ <strong>CRITICAL issues should block the PR.</strong> Use the severity levels to drive automation — your CI can mark the PR as failing if Claude reports a CRITICAL issue, and post-comment-only if it's MEDIUM or LOW.
+    </div>
+
+    <h3>Blocking PRs on critical issues</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Check if Claude flagged any CRITICAL issues</span>
+REVIEW=$(claude --dangerously-skip-permissions -p "...")
+
+if echo "$REVIEW" | grep -q "\[CRITICAL\]"; then
+  echo "❌ Critical issues found — blocking PR"
+  echo "$REVIEW"
+  exit 1  <span class="c-cmt"># non-zero exit fails the CI job → blocks merge</span>
+else
+  echo "✅ No critical issues"
+  <span class="c-cmt"># post the review as a comment but don't block</span>
+fi</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+  </div>
+
+  <!-- TEST FIXER -->
+  <div class="section" id="test-fix">
+    <h2>🧪 Auto Test-Fixer — Best Practices</h2>
+
+    <h3>The golden rules for AI test-fixing in CI</h3>
+    <ul>
+      <li>✅ <strong>Only fix implementation, never tests.</strong> Always tell Claude "do not modify test files." Otherwise it'll just delete the failing assertions and call it fixed. Technically passing, morally wrong.</li>
+      <li>✅ <strong>Verify before committing.</strong> The prompt should include "run npm test after fixing and only commit if all tests pass."</li>
+      <li>✅ <strong>Add [ci] or [skip ci] to the fix commit message</strong> so it doesn't trigger another pipeline loop.</li>
+      <li>✅ <strong>Set a maximum retry limit.</strong> If the AI can't fix it after one attempt, it should give up and report — not loop infinitely.</li>
+      <li>⚠️ <strong>Only auto-push on non-main branches.</strong> Never auto-commit to main without a PR and human review.</li>
+    </ul>
+
+    <h3>The ideal test-fixer prompt</h3>
+    <div class="code-wrap">
+      <pre>The test suite failed. Here is the output:
+[TEST OUTPUT]
+
+Your task:
+1. Read the failing test(s) to understand what they expect
+2. Read the source file(s) being tested
+3. Fix the implementation to make the tests pass
+4. DO NOT modify test files or test expectations
+5. Run `npm test` to verify your fix works
+6. If all tests pass: commit with message "fix: auto-fix failing tests [ci skip]"
+7. If you cannot fix it in one pass: explain what's wrong and exit WITHOUT committing
+
+Constraints:
+- Only change files in src/ — not in tests/ or __tests__/
+- Do not add console.log or debug statements
+- Do not change public APIs or function signatures</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+  </div>
+
+  <!-- RELEASE NOTES -->
+  <div class="section" id="release-notes">
+    <h2>📋 Release Notes Generation</h2>
+
+    <h3>Why AI release notes are actually good</h3>
+    <p>
+      Conventional commits are great — for developers. Release notes are for users.
+      "refactor: extract auth middleware into separate module" means nothing to a user.
+      "Login is now 300ms faster" does. AI translates between the two.
+    </p>
+
+    <h3>The release notes prompt</h3>
+    <div class="code-wrap">
+      <pre>Generate user-facing release notes for version [VERSION].
+
+Commit history since last release:
+[GIT LOG]
+
+Rules:
+- Write for users, not developers. No jargon.
+- "refactor: ..." becomes a maintenance note or is omitted
+- "feat: ..." becomes "New: ..."
+- "fix: ..." becomes "Fixed: ..."
+- Group by: New Features | Bug Fixes | Performance | Security
+- Omit: chore, docs-only, test-only commits (unless user-facing)
+- Max 2 sentences per item
+- If there are no user-facing changes: "Internal improvements and bug fixes."
+
+Format as Keep a Changelog Markdown.</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Trigger on git tag push</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Generate notes and create GitHub release in one step</span>
+PREV=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || git rev-list --max-parents=0 HEAD)
+LOG=$(git log --oneline ${PREV}..HEAD)
+
+NOTES=$(claude --dangerously-skip-permissions -p "Generate release notes. Commits: $LOG")
+
+gh release create "$TAG" --title "$TAG" --notes "$NOTES"</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+  </div>
+
+  <!-- SAFETY -->
+  <div class="section" id="safety">
+    <h2>🛡️ Safety &amp; Cost Controls</h2>
+
+    <h3>1. Restrict what the AI can do in CI</h3>
+    <p>
+      Use a minimal <code>.claude/settings.json</code> in your repo that limits what Claude can run in CI.
+      The pipeline should only need specific commands — not arbitrary shell access.
+    </p>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># .claude/settings.json (committed to repo)</span>
+{
+  <span class="c-key">"permissions"</span>: {
+    <span class="c-key">"allow"</span>: [
+      <span class="c-str">"Read"</span>, <span class="c-str">"Glob"</span>, <span class="c-str">"Grep"</span>, <span class="c-str">"Write"</span>, <span class="c-str">"Edit"</span>,
+      <span class="c-str">"Bash(npm test)"</span>,
+      <span class="c-str">"Bash(npm run *)"</span>,
+      <span class="c-str">"Bash(git add *)"</span>,
+      <span class="c-str">"Bash(git commit *)"</span>,
+      <span class="c-str">"Bash(git status)"</span>,
+      <span class="c-str">"Bash(git diff*)"</span>
+    ],
+    <span class="c-key">"deny"</span>: [
+      <span class="c-str">"Bash(git push*)"</span>,
+      <span class="c-str">"Bash(rm *)"</span>,
+      <span class="c-str">"WebSearch"</span>,
+      <span class="c-str">"WebFetch"</span>
+    ]
+  }
+}</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>2. Use the cheapest model that works</h3>
+    <p>
+      For most CI tasks (PR review, test fixing, release notes), <strong>Sonnet</strong> is the right model.
+      Opus costs ~5x more and isn't meaningfully better at reading a diff.
+      Haiku can work for very simple classification tasks.
+    </p>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Force a specific model in CI to control costs</span>
+claude --model claude-sonnet-4-6 --dangerously-skip-permissions -p "..."</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>3. Set token limits</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Truncate large diffs before sending to Claude</span>
+git diff origin/main...HEAD | head -c 50000 > /tmp/pr.diff
+<span class="c-cmt"># 50KB ≈ ~40K tokens — enough for any reasonable PR</span></pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>4. Only trigger on meaningful events</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Don't run AI on every push — only on PRs and releases</span>
+on:
+  pull_request:
+    types: [opened, synchronize]  <span class="c-cmt"># not on every push to a PR branch</span>
+  push:
+    tags: ['v*']                  <span class="c-cmt"># releases only</span></pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>5. Never auto-push to protected branches</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Guard against committing to main/master</span>
+if [ "$CI_COMMIT_REF_NAME" = "main" ] || [ "$CI_COMMIT_REF_NAME" = "master" ]; then
+  echo "Refusing to auto-commit to protected branch"
+  exit 0
+fi
+<span class="c-cmt"># Only commit on feature branches</span></pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <div class="callout danger">
+      ⚠️ <strong>Never give your CI AI access to production secrets.</strong> The CI environment should have only what it needs: the API key to call Claude, and perhaps a GitHub/GitLab token to post comments. Not your database URL, not your Stripe key, not your deploy credentials. Assume that any sufficiently complex prompt could be manipulated to exfiltrate environment variables.
+    </div>
+
+    <h3>Cost estimation</h3>
+    <table>
+      <thead><tr><th>Use case</th><th>Approx tokens</th><th>Cost (Sonnet, per run)</th></tr></thead>
+      <tbody>
+        <tr><td>PR review (small PR)</td><td>~10K in + 1K out</td><td>~$0.03</td></tr>
+        <tr><td>PR review (large PR)</td><td>~50K in + 2K out</td><td>~$0.18</td></tr>
+        <tr><td>Test fixer (simple)</td><td>~20K in + 5K out</td><td>~$0.09</td></tr>
+        <tr><td>Release notes</td><td>~5K in + 1K out</td><td>~$0.02</td></tr>
+        <tr><td>Security audit</td><td>~30K in + 3K out</td><td>~$0.12</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:.82rem; color:var(--muted);">Estimates based on Sonnet pricing as of early 2026. Check current pricing at anthropic.com/pricing.</p>
+  </div>
+
+  <footer>
+    <p>🏗️ CI/CD: where your tests run automatically, and now your fixes do too.</p>
+    <p style="margin-top:.5rem;">Last updated: February 2026 · Part of the AI CLI Setup series</p>
+  </footer>
+
+</div>
+<script>
+  function copyCode(btn) {
+    const pre = btn.closest('.code-wrap').querySelector('pre');
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+      btn.textContent = '✓ Copied!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    }).catch(() => {
+      const ta = document.createElement('textarea'); ta.value = pre.innerText;
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+      btn.textContent = '✓ Copied!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+  function copyLink(btn, text) {
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = '✓ Copied!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    }).catch(() => {
+      const ta = document.createElement('textarea'); ta.value = text;
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+      btn.textContent = '✓ Copied!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+  function setOS(os) {
+    const btnMac = document.getElementById('btnMac');
+    const btnWin = document.getElementById('btnWin');
+    if (os === 'mac') {
+      document.body.classList.remove('win');
+      btnMac.classList.add('mac-active'); btnMac.classList.remove('win-active');
+      btnWin.classList.remove('mac-active', 'win-active');
+    } else {
+      document.body.classList.add('win');
+      btnWin.classList.add('win-active'); btnWin.classList.remove('mac-active');
+      btnMac.classList.remove('mac-active', 'win-active');
+    }
+  }
+  document.querySelectorAll('.copy-btn').forEach(btn => { btn.textContent = 'Copy'; });
+</script>
+</body>
+</html>

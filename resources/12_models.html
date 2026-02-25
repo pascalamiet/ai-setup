@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Choosing the Right AI Model</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #222536;
+      --border: #2e3250;
+      --text: #e2e4f0;
+      --muted: #8b8fa8;
+      --accent: #fbbf24;
+      --accent-green: #34d399;
+      --accent-blue: #60a5fa;
+      --accent-purple: #a78bfa;
+      --accent-red: #f87171;
+      --accent-orange: #f97316;
+      --mac: #c084fc;
+      --win: #38bdf8;
+      --code-bg: #0d1117;
+      --radius: 10px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-size: 16px; line-height: 1.7; padding: 2rem 1rem;
+    }
+
+    .container { max-width: 860px; margin: 0 auto; }
+
+    .hero {
+      text-align: center; padding: 3rem 2rem 2rem;
+      background: linear-gradient(135deg, #1a1d27, #1f1a0e);
+      border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 2.5rem;
+    }
+    .hero h1 { font-size: 2.2rem; font-weight: 800; margin-bottom: .6rem; }
+    .hero p  { color: var(--muted); max-width: 620px; margin: 0 auto; font-size: 1rem; }
+    .hero .subtitle { margin-top: .5rem; font-size: .9rem; color: var(--accent); }
+
+    .os-toggle-bar {
+      display: flex; align-items: center; gap: .6rem; padding: .7rem 1rem;
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+      margin-bottom: 1.5rem; font-size: .88rem;
+    }
+    .os-toggle-bar span { color: var(--muted); }
+    .os-btn-global {
+      padding: .3rem .9rem; border-radius: 6px; border: 1px solid var(--border);
+      background: var(--surface); color: var(--muted); cursor: pointer;
+      font-size: .82rem; font-weight: 600; transition: all .15s; font-family: inherit;
+    }
+    .os-btn-global.mac-active { background: #2a1240; color: var(--mac); border-color: var(--mac); }
+    .os-btn-global.win-active { background: #0f1e30; color: var(--win); border-color: var(--win); }
+
+    .os-mac { display: block; }
+    .os-win { display: none; }
+    body.win .os-mac { display: none; }
+    body.win .os-win { display: block; }
+
+    .toc {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.2rem 1.5rem; margin-bottom: 2rem;
+    }
+    .toc h3 { margin-bottom: .8rem; font-size: .95rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+    .toc ol { padding-left: 1.3rem; }
+    .toc li { margin-bottom: .3rem; }
+    .toc a  { color: var(--accent-blue); text-decoration: none; }
+    .toc a:hover { text-decoration: underline; }
+
+    .section {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.8rem 2rem; margin-bottom: 1.5rem;
+    }
+    .section h2 { font-size: 1.35rem; font-weight: 700; margin-bottom: 1rem; color: var(--accent); }
+    .section h3 { color: var(--muted); text-transform: uppercase; letter-spacing: .05em; font-size: .8rem; font-weight: 600; margin: 1.4rem 0 .5rem; }
+    .section p  { margin-bottom: .75rem; }
+    .section ul, .section ol { padding-left: 1.4rem; margin-bottom: .75rem; }
+    .section li { margin-bottom: .35rem; }
+
+    .code-wrap { position: relative; margin: .75rem 0; }
+    pre {
+      background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px;
+      padding: 1rem 1.2rem; overflow-x: auto;
+      font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+      font-size: .85rem; line-height: 1.6; white-space: pre;
+    }
+    .copy-btn {
+      position: absolute; top: .5rem; right: .5rem; background: var(--surface2);
+      border: 1px solid var(--border); color: var(--muted); border-radius: 6px;
+      padding: .25rem .65rem; font-size: .75rem; cursor: pointer; transition: all .15s; font-family: inherit;
+    }
+    .copy-btn:hover { background: var(--border); color: var(--text); }
+    .copy-btn.copied { color: var(--accent-green); border-color: var(--accent-green); }
+
+    .link-copy {
+      display: flex; align-items: center; gap: .6rem; background: var(--code-bg);
+      border: 1px solid var(--border); border-radius: 8px; padding: .65rem 1rem;
+      margin: .5rem 0; font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: .85rem; word-break: break-all;
+    }
+    .link-copy span { flex: 1; color: var(--accent-blue); }
+    .link-copy button {
+      flex-shrink: 0; background: var(--surface2); border: 1px solid var(--border);
+      color: var(--muted); border-radius: 6px; padding: .2rem .6rem; font-size: .75rem;
+      cursor: pointer; transition: all .15s; font-family: inherit;
+    }
+    .link-copy button:hover { background: var(--border); color: var(--text); }
+    .link-copy button.copied { color: var(--accent-green); border-color: var(--accent-green); }
+
+    code {
+      font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: .85em;
+      background: #161b22; padding: .15em .4em; border-radius: 4px; color: #c9d1d9;
+    }
+
+    .callout {
+      border-left: 3px solid var(--accent); background: #1f1c10;
+      padding: .75rem 1.1rem; border-radius: 0 8px 8px 0; margin: 1rem 0; font-size: .9rem;
+    }
+    .callout.tip    { border-color: var(--accent-green); background: #0f1f18; }
+    .callout.info   { border-color: var(--accent-blue); background: #0f1826; }
+    .callout.fun    { border-color: var(--accent-purple); background: #1a1530; }
+    .callout.danger { border-color: var(--accent-red); background: #1f0f0f; }
+
+    /* model family cards */
+    .model-family {
+      border: 1px solid var(--border); border-radius: 10px; margin: 1rem 0; overflow: hidden;
+    }
+    .model-family-header {
+      display: flex; align-items: center; gap: .75rem;
+      padding: .9rem 1.2rem; background: var(--surface2);
+    }
+    .model-family-logo { font-size: 1.5rem; }
+    .model-family-header h3 {
+      margin: 0; font-size: 1rem; font-weight: 700; text-transform: none; letter-spacing: 0; color: var(--text);
+    }
+    .model-family-header .mf-tagline { font-size: .82rem; color: var(--muted); margin-top: .1rem; }
+    .model-rows { padding: .5rem 0; }
+    .model-row {
+      display: grid;
+      grid-template-columns: 1fr 90px 90px 90px;
+      gap: .5rem;
+      padding: .6rem 1.2rem;
+      border-top: 1px solid var(--border);
+      font-size: .88rem;
+      align-items: start;
+    }
+    .model-row:first-child { border-top: none; }
+    .model-row:hover { background: #1d2030; }
+    .model-name { font-family: 'JetBrains Mono', monospace; font-size: .8rem; font-weight: 700; }
+    .model-desc { color: var(--muted); font-size: .82rem; margin-top: .15rem; }
+    .model-col { text-align: center; font-size: .8rem; }
+    .model-col .col-label { color: var(--muted); font-size: .7rem; text-transform: uppercase; letter-spacing: .04em; margin-bottom: .2rem; }
+    .pill {
+      display: inline-block; padding: .1rem .45rem; border-radius: 999px;
+      font-size: .7rem; font-weight: 700;
+    }
+    .pill-fast   { background: rgba(52,211,153,.15); color: var(--accent-green); }
+    .pill-smart  { background: rgba(167,139,250,.15); color: var(--accent-purple); }
+    .pill-cheap  { background: rgba(251,191,36,.15);  color: var(--accent); }
+    .pill-mid    { background: rgba(96,165,250,.15);  color: var(--accent-blue); }
+    .pill-high   { background: rgba(249,115,22,.15);  color: var(--accent-orange); }
+
+    /* decision flow */
+    .decision {
+      background: var(--code-bg); border: 1px solid var(--border);
+      border-radius: 8px; padding: 1.2rem 1.4rem; margin: 1rem 0;
+      font-family: 'JetBrains Mono', monospace; font-size: .82rem; line-height: 2;
+    }
+    .d-q  { color: var(--accent); }
+    .d-y  { color: var(--accent-green); }
+    .d-n  { color: var(--muted); }
+    .d-ans { color: var(--accent-blue); font-weight: 700; }
+
+    .c-cmt { color: var(--muted); font-style: italic; }
+    .c-str { color: #a5d6ff; }
+    .c-key { color: var(--accent); }
+
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: .88rem; }
+    th { background: var(--surface2); padding: .6rem .9rem; text-align: left; font-weight: 600; color: var(--muted); font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; }
+    td { padding: .6rem .9rem; border-top: 1px solid var(--border); vertical-align: top; }
+    tr:hover td { background: #1d2030; }
+    td code { font-size: .8rem; }
+
+    a { color: var(--accent-blue); }
+    strong { font-weight: 600; }
+    footer { text-align: center; color: var(--muted); font-size: .85rem; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <div class="hero">
+    <h1>🧬 Choosing the Right AI Model</h1>
+    <p>
+      Opus for thinking. Haiku for blinking. Claude vs GPT vs Gemini.
+      Every model is "best" at something. Here's how to stop guessing and start picking correctly.
+    </p>
+    <div class="subtitle">The model is the engine. Picking the wrong one is expensive, slow, or both.</div>
+  </div>
+
+  <div class="os-toggle-bar">
+    <span>I'm on</span>
+    <button class="os-btn-global mac-active" id="btnMac" onclick="setOS('mac')">🍎 macOS</button>
+    <button class="os-btn-global" id="btnWin" onclick="setOS('win')">🪟 Windows</button>
+    <span style="margin-left:auto; font-size:.78rem;">— concepts apply everywhere</span>
+  </div>
+
+  <div class="toc">
+    <h3>📋 Contents</h3>
+    <ol>
+      <li><a href="#dimensions">The three dimensions: capability, speed, cost</a></li>
+      <li><a href="#claude">Claude family (Anthropic)</a></li>
+      <li><a href="#gpt">GPT family (OpenAI)</a></li>
+      <li><a href="#gemini">Gemini family (Google)</a></li>
+      <li><a href="#decision">Decision guide: which model for what</a></li>
+      <li><a href="#context-windows">Context windows explained</a></li>
+      <li><a href="#cli-config">Configuring models in CLI tools</a></li>
+      <li><a href="#api">Using models via the API</a></li>
+    </ol>
+  </div>
+
+  <!-- DIMENSIONS -->
+  <div class="section" id="dimensions">
+    <h2>📐 The Three Dimensions</h2>
+    <p>
+      Every model decision is a trade-off between three things. They don't all move in the same direction.
+    </p>
+    <table>
+      <thead><tr><th>Dimension</th><th>What it means</th><th>Measured by</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>🧠 <strong>Capability</strong></td>
+          <td>How well it reasons, codes, and handles complex tasks</td>
+          <td>Benchmark scores, real-world task success</td>
+        </tr>
+        <tr>
+          <td>⚡ <strong>Speed</strong></td>
+          <td>Tokens per second; time-to-first-token; total latency</td>
+          <td>Time to complete a request</td>
+        </tr>
+        <tr>
+          <td>💰 <strong>Cost</strong></td>
+          <td>Price per million input/output tokens</td>
+          <td>USD per MTok</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      The flagship models (Opus, GPT-4o, Gemini Ultra) are most capable but slowest and most expensive.
+      The small models (Haiku, GPT-4o mini, Gemini Flash) are fastest and cheapest but less capable.
+      <strong>The middle tier is usually the sweet spot for most coding tasks.</strong>
+    </p>
+    <div class="callout fun">
+      🎭 Choosing between models is like choosing between a sports car, a van, and a bicycle.
+      The sports car is impressive. But if you're picking up groceries, the van gets the job done faster
+      and cheaper. Nobody needs a sports car to autocomplete a function name.
+    </div>
+  </div>
+
+  <!-- CLAUDE -->
+  <div class="section" id="claude">
+    <h2>🟠 Claude Family — Anthropic</h2>
+    <p>
+      The Claude family follows a consistent naming pattern: <strong>model-tier-version</strong>.
+      Higher tier = more capable, slower, pricier.
+    </p>
+
+    <div class="model-family">
+      <div class="model-family-header">
+        <div class="model-family-logo">🟠</div>
+        <div>
+          <h3>Claude (Anthropic)</h3>
+          <div class="mf-tagline">Strong at coding, reasoning, and following nuanced instructions without going rogue.</div>
+        </div>
+      </div>
+      <div class="model-rows">
+        <div class="model-row" style="grid-template-columns: 200px 1fr; background: var(--surface2); font-size:.72rem; color:var(--muted); padding:.4rem 1.2rem;">
+          <div>Model</div><div>Description &nbsp;·&nbsp; Speed &nbsp;·&nbsp; Cost &nbsp;·&nbsp; Context</div>
+        </div>
+        <div class="model-row" style="grid-template-columns: 200px 1fr;">
+          <div>
+            <div class="model-name">claude-opus-4-6</div>
+            <div style="margin-top:.2rem;"><span class="pill pill-smart">Most capable</span></div>
+          </div>
+          <div class="model-desc">
+            Hardest problems, complex multi-step reasoning, architecture decisions, deep code analysis.
+            <span style="color:var(--accent-orange);">Slow · Expensive</span> · 200K context
+          </div>
+        </div>
+        <div class="model-row" style="grid-template-columns: 200px 1fr;">
+          <div>
+            <div class="model-name">claude-sonnet-4-6</div>
+            <div style="margin-top:.2rem;"><span class="pill pill-mid">Best balance</span></div>
+          </div>
+          <div class="model-desc">
+            The daily driver. Excellent coding, fast enough for interactive use, reasonable cost.
+            Most production codebases → use this.
+            <span style="color:var(--accent-blue);">Medium · Mid-cost</span> · 200K context
+          </div>
+        </div>
+        <div class="model-row" style="grid-template-columns: 200px 1fr;">
+          <div>
+            <div class="model-name">claude-haiku-4-5-20251001</div>
+            <div style="margin-top:.2rem;"><span class="pill pill-fast">Fastest</span> <span class="pill pill-cheap">Cheapest</span></div>
+          </div>
+          <div class="model-desc">
+            Autocomplete, classification, quick lookups, high-volume pipelines.
+            Don't use for complex reasoning — it'll get it wrong confidently.
+            <span style="color:var(--accent-green);">Very fast · Low cost</span> · 200K context
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h3>API pricing reference</h3>
+    <div class="link-copy">
+      <span>https://www.anthropic.com/pricing</span>
+      <button onclick="copyLink(this, 'https://www.anthropic.com/pricing')">Copy</button>
+    </div>
+
+    <h3>Claude Code default model</h3>
+    <p>
+      Claude Code uses <strong>claude-sonnet-4-6</strong> by default for interactive sessions.
+      You can override it:
+    </p>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Override model for a session</span>
+claude --model claude-opus-4-6
+
+<span class="c-cmt"># Or set a default in settings.json</span>
+{
+  <span class="c-key">"model"</span>: <span class="c-str">"claude-sonnet-4-6"</span>
+}</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Extended thinking (Opus)</h3>
+    <p>
+      Claude Opus supports <strong>extended thinking</strong> — a mode where the model explicitly reasons
+      step-by-step before answering, using a hidden scratchpad. This dramatically improves performance
+      on hard math, logic, and multi-constraint problems. It also makes responses slower and costs more.
+    </p>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Enable extended thinking via the API</span>
+{
+  <span class="c-key">"model"</span>: <span class="c-str">"claude-opus-4-6"</span>,
+  <span class="c-key">"thinking"</span>: {
+    <span class="c-key">"type"</span>: <span class="c-str">"enabled"</span>,
+    <span class="c-key">"budget_tokens"</span>: 10000
+  }
+}</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+  </div>
+
+  <!-- GPT -->
+  <div class="section" id="gpt">
+    <h2>🟢 GPT Family — OpenAI</h2>
+    <p>
+      Used with Codex CLI. OpenAI's model line is large and occasionally confusingly named,
+      but the pattern is: <strong>o-series</strong> = reasoning models, <strong>gpt-series</strong> = standard models.
+    </p>
+
+    <div class="model-family">
+      <div class="model-family-header">
+        <div class="model-family-logo">🟢</div>
+        <div>
+          <h3>GPT / o-series (OpenAI)</h3>
+          <div class="mf-tagline">Widely used, great ecosystem, strong coding via o3/o4 reasoning models.</div>
+        </div>
+      </div>
+      <div class="model-rows">
+        <div class="model-row" style="grid-template-columns: 200px 1fr; background: var(--surface2); font-size:.72rem; color:var(--muted); padding:.4rem 1.2rem;">
+          <div>Model</div><div>Description</div>
+        </div>
+        <div class="model-row" style="grid-template-columns: 200px 1fr;">
+          <div>
+            <div class="model-name">o3</div>
+            <div style="margin-top:.2rem;"><span class="pill pill-smart">Most capable</span></div>
+          </div>
+          <div class="model-desc">
+            OpenAI's reasoning flagship. Excels at math, science, code. Slow and expensive.
+            Use for genuinely hard problems where getting it right matters more than getting it fast.
+          </div>
+        </div>
+        <div class="model-row" style="grid-template-columns: 200px 1fr;">
+          <div>
+            <div class="model-name">o4-mini</div>
+            <div style="margin-top:.2rem;"><span class="pill pill-mid">Best balance</span></div>
+          </div>
+          <div class="model-desc">
+            Reasoning model, faster and cheaper than o3, still excellent at coding.
+            The Sonnet equivalent in the o-series. Great daily driver for Codex.
+          </div>
+        </div>
+        <div class="model-row" style="grid-template-columns: 200px 1fr;">
+          <div>
+            <div class="model-name">gpt-4o</div>
+            <div style="margin-top:.2rem;"><span class="pill pill-mid">Multimodal</span></div>
+          </div>
+          <div class="model-desc">
+            Fast, multimodal (images + text), good at coding. Not a reasoning model.
+            Good for tasks where speed matters more than deep reasoning.
+          </div>
+        </div>
+        <div class="model-row" style="grid-template-columns: 200px 1fr;">
+          <div>
+            <div class="model-name">gpt-4o-mini</div>
+            <div style="margin-top:.2rem;"><span class="pill pill-fast">Fastest</span> <span class="pill pill-cheap">Cheapest</span></div>
+          </div>
+          <div class="model-desc">
+            Fast, cheap, good for simple tasks. The Haiku equivalent.
+            High-volume pipelines, quick classification, autocomplete.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h3>Setting the model in Codex CLI</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Override model for a session</span>
+codex --model o4-mini
+
+<span class="c-cmt"># Set default in ~/.codex/config.json</span>
+{
+  <span class="c-key">"model"</span>: <span class="c-str">"o4-mini"</span>
+}</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>API pricing reference</h3>
+    <div class="link-copy">
+      <span>https://openai.com/api/pricing</span>
+      <button onclick="copyLink(this, 'https://openai.com/api/pricing')">Copy</button>
+    </div>
+  </div>
+
+  <!-- GEMINI -->
+  <div class="section" id="gemini">
+    <h2>🔵 Gemini Family — Google</h2>
+    <p>
+      Used with Gemini CLI. Google's model naming follows the <strong>Gemini [tier] [version]</strong> pattern.
+      The standout feature of Gemini is its <strong>massive context window</strong> — up to 2 million tokens.
+    </p>
+
+    <div class="model-family">
+      <div class="model-family-header">
+        <div class="model-family-logo">🔵</div>
+        <div>
+          <h3>Gemini (Google DeepMind)</h3>
+          <div class="mf-tagline">Largest context windows available. Strong at long-document tasks and codebases as a single context.</div>
+        </div>
+      </div>
+      <div class="model-rows">
+        <div class="model-row" style="grid-template-columns: 200px 1fr; background: var(--surface2); font-size:.72rem; color:var(--muted); padding:.4rem 1.2rem;">
+          <div>Model</div><div>Description</div>
+        </div>
+        <div class="model-row" style="grid-template-columns: 200px 1fr;">
+          <div>
+            <div class="model-name">gemini-2.5-pro</div>
+            <div style="margin-top:.2rem;"><span class="pill pill-smart">Most capable</span></div>
+          </div>
+          <div class="model-desc">
+            Google's flagship reasoning model. Excellent coding performance, 2M token context.
+            Best at tasks involving huge amounts of input — entire codebases, massive docs.
+          </div>
+        </div>
+        <div class="model-row" style="grid-template-columns: 200px 1fr;">
+          <div>
+            <div class="model-name">gemini-2.5-flash</div>
+            <div style="margin-top:.2rem;"><span class="pill pill-fast">Fast</span> <span class="pill pill-mid">Balanced</span></div>
+          </div>
+          <div class="model-desc">
+            Faster, cheaper than Pro, still 1M token context. Good daily driver.
+            The Sonnet/o4-mini equivalent in the Gemini family.
+          </div>
+        </div>
+        <div class="model-row" style="grid-template-columns: 200px 1fr;">
+          <div>
+            <div class="model-name">gemini-2.0-flash-lite</div>
+            <div style="margin-top:.2rem;"><span class="pill pill-fast">Fastest</span> <span class="pill pill-cheap">Cheapest</span></div>
+          </div>
+          <div class="model-desc">
+            Extremely fast and cheap. High-volume pipelines, simple tasks. Limited reasoning.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h3>Setting the model in Gemini CLI</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Override model for a session</span>
+gemini --model gemini-2.5-pro
+
+<span class="c-cmt"># Set default in ~/.gemini/settings.json</span>
+{
+  <span class="c-key">"model"</span>: <span class="c-str">"gemini-2.5-flash"</span>
+}</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>API pricing reference</h3>
+    <div class="link-copy">
+      <span>https://ai.google.dev/pricing</span>
+      <button onclick="copyLink(this, 'https://ai.google.dev/pricing')">Copy</button>
+    </div>
+
+    <div class="callout tip">
+      ✅ <strong>Gemini's killer feature is context.</strong> If you need to dump an entire large codebase (500K+ tokens) into a single prompt, Gemini 2.5 Pro is currently the only option. For standard project sizes, this advantage is less relevant.
+    </div>
+  </div>
+
+  <!-- DECISION GUIDE -->
+  <div class="section" id="decision">
+    <h2>🗺️ Decision Guide: Which Model for What</h2>
+
+    <div class="decision">
+<span class="d-q">Need to pick a model?</span>
+│
+├── <span class="d-q">Is it a simple, repetitive, or high-volume task?</span>
+│   ├── <span class="d-y">YES →</span> <span class="d-ans">Haiku / GPT-4o mini / Gemini Flash</span>  (fast + cheap)
+│   └── <span class="d-n">NO ↓</span>
+│
+├── <span class="d-q">Is the codebase/document extremely large (&gt;200K tokens)?</span>
+│   ├── <span class="d-y">YES →</span> <span class="d-ans">Gemini 2.5 Pro</span>  (2M context window)
+│   └── <span class="d-n">NO ↓</span>
+│
+├── <span class="d-q">Is this a hard reasoning/math/architecture problem?</span>
+│   ├── <span class="d-y">YES →</span> <span class="d-ans">Claude Opus / o3</span>  (with extended thinking if Opus)
+│   └── <span class="d-n">NO ↓</span>
+│
+├── <span class="d-q">Is this everyday coding? (features, bugs, tests, reviews)</span>
+│   └── <span class="d-y">YES →</span> <span class="d-ans">Claude Sonnet / o4-mini / Gemini Flash</span>  (the sweet spot)
+│
+└── <span class="d-q">Running in CI or an automated pipeline?</span>
+    └── <span class="d-y">YES →</span> <span class="d-ans">Sonnet</span> for quality · <span class="d-ans">Haiku</span> for cost
+    </div>
+
+    <h3>Task-to-model cheat sheet</h3>
+    <table>
+      <thead><tr><th>Task</th><th>Recommended</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td>Autocomplete / copilot</td><td>Haiku / Flash</td><td>Latency matters more than depth</td></tr>
+        <tr><td>Fix a failing test</td><td>Sonnet</td><td>Focused, well-scoped task</td></tr>
+        <tr><td>Add a feature</td><td>Sonnet</td><td>Standard coding task</td></tr>
+        <tr><td>Refactor a module</td><td>Sonnet / Opus</td><td>Depends on complexity</td></tr>
+        <tr><td>Design a system architecture</td><td>Opus / o3</td><td>Multi-constraint reasoning</td></tr>
+        <tr><td>Security audit</td><td>Opus / o3</td><td>Deep analysis, subtle patterns</td></tr>
+        <tr><td>Read entire large codebase</td><td>Gemini 2.5 Pro</td><td>2M token context</td></tr>
+        <tr><td>Generate boilerplate</td><td>Haiku / Flash</td><td>Simple pattern matching</td></tr>
+        <tr><td>Write documentation</td><td>Sonnet</td><td>Quality matters, not complexity</td></tr>
+        <tr><td>CI pipeline task (budget matters)</td><td>Haiku</td><td>100x cheaper than Opus</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- CONTEXT WINDOWS -->
+  <div class="section" id="context-windows">
+    <h2>📏 Context Windows Explained</h2>
+    <p>
+      The context window is how much text (in tokens) a model can see at once — your prompt,
+      the conversation history, files you've attached, and the model's own response, all combined.
+    </p>
+
+    <h3>Why it matters</h3>
+    <ul>
+      <li>📁 <strong>Codebase size.</strong> A 100K token context fits roughly 75,000 lines of code. A 200K context fits a substantial project. A 2M context fits almost anything.</li>
+      <li>🗂️ <strong>Conversation length.</strong> Long conversations eat context. When the window fills up, the model starts forgetting earlier messages.</li>
+      <li>💡 <strong>Reasoning quality.</strong> More context ≠ better reasoning. Models can struggle to "attend" to specific details buried in a 2M token prompt. Focused, smaller contexts often yield better results.</li>
+    </ul>
+
+    <h3>Token ↔ text rough conversions</h3>
+    <table>
+      <thead><tr><th>Tokens</th><th>Approximate equivalent</th></tr></thead>
+      <tbody>
+        <tr><td>1,000</td><td>~750 words (a short article)</td></tr>
+        <tr><td>10,000</td><td>~7,500 words (a long essay)</td></tr>
+        <tr><td>100,000</td><td>~75,000 words (~a short novel, or a medium-sized codebase)</td></tr>
+        <tr><td>200,000</td><td>~150,000 words (~a large codebase)</td></tr>
+        <tr><td>1,000,000</td><td>~750,000 words (~a very large monorepo)</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout info">
+      ℹ️ <strong>You're usually billed for context + output.</strong> A 200K input prompt costs 200K input tokens. Using large context windows has real cost implications — especially if you're running many requests.
+    </div>
+  </div>
+
+  <!-- CLI CONFIG -->
+  <div class="section" id="cli-config">
+    <h2>⚙️ Configuring Models in CLI Tools</h2>
+
+    <h3>Claude Code</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Session flag</span>
+claude --model claude-sonnet-4-6
+
+<span class="c-cmt"># Default in ~/.claude/settings.json or .claude/settings.json</span>
+{ <span class="c-key">"model"</span>: <span class="c-str">"claude-sonnet-4-6"</span> }</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Codex CLI</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Session flag</span>
+codex --model o4-mini
+
+<span class="c-cmt"># Default in ~/.codex/config.json</span>
+{ <span class="c-key">"model"</span>: <span class="c-str">"o4-mini"</span> }</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Gemini CLI</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Session flag</span>
+gemini --model gemini-2.5-flash
+
+<span class="c-cmt"># Default in ~/.gemini/settings.json</span>
+{ <span class="c-key">"model"</span>: <span class="c-str">"gemini-2.5-flash"</span> }</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Available model IDs to copy</h3>
+    <div style="margin-top:.5rem;">
+      <div class="link-copy"><span>claude-opus-4-6</span><button onclick="copyLink(this, 'claude-opus-4-6')">Copy</button></div>
+      <div class="link-copy"><span>claude-sonnet-4-6</span><button onclick="copyLink(this, 'claude-sonnet-4-6')">Copy</button></div>
+      <div class="link-copy"><span>claude-haiku-4-5-20251001</span><button onclick="copyLink(this, 'claude-haiku-4-5-20251001')">Copy</button></div>
+      <div class="link-copy"><span>o3</span><button onclick="copyLink(this, 'o3')">Copy</button></div>
+      <div class="link-copy"><span>o4-mini</span><button onclick="copyLink(this, 'o4-mini')">Copy</button></div>
+      <div class="link-copy"><span>gpt-4o</span><button onclick="copyLink(this, 'gpt-4o')">Copy</button></div>
+      <div class="link-copy"><span>gpt-4o-mini</span><button onclick="copyLink(this, 'gpt-4o-mini')">Copy</button></div>
+      <div class="link-copy"><span>gemini-2.5-pro</span><button onclick="copyLink(this, 'gemini-2.5-pro')">Copy</button></div>
+      <div class="link-copy"><span>gemini-2.5-flash</span><button onclick="copyLink(this, 'gemini-2.5-flash')">Copy</button></div>
+    </div>
+  </div>
+
+  <!-- API -->
+  <div class="section" id="api">
+    <h2>🔌 Using Models via the API</h2>
+    <p>
+      If you're building applications that call AI models directly, here's the pattern for each provider.
+    </p>
+
+    <h3>Anthropic API (Claude)</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt">// TypeScript — Anthropic SDK</span>
+import Anthropic from <span class="c-str">"@anthropic-ai/sdk"</span>;
+
+const client = new Anthropic(); <span class="c-cmt">// uses ANTHROPIC_API_KEY env var</span>
+
+const response = await client.messages.create({
+  model: <span class="c-str">"claude-sonnet-4-6"</span>,
+  max_tokens: 4096,
+  messages: [{ role: <span class="c-str">"user"</span>, content: <span class="c-str">"Fix the bug in this code: ..."</span> }]
+});
+
+console.log(response.content[0].text);</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>OpenAI API (GPT / o-series)</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt">// TypeScript — OpenAI SDK</span>
+import OpenAI from <span class="c-str">"openai"</span>;
+
+const client = new OpenAI(); <span class="c-cmt">// uses OPENAI_API_KEY env var</span>
+
+const response = await client.chat.completions.create({
+  model: <span class="c-str">"o4-mini"</span>,
+  messages: [{ role: <span class="c-str">"user"</span>, content: <span class="c-str">"Fix the bug in this code: ..."</span> }]
+});
+
+console.log(response.choices[0].message.content);</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Google Generative AI (Gemini)</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt">// TypeScript — Google AI SDK</span>
+import { GoogleGenAI } from <span class="c-str">"@google/genai"</span>;
+
+const client = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+
+const response = await client.models.generateContent({
+  model: <span class="c-str">"gemini-2.5-flash"</span>,
+  contents: <span class="c-str">"Fix the bug in this code: ..."</span>
+});
+
+console.log(response.text);</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Install the SDKs</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># All three, if you're using multiple providers</span>
+npm install @anthropic-ai/sdk openai @google/genai</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+  </div>
+
+  <footer>
+    <p>🧬 The right model is the smallest one that gets the job done. Everything else is expensive nostalgia.</p>
+    <p style="margin-top:.5rem;">Last updated: February 2026 · Part of the AI CLI Setup series</p>
+  </footer>
+
+</div>
+<script>
+  function copyCode(btn) {
+    const pre = btn.closest('.code-wrap').querySelector('pre');
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+      btn.textContent = '✓ Copied!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    }).catch(() => {
+      const ta = document.createElement('textarea'); ta.value = pre.innerText;
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+      btn.textContent = '✓ Copied!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+  function copyLink(btn, text) {
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = '✓ Copied!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    }).catch(() => {
+      const ta = document.createElement('textarea'); ta.value = text;
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+      btn.textContent = '✓ Copied!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+  function setOS(os) {
+    const btnMac = document.getElementById('btnMac');
+    const btnWin = document.getElementById('btnWin');
+    if (os === 'mac') {
+      document.body.classList.remove('win');
+      btnMac.classList.add('mac-active'); btnMac.classList.remove('win-active');
+      btnWin.classList.remove('mac-active', 'win-active');
+    } else {
+      document.body.classList.add('win');
+      btnWin.classList.add('win-active'); btnWin.classList.remove('mac-active');
+      btnMac.classList.remove('mac-active', 'win-active');
+    }
+  }
+  document.querySelectorAll('.copy-btn').forEach(btn => { btn.textContent = 'Copy'; });
+</script>
+</body>
+</html>
