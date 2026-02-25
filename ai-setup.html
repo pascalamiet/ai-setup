@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI CLI Setup Guide</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #22263a;
+      --border: #2e3250;
+      --text: #e2e8f0;
+      --muted: #8892b0;
+      --accent-blue: #64b5f6;
+      --accent-green: #69f0ae;
+      --accent-purple: #ce93d8;
+      --accent-yellow: #ffd54f;
+      --accent-red: #ef5350;
+      --mac: #4fc3f7;
+      --win: #81c784;
+      --code-bg: #0d1117;
+      --radius: 10px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    /* ── Header ── */
+    header {
+      text-align: center;
+      padding: 3rem 1rem 2rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 3rem;
+    }
+    header h1 {
+      font-size: 2.4rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 0.5rem;
+    }
+    header p {
+      color: var(--muted);
+      font-size: 1.05rem;
+      max-width: 540px;
+      margin: 0 auto;
+    }
+
+    /* ── Section titles ── */
+    h2 {
+      font-size: 1.7rem;
+      font-weight: 700;
+      margin: 2.5rem 0 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin: 1.4rem 0 0.6rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.82rem;
+    }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.6rem;
+      margin-bottom: 1.5rem;
+    }
+
+    /* ── OS tabs ── */
+    .os-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.2rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.8rem;
+    }
+    .os-tab {
+      padding: 0.35rem 1rem;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: default;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .os-tab.mac  { background: rgba(79,195,247,0.12); color: var(--mac); }
+    .os-tab.win  { background: rgba(129,199,132,0.12); color: var(--win); }
+
+    /* ── Code blocks ── */
+    .code-wrap {
+      position: relative;
+      margin: 0.6rem 0;
+    }
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 3.5rem 1rem 1.1rem;
+      overflow-x: auto;
+      font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace;
+      font-size: 0.88rem;
+      line-height: 1.6;
+      white-space: pre;
+    }
+    code { color: var(--accent-green); }
+    .comment { color: var(--muted); }
+    .keyword { color: var(--accent-yellow); }
+    .string  { color: var(--accent-purple); }
+
+    /* ── Copy button ── */
+    .copy-btn {
+      position: absolute;
+      top: 0.55rem;
+      right: 0.55rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 0.75rem;
+      padding: 0.25rem 0.6rem;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+    .copy-btn:hover { background: var(--border); color: var(--text); }
+    .copy-btn.copied { color: var(--accent-green); border-color: var(--accent-green); }
+
+    /* ── Info / note boxes ── */
+    .note {
+      background: rgba(100,181,246,0.07);
+      border-left: 3px solid var(--accent-blue);
+      border-radius: 0 8px 8px 0;
+      padding: 0.75rem 1rem;
+      margin: 0.8rem 0;
+      font-size: 0.9rem;
+      color: var(--text);
+    }
+    .warn {
+      background: rgba(255,213,79,0.07);
+      border-left: 3px solid var(--accent-yellow);
+      border-radius: 0 8px 8px 0;
+      padding: 0.75rem 1rem;
+      margin: 0.8rem 0;
+      font-size: 0.9rem;
+    }
+
+    /* ── Tool hero badges ── */
+    .tool-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.2rem;
+    }
+    .tool-badge {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      flex-shrink: 0;
+    }
+    .badge-openai  { background: rgba(16,163,127,0.15); }
+    .badge-gemini  { background: rgba(100,181,246,0.15); }
+    .badge-claude  { background: rgba(206,147,216,0.15); }
+
+    .tool-meta h2 { margin: 0; font-size: 1.5rem; }
+    .tool-meta p  { margin: 0; color: var(--muted); font-size: 0.9rem; }
+
+    /* ── Separator ── */
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2.5rem 0;
+    }
+
+    /* ── Summary table ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      margin-top: 1rem;
+    }
+    th {
+      background: var(--surface2);
+      color: var(--muted);
+      text-align: left;
+      padding: 0.6rem 0.9rem;
+      font-weight: 600;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    td {
+      padding: 0.65rem 0.9rem;
+      border-top: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    tr:hover td { background: var(--surface2); }
+    td code {
+      font-size: 0.82rem;
+      color: var(--accent-green);
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
+    }
+
+    /* ── Inline note spans ── */
+    .tag {
+      display: inline-block;
+      padding: 0.1rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .tag-rec { background: rgba(105,240,174,0.12); color: var(--accent-green); }
+    .tag-dep { background: rgba(239,83,80,0.12);   color: var(--accent-red); }
+    .tag-exp { background: rgba(255,213,79,0.12);  color: var(--accent-yellow); }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.82rem;
+      margin-top: 4rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ════════════════════ HEADER ════════════════════ -->
+  <header>
+    <h1>🤖 AI CLI Setup Guide</h1>
+    <p>
+      Install <strong>Codex</strong>, <strong>Gemini CLI</strong> &amp; <strong>Claude Code</strong>
+      without losing your mind (or your API credits). Works on macOS &amp; Windows.
+    </p>
+  </header>
+
+  <!-- ════════════════════ PREREQUISITES ════════════════════ -->
+  <h2>🧰 Prerequisites</h2>
+  <p style="color:var(--muted); margin-bottom:1rem;">Before you summon the AI overlords into your terminal, make sure you have the basics. Think of this as the "have you tried turning it off and on again?" of the AI world.</p>
+
+  <div class="card">
+    <div class="os-tabs">
+      <span class="os-tab mac">🍎 macOS</span>
+    </div>
+    <h3>1 — Install Homebrew (if you don't have it)</h3>
+    <div class="note">Homebrew is macOS's package manager. If you already have it, skip this step. Run <code>brew --version</code> to check.</div>
+    <div class="code-wrap">
+      <pre><code>/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"</button>
+    </div>
+
+    <h3>2 — Install Node.js via Homebrew</h3>
+    <div class="note">Node.js is required if you want to install tools via npm. Homebrew-installed CLI tools bundle their own runtime, so this is optional if you go the Homebrew route for everything.</div>
+    <div class="code-wrap">
+      <pre><code>brew install node</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">brew install node</button>
+    </div>
+    <div class="code-wrap">
+      <pre><code><span class="comment"># Verify — should print v22.x.x or higher</span>
+node --version</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">node --version</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="os-tabs">
+      <span class="os-tab win">🪟 Windows</span>
+    </div>
+    <h3>1 — Install Node.js</h3>
+    <div class="note">Download the LTS installer from <strong>nodejs.org</strong>, or use winget:</div>
+    <div class="code-wrap">
+      <pre><code>winget install OpenJS.NodeJS.LTS</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">winget install OpenJS.NodeJS.LTS</button>
+    </div>
+    <div class="code-wrap">
+      <pre><code><span class="comment"># Verify in a new terminal window</span>
+node --version
+npm --version</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">node --version
+npm --version</button>
+    </div>
+    <h3>2 — Fix PowerShell execution policy (if npm commands fail)</h3>
+    <div class="warn">⚠️ Windows sometimes refuses to run npm scripts. Fix it once and forget it:</div>
+    <div class="code-wrap">
+      <pre><code>Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser</button>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- ════════════════════ CODEX ════════════════════ -->
+  <div class="tool-header">
+    <div class="tool-badge badge-openai">🟢</div>
+    <div class="tool-meta">
+      <h2>OpenAI Codex CLI</h2>
+      <p>Your AI pair programmer who never asks for a raise, but does ask for tokens.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="os-tabs">
+      <span class="os-tab mac">🍎 macOS</span>
+    </div>
+
+    <h3>Option A — Homebrew <span class="tag tag-rec">Recommended</span></h3>
+    <div class="note">Bundles its own Node.js runtime. No manual dependency juggling required.</div>
+    <div class="code-wrap">
+      <pre><code>brew install codex</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">brew install codex</button>
+    </div>
+
+    <h3>Option B — npm <small style="font-size:0.8rem;color:var(--muted)">(requires Node.js 22+)</small></h3>
+    <div class="code-wrap">
+      <pre><code>npm install -g @openai/codex</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">npm install -g @openai/codex</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="os-tabs">
+      <span class="os-tab win">🪟 Windows</span>
+    </div>
+
+    <h3>Option A — WSL 2 <span class="tag tag-rec">Recommended</span></h3>
+    <div class="note">Native Windows support is experimental. WSL 2 is the stable path. Run these in an elevated PowerShell:</div>
+    <div class="code-wrap">
+      <pre><code><span class="comment"># Step 1 — Install WSL 2</span>
+wsl --install</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">wsl --install</button>
+    </div>
+    <div class="code-wrap">
+      <pre><code><span class="comment"># Step 2 — Open WSL, then install nvm + Node.js 22</span>
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh | bash</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh | bash</button>
+    </div>
+    <div class="code-wrap">
+      <pre><code><span class="comment"># Step 3 — Restart WSL shell, then:</span>
+nvm install 22</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">nvm install 22</button>
+    </div>
+    <div class="code-wrap">
+      <pre><code><span class="comment"># Step 4 — Install Codex</span>
+npm install -g @openai/codex</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">npm install -g @openai/codex</button>
+    </div>
+
+    <h3>Option B — Native Windows <span class="tag tag-exp">Experimental</span></h3>
+    <div class="warn">⚠️ Requires Visual Studio Build Tools (C++ workload). Approach with care and a coffee.</div>
+    <div class="code-wrap">
+      <pre><code>winget install --id Microsoft.VisualStudio.2022.BuildTools -e</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">winget install --id Microsoft.VisualStudio.2022.BuildTools -e</button>
+    </div>
+    <div class="code-wrap">
+      <pre><code>npm install -g @openai/codex</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">npm install -g @openai/codex</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>🔑 Authentication</h3>
+    <div class="note">You need a ChatGPT Plus/Pro/Team/Enterprise account, or an OpenAI API key.</div>
+    <div class="code-wrap">
+      <pre><code><span class="comment"># Launch and follow the interactive prompt</span>
+codex</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">codex</button>
+    </div>
+    <div class="code-wrap">
+      <pre><code><span class="comment"># Or set your API key directly (add to ~/.zshrc or ~/.bashrc)</span>
+<span class="keyword">export</span> OPENAI_API_KEY=<span class="string">"sk-your-key-here"</span>
+codex</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">export OPENAI_API_KEY="sk-your-key-here"</button>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- ════════════════════ GEMINI CLI ════════════════════ -->
+  <div class="tool-header">
+    <div class="tool-badge badge-gemini">🔵</div>
+    <div class="tool-meta">
+      <h2>Google Gemini CLI</h2>
+      <p>Google's answer to "what if your search bar could also write your code?" Yes, really.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="os-tabs">
+      <span class="os-tab mac">🍎 macOS</span>
+    </div>
+
+    <h3>Option A — Homebrew <span class="tag tag-rec">Recommended</span></h3>
+    <div class="code-wrap">
+      <pre><code>brew install gemini-cli</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">brew install gemini-cli</button>
+    </div>
+
+    <h3>Option B — npm <small style="font-size:0.8rem;color:var(--muted)">(requires Node.js 20+)</small></h3>
+    <div class="code-wrap">
+      <pre><code>npm install -g @google/gemini-cli</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">npm install -g @google/gemini-cli</button>
+    </div>
+
+    <h3>Option C — No install, just run it</h3>
+    <div class="code-wrap">
+      <pre><code>npx @google/gemini-cli</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">npx @google/gemini-cli</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="os-tabs">
+      <span class="os-tab win">🪟 Windows</span>
+    </div>
+
+    <h3>npm <small style="font-size:0.8rem;color:var(--muted)">(requires Node.js 20+)</small></h3>
+    <div class="note">No winget package yet — npm is the way to go on Windows.</div>
+    <div class="code-wrap">
+      <pre><code>npm install -g @google/gemini-cli</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">npm install -g @google/gemini-cli</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>🔑 Authentication</h3>
+    <div class="note">Three ways to get in. Pick your poison (or your Google account).</div>
+
+    <h3>Option A — Google Account (free tier, browser login)</h3>
+    <div class="code-wrap">
+      <pre><code><span class="comment"># Launches browser OAuth — sign in with any Google account</span>
+gemini</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">gemini</button>
+    </div>
+
+    <h3>Option B — Gemini API Key</h3>
+    <div class="note">Get your free key at <strong>aistudio.google.com/apikey</strong></div>
+    <div class="code-wrap">
+      <pre><code><span class="comment"># Add to ~/.zshrc or ~/.bashrc</span>
+<span class="keyword">export</span> GEMINI_API_KEY=<span class="string">"your_api_key_here"</span>
+gemini</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">export GEMINI_API_KEY="your_api_key_here"</button>
+    </div>
+
+    <h3>Option C — Google Cloud / Vertex AI</h3>
+    <div class="code-wrap">
+      <pre><code><span class="keyword">export</span> GOOGLE_API_KEY=<span class="string">"your_api_key_here"</span>
+<span class="keyword">export</span> GOOGLE_GENAI_USE_VERTEXAI=<span class="string">true</span>
+<span class="keyword">export</span> GOOGLE_CLOUD_PROJECT=<span class="string">"your-project-id"</span>
+gemini</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">export GOOGLE_API_KEY="your_api_key_here"
+export GOOGLE_GENAI_USE_VERTEXAI=true
+export GOOGLE_CLOUD_PROJECT="your-project-id"</button>
+    </div>
+
+    <h3>Release channels (optional)</h3>
+    <div class="code-wrap">
+      <pre><code><span class="comment"># Stable (default)</span>
+npm install -g @google/gemini-cli@latest
+
+<span class="comment"># Preview features</span>
+npm install -g @google/gemini-cli@preview
+
+<span class="comment"># Living on the edge (may contain dragons)</span>
+npm install -g @google/gemini-cli@nightly</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">npm install -g @google/gemini-cli@latest</button>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- ════════════════════ CLAUDE CODE ════════════════════ -->
+  <div class="tool-header">
+    <div class="tool-badge badge-claude">🟣</div>
+    <div class="tool-meta">
+      <h2>Anthropic Claude Code</h2>
+      <p>The tool you're currently interacting with. It's watching. It's always watching.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="os-tabs">
+      <span class="os-tab mac">🍎 macOS</span>
+    </div>
+
+    <h3>Option A — Native installer <span class="tag tag-rec">Recommended</span></h3>
+    <div class="note">Auto-updates itself. No Node.js needed. The cleanest route.</div>
+    <div class="code-wrap">
+      <pre><code>curl -fsSL https://claude.ai/install.sh | bash</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">curl -fsSL https://claude.ai/install.sh | bash</button>
+    </div>
+
+    <h3>Option B — Homebrew</h3>
+    <div class="warn">⚠️ Does not auto-update. You'll need to run <code>brew upgrade claude-code</code> manually.</div>
+    <div class="code-wrap">
+      <pre><code>brew install --cask claude-code</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">brew install --cask claude-code</button>
+    </div>
+    <div class="code-wrap">
+      <pre><code><span class="comment"># Upgrade later with:</span>
+brew upgrade claude-code</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">brew upgrade claude-code</button>
+    </div>
+
+    <h3>Option C — npm <span class="tag tag-dep">Deprecated</span></h3>
+    <div class="warn">⚠️ The npm method is deprecated. Only use if you have a strong opinion and enjoy pain.</div>
+    <div class="code-wrap">
+      <pre><code><span class="comment"># Requires Node.js 18+. Do NOT use sudo here.</span>
+npm install -g @anthropic-ai/claude-code</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">npm install -g @anthropic-ai/claude-code</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="os-tabs">
+      <span class="os-tab win">🪟 Windows</span>
+    </div>
+
+    <h3>Option A — PowerShell one-liner <span class="tag tag-rec">Recommended</span></h3>
+    <div class="note">Auto-updates. No Node.js needed. The cleanest Windows install.</div>
+    <div class="code-wrap">
+      <pre><code>irm https://claude.ai/install.ps1 | iex</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">irm https://claude.ai/install.ps1 | iex</button>
+    </div>
+
+    <h3>Option B — winget</h3>
+    <div class="code-wrap">
+      <pre><code>winget install Anthropic.ClaudeCode</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">winget install Anthropic.ClaudeCode</button>
+    </div>
+    <div class="code-wrap">
+      <pre><code><span class="comment"># Upgrade later with:</span>
+winget upgrade Anthropic.ClaudeCode</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">winget upgrade Anthropic.ClaudeCode</button>
+    </div>
+
+    <h3>Option C — WSL</h3>
+    <div class="code-wrap">
+      <pre><code><span class="comment"># Inside your WSL terminal:</span>
+curl -fsSL https://claude.ai/install.sh | bash</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">curl -fsSL https://claude.ai/install.sh | bash</button>
+    </div>
+
+    <h3>Option D — CMD (no PowerShell)</h3>
+    <div class="code-wrap">
+      <pre><code>curl -fsSL https://claude.ai/install.cmd -o install.cmd && install.cmd && del install.cmd</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">curl -fsSL https://claude.ai/install.cmd -o install.cmd && install.cmd && del install.cmd</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>🔑 Authentication &amp; First Launch</h3>
+    <div class="note">Claude Code uses browser-based OAuth — no manual API key fiddling required for standard use.</div>
+    <div class="code-wrap">
+      <pre><code><span class="comment"># Verify installation</span>
+claude --version</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">claude --version</button>
+    </div>
+    <div class="code-wrap">
+      <pre><code><span class="comment"># Run diagnostics (checks all dependencies)</span>
+claude doctor</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">claude doctor</button>
+    </div>
+    <div class="code-wrap">
+      <pre><code><span class="comment"># Start Claude Code — browser auth opens automatically</span>
+claude</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">claude</button>
+    </div>
+    <div class="warn">⚠️ Requires a Claude Pro, Max, Teams, or Enterprise plan. The free tier waves at you from a distance.</div>
+
+    <h3>Migrating from the old npm install?</h3>
+    <div class="code-wrap">
+      <pre><code><span class="comment"># Install native version first, then remove the old npm one</span>
+curl -fsSL https://claude.ai/install.sh | bash
+npm uninstall -g @anthropic-ai/claude-code</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">curl -fsSL https://claude.ai/install.sh | bash
+npm uninstall -g @anthropic-ai/claude-code</button>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- ════════════════════ SUMMARY TABLE ════════════════════ -->
+  <h2>📊 Quick Reference</h2>
+  <div class="card" style="overflow-x:auto;">
+    <table>
+      <thead>
+        <tr>
+          <th>Tool</th>
+          <th>🍎 macOS (Homebrew)</th>
+          <th>🪟 Windows</th>
+          <th>Node.js req.</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Codex CLI</strong></td>
+          <td><code>brew install codex</code></td>
+          <td>WSL 2 + <code>npm i -g @openai/codex</code></td>
+          <td>22+ (npm)</td>
+        </tr>
+        <tr>
+          <td><strong>Gemini CLI</strong></td>
+          <td><code>brew install gemini-cli</code></td>
+          <td><code>npm i -g @google/gemini-cli</code></td>
+          <td>20+ (npm)</td>
+        </tr>
+        <tr>
+          <td><strong>Claude Code</strong></td>
+          <td><code>brew install --cask claude-code</code></td>
+          <td><code>irm https://claude.ai/install.ps1 | iex</code></td>
+          <td>None (native)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <hr>
+
+  <!-- ════════════════════ KEEP UPDATED ════════════════════ -->
+  <h2>🔄 Keeping Everything Updated</h2>
+  <div class="card">
+    <div class="os-tabs">
+      <span class="os-tab mac">🍎 macOS</span>
+    </div>
+    <div class="code-wrap">
+      <pre><code><span class="comment"># Update all Homebrew packages at once</span>
+brew update &amp;&amp; brew upgrade</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">brew update && brew upgrade</button>
+    </div>
+    <div class="code-wrap">
+      <pre><code><span class="comment"># Or update npm-installed tools individually</span>
+npm update -g @openai/codex
+npm update -g @google/gemini-cli</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">npm update -g @openai/codex
+npm update -g @google/gemini-cli</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="os-tabs">
+      <span class="os-tab win">🪟 Windows</span>
+    </div>
+    <div class="code-wrap">
+      <pre><code><span class="comment"># Claude Code auto-updates itself (native installer)</span>
+<span class="comment"># For the rest:</span>
+npm update -g @openai/codex
+npm update -g @google/gemini-cli</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">npm update -g @openai/codex
+npm update -g @google/gemini-cli</button>
+    </div>
+    <div class="code-wrap">
+      <pre><code><span class="comment"># If installed via winget:</span>
+winget upgrade --all</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">winget upgrade --all</button>
+    </div>
+  </div>
+
+  <!-- ════════════════════ FOOTER ════════════════════ -->
+  <footer>
+    <p>🤖 Three AI assistants installed. One terminal. Zero excuses for unfinished side projects.</p>
+    <p style="margin-top:0.5rem;">Last updated: February 2026</p>
+  </footer>
+
+</div>
+
+<!-- ════════════════════ COPY LOGIC ════════════════════ -->
+<script>
+  function copyCode(btn) {
+    const text = btn.getAttribute('onclick').includes('copyCode')
+      ? btn.getAttribute('onclick')
+      : '';
+
+    // Get the text from the button's own stored text (we pass raw text as the attribute value)
+    // Actually, just grab the sibling <pre><code> text
+    const pre = btn.closest('.code-wrap').querySelector('pre');
+    const rawText = pre.innerText;
+
+    navigator.clipboard.writeText(rawText).then(() => {
+      const original = btn.textContent;
+      btn.textContent = '✓ Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'Copy';
+        btn.classList.remove('copied');
+      }, 1800);
+    }).catch(() => {
+      // Fallback for older browsers
+      const ta = document.createElement('textarea');
+      ta.value = rawText;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      btn.textContent = '✓ Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'Copy';
+        btn.classList.remove('copied');
+      }, 1800);
+    });
+  }
+
+  // Set all copy buttons to show "Copy" initially
+  document.querySelectorAll('.copy-btn').forEach(btn => {
+    btn.textContent = 'Copy';
+  });
+</script>
+</body>
+</html>
