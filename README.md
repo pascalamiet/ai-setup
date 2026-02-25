@@ -12,11 +12,22 @@ If you are completely new to using agents, then the `resources/` folder contains
 
 If you want to collaborate with us and be able to modify files, reach out to us and we can add you as a collaborator. 
 
-## 📦 Resources 
+## 📦 Resources
 
 A few useful resources:
-- [Skills Library](www.skills.sh)
+
+**Skills & Subagents:**
+- [Skills Library](https://www.skills.sh)
 - [Agents Library](https://subagents.cc/)
+- [SkillsMP](https://skillsmp.com) — Skills marketplace covering Claude Code, Codex, and ChatGPT
+- [Build with Claude](https://www.buildwithclaude.com/subagents) — Plugin marketplace for Claude Code (subagents, skills, commands, hooks)
+- [Claude Plugins](https://claude-plugins.dev/) — Community registry with CLI installer for Claude Code plugins
+
+**MCP Servers:**
+- [mcp.so](https://mcp.so/) — Community-driven directory of 17,000+ MCP servers
+- [MCP Market](https://mcpmarket.com/) — Directory of MCP servers and agent skills for Claude, Cursor, and other AI tools
+
+**AI Coding Agents:**
 - [Claude Code](https://claude.com/product/claude-code)
 - [Gemini-CLI](https://google-gemini.github.io/gemini-cli/)
 - [Codex](https://openai.com/codex/)
