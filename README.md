@@ -14,8 +14,6 @@ If you want to collaborate with us and be able to modify files, reach out to us 
 
 ## 📦 Resources
 
-A few useful resources:
-
 **Skills & Subagents:**
 - [Skills Library](https://www.skills.sh) — The original skills platform; browse and download SKILL.md files for Claude Code and other agents
 - [Agents Library](https://subagents.cc/) — Curated collection of ready-to-use subagent definitions you can drop straight into your project
