@@ -6,7 +6,7 @@ It is also a platform where everyone who is interested can simply download the f
 
 ## 👨‍💻 Beginners
 
-If you are completely new to using agents, then the file `ai-setup.html` is here to help you set up the most popular coding agents in your terminal. From there you can then expand your knowledge by looking at the documents in the `resources/` folder or by asking your AI agent of choice directly.
+If you are completely new to using agents, then the `resources/` folder contains some basic guides. The file `01_setup.html` is here to help you set up the most popular coding agents in your terminal. From there you can then expand your knowledge by looking at the guides `02_subagents.html` and `03_skills.html` or by asking your AI agent of choice directly.
 
 ## 👥 Collaboration
 

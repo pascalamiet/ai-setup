@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🤖 AI Subagents — Beginner's Guide</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #222536;
+      --border: #2e3250;
+      --text: #e2e4f0;
+      --muted: #8b8fa8;
+      --accent-cc: #a78bfa;
+      --accent-codex: #34d399;
+      --accent-gemini: #60a5fa;
+      --accent-warn: #fbbf24;
+      --mac: #c084fc;
+      --win: #38bdf8;
+      --code-bg: #0d1117;
+      --radius: 10px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-size: 16px;
+      line-height: 1.7;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      text-align: center;
+      padding: 3rem 2rem 2rem;
+      background: linear-gradient(135deg, #1a1d27, #1e2035);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 2.5rem;
+    }
+    .hero h1 { font-size: 2.2rem; font-weight: 800; margin-bottom: .6rem; }
+    .hero p  { color: var(--muted); max-width: 600px; margin: 0 auto; }
+    .hero .subtitle {
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      color: var(--accent-cc);
+    }
+
+    /* ── Global OS toggle ── */
+    .os-toggle-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.7rem 1rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      font-size: 0.88rem;
+    }
+    .os-toggle-bar span { color: var(--muted); }
+    .os-btn-global {
+      padding: 0.3rem 0.9rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-weight: 600;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+    .os-btn-global.mac-active { background: rgba(192,132,252,0.12); color: var(--mac); border-color: var(--mac); }
+    .os-btn-global.win-active { background: rgba(56,189,248,0.12);  color: var(--win); border-color: var(--win); }
+
+    /* ── OS content panels (block-level, controlled by global toggle) ── */
+    .os-mac { display: block; }
+    .os-win { display: none; }
+    body.win .os-mac { display: none; }
+    body.win .os-win { display: block; }
+
+    /* ── OS table rows (override display to table-row) ── */
+    tr.os-mac { display: table-row; }
+    tr.os-win { display: none; }
+    body.win tr.os-mac { display: none; }
+    body.win tr.os-win { display: table-row; }
+
+    /* ── Sections ── */
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.8rem 2rem;
+      margin-bottom: 1.5rem;
+    }
+    .section h2 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+    .section h3 {
+      font-weight: 600;
+      margin: 1.4rem 0 .5rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      font-size: .8rem;
+    }
+    .section p  { margin-bottom: .75rem; }
+    .section ul { padding-left: 1.4rem; margin-bottom: .75rem; }
+    .section li { margin-bottom: .35rem; }
+
+    /* ── Tool badges ── */
+    .badge {
+      display: inline-block;
+      padding: .15rem .65rem;
+      border-radius: 999px;
+      font-size: .75rem;
+      font-weight: 700;
+      letter-spacing: .04em;
+      margin-right: .4rem;
+      vertical-align: middle;
+    }
+    .badge-cc     { background: #2d1f5e; color: var(--accent-cc); }
+    .badge-codex  { background: #0f3028; color: var(--accent-codex); }
+    .badge-gemini { background: #0f2447; color: var(--accent-gemini); }
+
+    /* ── Code blocks ── */
+    .code-wrap {
+      position: relative;
+      margin: .75rem 0;
+    }
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.2rem;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+      font-size: .85rem;
+      line-height: 1.6;
+      white-space: pre;
+    }
+    .copy-btn {
+      position: absolute;
+      top: .5rem;
+      right: .5rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 6px;
+      padding: .25rem .65rem;
+      font-size: .75rem;
+      cursor: pointer;
+      transition: all .15s;
+      font-family: inherit;
+    }
+    .copy-btn:hover { background: var(--border); color: var(--text); }
+    .copy-btn.copied { color: #34d399; border-color: #34d399; }
+
+    /* ── Inline code ── */
+    code {
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: .85em;
+      background: #161b22;
+      padding: .15em .4em;
+      border-radius: 4px;
+      color: #c9d1d9;
+    }
+
+    /* ── Callout boxes ── */
+    .callout {
+      border-left: 3px solid var(--accent-warn);
+      background: #1f1c10;
+      padding: .75rem 1.1rem;
+      border-radius: 0 8px 8px 0;
+      margin: 1rem 0;
+      font-size: .9rem;
+    }
+    .callout.tip  { border-color: #34d399; background: #0f1f18; }
+    .callout.info { border-color: #60a5fa; background: #0f1826; }
+
+    /* ── Comparison table ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: .9rem;
+    }
+    th {
+      background: var(--surface2);
+      padding: .6rem .9rem;
+      text-align: left;
+      font-weight: 600;
+      color: var(--muted);
+      font-size: .8rem;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+    td {
+      padding: .6rem .9rem;
+      border-top: 1px solid var(--border);
+      vertical-align: top;
+    }
+    tr:hover td { background: #1d2030; }
+
+    /* ── Section accent colors ── */
+    .cc-accent     h2 { color: var(--accent-cc); }
+    .codex-accent  h2 { color: var(--accent-codex); }
+    .gemini-accent h2 { color: var(--accent-gemini); }
+    .cc-accent     { border-color: #3d2d7a; }
+    .codex-accent  { border-color: #1a5c46; }
+    .gemini-accent { border-color: #1a3d6e; }
+
+    /* ── TOC ── */
+    .toc {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.2rem 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .toc h3 { margin-bottom: .8rem; font-size: .95rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+    .toc ol { padding-left: 1.3rem; }
+    .toc li { margin-bottom: .3rem; }
+    .toc a  { color: var(--accent-gemini); text-decoration: none; }
+    .toc a:hover { text-decoration: underline; }
+
+    /* ── Folder tree ── */
+    .tree {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .85rem;
+      line-height: 1.8;
+    }
+    .tree .dir  { color: #60a5fa; }
+    .tree .file { color: #a3e635; }
+    .tree .opt  { color: var(--muted); }
+
+    a { color: var(--accent-gemini); }
+    strong { font-weight: 600; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+
+    footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: .85rem;
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ════════════════ HERO ════════════════ -->
+  <div class="hero">
+    <h1>🤖 AI Subagents — Beginner's Guide</h1>
+    <p>Your main agent is smart. But sometimes the job is too big for one brain.<br/>
+    Enter subagents — specialist agents your main agent can spin up to divide and conquer.</p>
+    <div class="subtitle">One manager. Many specialists. Zero résumés to review.</div>
+  </div>
+
+  <!-- ════════════════ GLOBAL OS TOGGLE ════════════════ -->
+  <div class="os-toggle-bar">
+    <span>I'm on</span>
+    <button class="os-btn-global mac-active" id="btnMac" onclick="setOS('mac')">🍎 macOS</button>
+    <button class="os-btn-global" id="btnWin" onclick="setOS('win')">🪟 Windows</button>
+    <span style="margin-left:auto; font-size:0.78rem;">— file paths below will update automatically</span>
+  </div>
+
+  <!-- ════════════════ TOC ════════════════ -->
+  <div class="toc">
+    <h3>📋 Contents</h3>
+    <ol>
+      <li><a href="#what">What are subagents?</a></li>
+      <li><a href="#why">Why would I use them?</a></li>
+      <li><a href="#cc">Claude Code — Subagents</a></li>
+      <li><a href="#codex">OpenAI Codex CLI — Subagents</a></li>
+      <li><a href="#gemini">Google Gemini CLI — Subagents</a></li>
+      <li><a href="#tips">Tips &amp; tricks for all tools</a></li>
+    </ol>
+  </div>
+
+  <!-- ════════════════ WHAT ════════════════ -->
+  <div class="section" id="what">
+    <h2>🧠 What are subagents?</h2>
+    <p>
+      Think of your main AI agent as a manager. A <strong>subagent</strong> is a separate, independent agent that the manager can spin up to handle a specific task — it runs in its own isolated context, does its job, and reports back.
+    </p>
+    <p>
+      Unlike your main conversation, a subagent starts fresh. It doesn't know your chat history. This isolation is a feature, not a bug: it prevents context pollution and lets multiple subagents work in parallel without interfering with each other.
+    </p>
+    <p>
+      All three tools covered here — Claude Code, Codex CLI, and Gemini CLI — support both built-in automatically-spawned subagents and user-defined custom agents you create yourself as Markdown files.
+    </p>
+    <div class="callout info">
+      💡 <strong>Key insight:</strong> Subagents are about <em>parallelism</em> and <em>isolation</em>. They let the main agent delegate work, run tasks simultaneously, and keep the main context clean.
+    </div>
+  </div>
+
+  <!-- ════════════════ WHY ════════════════ -->
+  <div class="section" id="why">
+    <h2>🤔 Why would I use them?</h2>
+    <ul>
+      <li>⚡ <strong>Parallelism.</strong> Spawn multiple agents to research different topics at the same time. What takes one pass in sequence takes one pass in parallel.</li>
+      <li>🧹 <strong>Context isolation.</strong> Subagents don't pollute your main conversation. A long research task stays out of your working memory.</li>
+      <li>🎯 <strong>Specialization.</strong> A dedicated SQL-expert agent is better at SQL than a generic one — it has a laser focus and the right tool set.</li>
+      <li>🧩 <strong>Divide and conquer.</strong> Break a big task into smaller pieces and fan them out to multiple agents simultaneously.</li>
+      <li>🛡️ <strong>Sandboxing.</strong> Limit which tools an agent can use. A read-only research agent can't accidentally edit your files.</li>
+    </ul>
+  </div>
+
+  <!-- ════════════════ CLAUDE CODE ════════════════ -->
+  <div class="section cc-accent" id="cc">
+    <h2>🟣 Claude Code — Subagents</h2>
+    <p>
+      Claude Code supports subagents in two ways: a set of <strong>built-in specialist agents</strong> that Claude spawns automatically via the <code>Task</code> tool, and <strong>user-defined custom agents</strong> you create yourself as Markdown files — the same pattern as Gemini CLI.
+    </p>
+
+    <h3>🤖 Built-in Subagent Types</h3>
+    <p>These ship with Claude Code. Claude selects and spawns them automatically based on the task at hand.</p>
+    <table>
+      <thead>
+        <tr><th>Type</th><th>Best for</th><th>Tool access</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>general-purpose</code></td>
+          <td>Researching complex questions, multi-step tasks, code search</td>
+          <td>All tools</td>
+        </tr>
+        <tr>
+          <td><code>Explore</code></td>
+          <td>Fast codebase exploration, finding files by pattern, keyword search</td>
+          <td>Read, Glob, Grep, WebSearch, WebFetch (no editing)</td>
+        </tr>
+        <tr>
+          <td><code>Plan</code></td>
+          <td>Designing architecture and implementation strategies</td>
+          <td>Read, Glob, Grep (no editing)</td>
+        </tr>
+        <tr>
+          <td><code>claude-code-guide</code></td>
+          <td>Questions about Claude Code features and the Claude API</td>
+          <td>Glob, Grep, Read, WebFetch, WebSearch</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>⚙️ How Automatic Spawning Works</h3>
+    <ol style="padding-left:1.4rem; margin-bottom:.75rem;">
+      <li style="margin-bottom:.5rem;">You give Claude a task in the main session.</li>
+      <li style="margin-bottom:.5rem;">Claude calls the <code>Task</code> tool, choosing a subagent type and writing it a detailed prompt.</li>
+      <li style="margin-bottom:.5rem;">The subagent runs in its own isolated context — no access to your conversation history.</li>
+      <li style="margin-bottom:.5rem;">The subagent completes its work and returns a single result message.</li>
+      <li style="margin-bottom:.5rem;">Claude incorporates that result into its main response.</li>
+    </ol>
+    <p>Multiple subagents can run in parallel. Claude can also run subagents in the background using <code>run_in_background: true</code>, continuing to help you while the long task completes.</p>
+
+    <h3>🔍 Example — Parallel Subagents in Action</h3>
+    <div class="code-wrap">
+      <pre>You: "Audit the auth system: check for security issues,
+     document the API surface, and suggest a refactor plan."
+
+Claude internally spawns three subagents in parallel:
+  → Explore agent   : maps all auth-related files
+  → general-purpose : hunts for security vulnerabilities
+  → Plan agent      : designs the refactor architecture
+
+All three run simultaneously. Claude combines the results.</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>✏️ Defining Your Own Custom Agents</h3>
+    <p>
+      You can define custom agents as <code>.md</code> files with YAML frontmatter — the same pattern as Gemini CLI. Place them in the personal or project folder below.
+    </p>
+
+    <h3>📝 Agent file template</h3>
+    <div class="code-wrap">
+      <pre>---
+name: my-agent
+description: >
+  Use this agent when the user wants to do X.
+  Do not use for Y.
+
+  Examples:
+  - User asks "review my SQL queries" → use this agent
+  - User asks "write a function" → do not use this agent
+model: sonnet
+color: purple
+---
+
+You are a specialist in [your domain]. Your job is to [main purpose].
+
+When called, you will:
+1. First do this
+2. Then do that
+3. Finally, summarize your findings</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>⚙️ Frontmatter options</h3>
+    <table>
+      <thead><tr><th>Field</th><th>Required?</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td><code>name</code></td><td>✅ Yes</td><td>Agent identifier — Claude uses this when selecting it</td></tr>
+        <tr><td><code>description</code></td><td>✅ Yes</td><td>When Claude should (and shouldn't) use this agent — include concrete examples for best results</td></tr>
+        <tr><td><code>model</code></td><td>No</td><td>Which Claude model to use: <code>sonnet</code>, <code>haiku</code>, <code>opus</code></td></tr>
+        <tr><td><code>color</code></td><td>No</td><td>Display color in the UI</td></tr>
+      </tbody>
+    </table>
+
+    <h3>🗂️ Where to put it</h3>
+    <div class="os-mac">
+      <div class="code-wrap">
+        <pre># Personal — available in all your projects
+~/.claude/agents/my-agent.md
+
+# Project — checked into git, shared with your team
+.claude/agents/my-agent.md</pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+    </div>
+    <div class="os-win">
+      <div class="code-wrap">
+        <pre># Personal — available in all your projects
+%USERPROFILE%\.claude\agents\my-agent.md
+
+# Project — checked into git, shared with your team
+.claude\agents\my-agent.md</pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+    </div>
+
+    <div class="callout info">
+      ℹ️ <strong>Tip:</strong> The <code>description</code> field is the most important part. Claude reads it to decide whether to spawn your agent. Be explicit about when to use it and when not to — and include concrete examples.
+    </div>
+  </div>
+
+  <!-- ════════════════ CODEX ════════════════ -->
+  <div class="section codex-accent" id="codex">
+    <h2>🟢 OpenAI Codex CLI — Subagents</h2>
+    <p>
+      Codex CLI supports the same two-track approach: <strong>built-in agents</strong> it spawns automatically when you give it a complex task, and <strong>user-defined custom agents</strong> you create as Markdown files in the <code>.agents/</code> directory.
+    </p>
+
+    <h3>⚙️ How Automatic Spawning Works</h3>
+    <p>
+      When you give Codex a complex coding task, it breaks the work into parallel threads — spawning internal agents to tackle different parts simultaneously, then merging the results.
+    </p>
+    <div class="code-wrap">
+      <pre>You: "Refactor the payment module: update the API calls,
+     add unit tests, and update the docs."
+
+Codex internally:
+  → Spawns an agent to refactor the API calls
+  → Spawns an agent to write the unit tests
+  → Spawns an agent to update the documentation
+
+Results are merged back into a single coherent changeset.</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>✏️ Defining Your Own Custom Agents</h3>
+    <p>
+      Like Claude Code, you can define custom agents as <code>.md</code> files with YAML frontmatter. Place them in the personal or project folder below.
+    </p>
+
+    <h3>📝 Agent file template</h3>
+    <div class="code-wrap">
+      <pre>---
+name: my-agent
+description: >
+  Use this agent when the user wants to do X.
+  Do not use for Y.
+model: gpt-4o
+---
+
+You are a specialist in [your domain]. Your job is to [main purpose].
+
+When called, you will:
+1. First do this
+2. Then do that
+3. Finally, summarize your findings</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>🗂️ Where to put it</h3>
+    <div class="os-mac">
+      <div class="code-wrap">
+        <pre># Personal — available in all your projects
+~/.agents/my-agent.md
+
+# Project — checked into git, shared with your team
+.agents/my-agent.md</pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+    </div>
+    <div class="os-win">
+      <div class="code-wrap">
+        <pre># Personal — available in all your projects
+%USERPROFILE%\.agents\my-agent.md
+
+# Project — checked into git, shared with your team
+.agents\my-agent.md</pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════ GEMINI ════════════════ -->
+  <div class="section gemini-accent" id="gemini">
+    <h2>🔵 Google Gemini CLI — Subagents</h2>
+    <p>
+      Gemini CLI (experimental as of early 2026) follows the same Markdown file pattern. Each agent is a single <code>.md</code> file with YAML frontmatter. The key difference from CC and Codex: you can invoke them <strong>manually</strong> with <code>@agent-name</code> in your prompt, giving you explicit control over which agent handles which task.
+    </p>
+
+    <h3>📁 Folder structure</h3>
+    <div class="code-wrap">
+      <pre class="tree"><span class="dir">.gemini/</span>
+└── <span class="dir">agents/</span>
+    ├── <span class="file">security-auditor.md</span>   ← one file per agent
+    ├── <span class="file">code-reviewer.md</span>
+    └── <span class="file">sql-expert.md</span></pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <p>That's it — no subfolders needed. One <code>.md</code> file = one agent.</p>
+
+    <h3>🗂️ Where to put it</h3>
+    <div class="os-mac">
+      <p><strong>Project agent</strong> (shared with team via git):</p>
+      <div class="code-wrap">
+        <pre>mkdir -p .gemini/agents</pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <p><strong>Personal agent</strong> (available in all your projects):</p>
+      <div class="code-wrap">
+        <pre>mkdir -p ~/.gemini/agents</pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+    </div>
+    <div class="os-win">
+      <p><strong>Project agent (PowerShell):</strong></p>
+      <div class="code-wrap">
+        <pre>New-Item -ItemType Directory -Force -Path ".gemini\agents"</pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <p><strong>Personal agent:</strong></p>
+      <div class="code-wrap">
+        <pre>New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.gemini\agents"</pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+    </div>
+
+    <h3>📝 Agent file template</h3>
+    <div class="code-wrap">
+      <pre>---
+name: my-agent
+description: Short description of what this agent does.
+kind: local
+tools:
+  - read_file
+  - grep_search
+model: gemini-2.5-pro
+temperature: 0.2
+max_turns: 10
+---
+
+# My Agent
+
+You are a specialist in [your domain]. Your job is to [main purpose].
+
+When called, you will:
+1. First do this
+2. Then do that
+3. Finally, summarize
+
+Always be concise. Always cite specific files and line numbers.</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>⚙️ Frontmatter options</h3>
+    <table>
+      <thead><tr><th>Field</th><th>Required?</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td><code>name</code></td><td>✅ Yes</td><td>How you call it: <code>@name</code></td></tr>
+        <tr><td><code>description</code></td><td>✅ Yes</td><td>What the agent does</td></tr>
+        <tr><td><code>kind</code></td><td>No</td><td><code>local</code> (default) or <code>remote</code></td></tr>
+        <tr><td><code>tools</code></td><td>No</td><td>List of tools the agent can use — omit for all tools</td></tr>
+        <tr><td><code>model</code></td><td>No</td><td>Override which Gemini model to use</td></tr>
+        <tr><td><code>temperature</code></td><td>No</td><td>Creativity (0 = precise, 1 = creative)</td></tr>
+        <tr><td><code>max_turns</code></td><td>No</td><td>Max back-and-forth steps before stopping</td></tr>
+      </tbody>
+    </table>
+
+    <h3>🚀 Real example — a SQL expert agent</h3>
+    <p>Save as <code class="os-mac">.gemini/agents/sql-expert.md</code><code class="os-win">.gemini\agents\sql-expert.md</code>:</p>
+    <div class="code-wrap">
+      <pre>---
+name: sql-expert
+description: Expert SQL query reviewer and optimizer.
+kind: local
+tools:
+  - read_file
+  - grep_search
+model: gemini-2.5-pro
+temperature: 0.1
+max_turns: 15
+---
+
+You are a senior database engineer specializing in query optimization.
+
+When reviewing SQL:
+1. Check for missing indexes on WHERE/JOIN columns
+2. Look for N+1 query patterns
+3. Identify unnecessary full table scans
+4. Suggest query rewrites with estimated performance gains
+5. Flag any SQL injection risks
+
+Always show the original query, then the optimized version, with an explanation.</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <p>Use it by typing: <code>@sql-expert review the queries in database/queries.sql</code></p>
+
+    <div class="callout">
+      ⚠️ <strong>Experimental:</strong> Gemini CLI subagents are still experimental as of early 2026. The syntax and features may change. Check the <a href="https://geminicli.com/docs/core/subagents/" target="_blank">official docs</a> for the latest.
+    </div>
+  </div>
+
+  <!-- ════════════════ TIPS ════════════════ -->
+  <div class="section" id="tips">
+    <h2>💡 Tips for working with subagents</h2>
+
+    <h3>1. Phrase tasks to encourage parallelism</h3>
+    <p>The more explicitly you ask for parallel work, the more likely Claude or Codex is to use subagents. Try: <em>"Do X and Y simultaneously"</em> or <em>"Explore A and B in parallel."</em> Vague, single-step prompts rarely trigger subagent spawning.</p>
+
+    <h3>2. Expect isolated context</h3>
+    <p>Subagents don't know your conversation history. If a subagent needs specific context, it must be passed explicitly in the task prompt. Don't assume a subagent remembers what you said three messages ago — it doesn't.</p>
+
+    <h3>3. Check custom agents into git</h3>
+    <p>Agent files in your project folder (<code>.claude/agents/</code>, <code>.agents/</code>, <code>.gemini/agents/</code>) can be committed to git. Every teammate gets the same agents automatically — no onboarding needed.</p>
+    <div class="code-wrap">
+      <pre># Commit your team's agents to version control
+git add .claude/agents/ .agents/ .gemini/agents/
+git commit -m "feat: add sql-expert and security-auditor agents"</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>4. Limit agent tool access for safety</h3>
+    <p>Restrict what an agent can do using the <code>tools:</code> list (Gemini) or by keeping the system prompt narrow (CC/Codex). A research agent only needs read access — there's no reason to give it write tools.</p>
+    <div class="code-wrap">
+      <pre>---
+name: auditor
+description: Read-only security auditor. Does not modify any files.
+tools:
+  - read_file
+  - grep_search
+---
+
+You audit code for security issues. You never write or modify files.</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>5. Write the description carefully</h3>
+    <p>The <code>description</code> field is the most important part of any custom agent. It controls when the agent is auto-triggered and how you find it later. Be explicit: <em>what it does</em>, <em>when to use it</em>, <em>when NOT to use it</em>, and include concrete examples.</p>
+
+    <h3>6. Personal agents follow you everywhere</h3>
+    <p>Agents placed in your home directory (<code class="os-mac">~/.claude/agents/</code><code class="os-win">%USERPROFILE%\.claude\agents\</code>, <code class="os-mac">~/.agents/</code><code class="os-win">%USERPROFILE%\.agents\</code>, <code class="os-mac">~/.gemini/agents/</code><code class="os-win">%USERPROFILE%\.gemini\agents\</code>) are available in every project. Great for personal specialists like a writing assistant, a commit message reviewer, or a documentation summarizer.</p>
+  </div>
+
+  <!-- ════════════════ CHEAT SHEET ════════════════ -->
+  <div class="section">
+    <h2>🗺️ Quick Reference Cheat Sheet</h2>
+    <table>
+      <thead>
+        <tr><th></th><th><span class="badge badge-cc">CC</span> Claude Code</th><th><span class="badge badge-codex">CODEX</span> Codex CLI</th><th><span class="badge badge-gemini">GEMINI</span> Gemini CLI</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Auto-spawn built-in agents</strong></td>
+          <td>✅ Yes (Task tool)</td>
+          <td>✅ Yes (internal)</td>
+          <td>✅ Yes</td>
+        </tr>
+        <tr>
+          <td><strong>Define custom agents</strong></td>
+          <td>✅ <code>.claude/agents/NAME.md</code></td>
+          <td>✅ <code>.agents/NAME.md</code></td>
+          <td>✅ <code>.gemini/agents/NAME.md</code></td>
+        </tr>
+        <tr class="os-mac">
+          <td><strong>Personal agents</strong></td>
+          <td><code>~/.claude/agents/</code></td>
+          <td><code>~/.agents/</code></td>
+          <td><code>~/.gemini/agents/</code></td>
+        </tr>
+        <tr class="os-win">
+          <td><strong>Personal agents</strong></td>
+          <td><code>%USERPROFILE%\.claude\agents\</code></td>
+          <td><code>%USERPROFILE%\.agents\</code></td>
+          <td><code>%USERPROFILE%\.gemini\agents\</code></td>
+        </tr>
+        <tr>
+          <td><strong>Manual invocation</strong></td>
+          <td>❌ Claude decides</td>
+          <td>❌ Codex decides</td>
+          <td>✅ <code>@NAME your prompt</code></td>
+        </tr>
+        <tr>
+          <td><strong>Isolated context</strong></td>
+          <td>✅ Yes</td>
+          <td>✅ Yes</td>
+          <td>✅ Yes</td>
+        </tr>
+        <tr>
+          <td><strong>Run in background</strong></td>
+          <td>✅ Yes</td>
+          <td>✅ Yes</td>
+          <td>❌ No</td>
+        </tr>
+        <tr>
+          <td><strong>Parallel execution</strong></td>
+          <td>✅ Yes</td>
+          <td>✅ Yes</td>
+          <td>✅ Yes</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <footer>
+    <p>Written with 🤖 help from Claude Code · Last updated Feb 2026</p>
+    <p style="margin-top:.5rem;">
+      Sources:
+      <a href="https://geminicli.com/docs/core/subagents/" target="_blank">Gemini Subagents Docs</a>
+    </p>
+  </footer>
+
+</div>
+
+<!-- ════════════════ SCRIPTS ════════════════ -->
+<script>
+  function copyCode(btn) {
+    const pre = btn.closest('.code-wrap').querySelector('pre');
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    }).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = pre.innerText;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  function setOS(os) {
+    const btnMac = document.getElementById('btnMac');
+    const btnWin = document.getElementById('btnWin');
+    if (os === 'mac') {
+      document.body.classList.remove('win');
+      btnMac.classList.add('mac-active');
+      btnMac.classList.remove('win-active');
+      btnWin.classList.remove('mac-active', 'win-active');
+    } else {
+      document.body.classList.add('win');
+      btnWin.classList.add('win-active');
+      btnWin.classList.remove('mac-active');
+      btnMac.classList.remove('mac-active', 'win-active');
+    }
+  }
+
+  document.querySelectorAll('.copy-btn').forEach(btn => { btn.textContent = 'Copy'; });
+</script>
+</body>
+</html>

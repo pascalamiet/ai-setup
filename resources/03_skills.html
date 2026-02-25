@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Claude Code Skills — The Complete Guide</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #222536;
+      --border: #2e3250;
+      --text: #e2e4f0;
+      --muted: #8b8fa8;
+      --accent: #a78bfa;
+      --accent-green: #34d399;
+      --accent-yellow: #fbbf24;
+      --accent-blue: #60a5fa;
+      --accent-red: #f87171;
+      --mac: #c084fc;
+      --win: #38bdf8;
+      --code-bg: #0d1117;
+      --radius: 10px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-size: 16px;
+      line-height: 1.7;
+      padding: 2rem 1rem;
+    }
+
+    .container { max-width: 860px; margin: 0 auto; }
+
+    /* ── Hero ── */
+    .hero {
+      text-align: center;
+      padding: 3rem 2rem 2rem;
+      background: linear-gradient(135deg, #1a1d27, #1e1b35);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 2.5rem;
+    }
+    .hero h1 { font-size: 2.2rem; font-weight: 800; margin-bottom: .6rem; }
+    .hero p  { color: var(--muted); max-width: 620px; margin: 0 auto; font-size: 1rem; }
+    .hero .subtitle { margin-top: .5rem; font-size: .9rem; color: var(--accent); }
+
+    /* ── TOC ── */
+    .toc {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.2rem 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .toc h3 { margin-bottom: .8rem; font-size: .95rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+    .toc ol { padding-left: 1.3rem; }
+    .toc li { margin-bottom: .3rem; }
+    .toc a  { color: var(--accent-blue); text-decoration: none; }
+    .toc a:hover { text-decoration: underline; }
+
+    /* ── Sections ── */
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.8rem 2rem;
+      margin-bottom: 1.5rem;
+    }
+    .section h2 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: var(--accent);
+    }
+    .section h3 {
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      font-size: .8rem;
+      font-weight: 600;
+      margin: 1.4rem 0 .5rem;
+    }
+    .section p  { margin-bottom: .75rem; }
+    .section ul { padding-left: 1.4rem; margin-bottom: .75rem; }
+    .section li { margin-bottom: .35rem; }
+
+    /* ── Code blocks ── */
+    .code-wrap {
+      position: relative;
+      margin: .75rem 0;
+    }
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.2rem;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+      font-size: .85rem;
+      line-height: 1.6;
+      white-space: pre;
+    }
+    pre.has-copy { padding-right: 5.5rem; }
+    .copy-btn {
+      position: absolute;
+      top: .5rem;
+      right: .5rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 6px;
+      padding: .25rem .65rem;
+      font-size: .75rem;
+      cursor: pointer;
+      transition: all .15s;
+      font-family: inherit;
+    }
+    .copy-btn:hover { background: var(--border); color: var(--text); }
+    .copy-btn.copied { color: var(--accent-green); border-color: var(--accent-green); }
+
+    /* ── Syntax colors in pre ── */
+    .c-key  { color: var(--accent-yellow); }   /* yaml keys */
+    .c-val  { color: #a5d6ff; }                /* yaml values */
+    .c-str  { color: #a5d6ff; }
+    .c-cmt  { color: var(--muted); font-style: italic; }
+    .c-cmd  { color: var(--accent-green); }
+    .c-arg  { color: #fca5a5; }
+    .c-ph   { color: var(--accent); }          /* placeholders */
+    .c-dir  { color: var(--accent-blue); }
+    .c-file { color: var(--accent-green); }
+    .c-opt  { color: var(--muted); }
+
+    /* ── Inline code ── */
+    code {
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: .85em;
+      background: #161b22;
+      padding: .15em .4em;
+      border-radius: 4px;
+      color: #c9d1d9;
+    }
+
+    /* ── Callout boxes ── */
+    .callout {
+      border-left: 3px solid var(--accent-yellow);
+      background: #1f1c10;
+      padding: .75rem 1.1rem;
+      border-radius: 0 8px 8px 0;
+      margin: 1rem 0;
+      font-size: .9rem;
+    }
+    .callout.tip  { border-color: var(--accent-green); background: #0f1f18; }
+    .callout.info { border-color: var(--accent-blue); background: #0f1826; }
+    .callout.fun  { border-color: var(--accent); background: #1a1530; }
+
+    /* ── OS toggle (global) ── */
+    .os-toggle-bar {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      padding: .7rem 1rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      font-size: .88rem;
+    }
+    .os-toggle-bar span { color: var(--muted); }
+    .os-btn-global {
+      padding: .3rem .9rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      cursor: pointer;
+      font-size: .82rem;
+      font-weight: 600;
+      transition: all .15s;
+    }
+    .os-btn-global.mac-active { background: #2a1240; color: var(--mac); border-color: var(--mac); }
+    .os-btn-global.win-active { background: #0f1e30; color: var(--win); border-color: var(--win); }
+
+    /* OS content panels */
+    .os-mac { display: block; }
+    .os-win { display: none; }
+    body.win .os-mac { display: none; }
+    body.win .os-win { display: block; }
+
+    /* ── Section OS tabs (local) ── */
+    .os-tabs { display: flex; gap: .4rem; margin: 1rem 0 .5rem; }
+    .os-btn {
+      padding: .3rem .85rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--muted);
+      cursor: pointer;
+      font-size: .82rem;
+      transition: all .15s;
+    }
+    .os-btn.active-mac { background: #2a1240; color: var(--mac); border-color: var(--mac); }
+    .os-btn.active-win { background: #0f1e30; color: var(--win); border-color: var(--win); }
+    .os-panel { display: none; }
+    .os-panel.active { display: block; }
+
+    /* ── Table ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: .88rem;
+    }
+    th {
+      background: var(--surface2);
+      padding: .6rem .9rem;
+      text-align: left;
+      font-weight: 600;
+      color: var(--muted);
+      font-size: .78rem;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+    td {
+      padding: .6rem .9rem;
+      border-top: 1px solid var(--border);
+      vertical-align: top;
+    }
+    tr:hover td { background: #1d2030; }
+    td code { font-size: .8rem; }
+
+    /* ── Badges ── */
+    .badge {
+      display: inline-block;
+      padding: .1rem .55rem;
+      border-radius: 999px;
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .03em;
+      vertical-align: middle;
+    }
+    .badge-opt  { background: rgba(251,191,36,.12); color: var(--accent-yellow); }
+    .badge-req  { background: rgba(248,113,113,.12); color: var(--accent-red); }
+    .badge-rec  { background: rgba(52,211,153,.12);  color: var(--accent-green); }
+    .badge-pro  { background: rgba(167,139,250,.12); color: var(--accent); }
+
+    a { color: var(--accent-blue); }
+    strong { font-weight: 600; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+
+    footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: .85rem;
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ════════════════ HERO ════════════════ -->
+  <div class="hero">
+    <h1>🪄 Claude Code Skills</h1>
+    <p>
+      Custom slash commands that turn you from a person who types the same long prompt 47 times a week
+      into someone who just types <code>/that-thing</code> and goes for a coffee.
+    </p>
+    <div class="subtitle">Your laziness, finally justified.</div>
+  </div>
+
+  <!-- ════════════════ GLOBAL OS TOGGLE ════════════════ -->
+  <div class="os-toggle-bar" id="globalOsBar">
+    <span>I'm on</span>
+    <button class="os-btn-global mac-active" id="btnMac" onclick="setOS('mac')">🍎 macOS</button>
+    <button class="os-btn-global" id="btnWin" onclick="setOS('win')">🪟 Windows</button>
+    <span style="margin-left:auto; font-size:.78rem;">— all path examples below will update automatically</span>
+  </div>
+
+  <!-- ════════════════ TOC ════════════════ -->
+  <div class="toc">
+    <h3>📋 Contents</h3>
+    <ol>
+      <li><a href="#what">What is a skill?</a></li>
+      <li><a href="#where">Where do skills live?</a></li>
+      <li><a href="#anatomy">Anatomy of a SKILL.md</a></li>
+      <li><a href="#template">The full template</a></li>
+      <li><a href="#example">A real working example</a></li>
+      <li><a href="#options">All YAML options explained</a></li>
+      <li><a href="#tips">Tips & tricks</a></li>
+    </ol>
+  </div>
+
+  <!-- ════════════════ WHAT IS A SKILL ════════════════ -->
+  <div class="section" id="what">
+    <h2>🧠 What is a skill?</h2>
+    <p>
+      A <strong>skill</strong> is a saved set of instructions that Claude Code follows every time you type a
+      specific slash command. Think of it as writing a really detailed sticky note for your AI colleague —
+      except this one actually reads it.
+    </p>
+    <p>
+      Instead of typing <em>"Please review this file for security issues, check for SQL injection, XSS,
+      hardcoded secrets, and give me a score out of 10 with specific line numbers…"</em> every single day,
+      you write that once in a file and forever after you just type:
+    </p>
+    <div class="code-wrap">
+      <pre class="has-copy"><span class="c-cmd">/security-review</span> <span class="c-arg">src/auth.py</span></pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <p>
+      That's it. Your coffee is getting cold. Go get it.
+    </p>
+    <div class="callout fun">
+      🪄 <strong>The actual magic:</strong> Skills aren't just shortcuts — they are <em>context for Claude</em>.
+      A skill can tell Claude what persona to take, what to check for, what NOT to do, what tools it can use,
+      and how to format its output. It's the difference between asking a random intern for help and
+      briefing a specialist.
+    </div>
+
+    <h3>Skills vs. Subagents — don't mix these up</h3>
+    <p>
+      Claude Code has <em>two</em> related but distinct concepts:
+    </p>
+    <ul>
+      <li>
+        <strong>Skills</strong> — files you create. They run inside your current conversation.
+        Triggered with <code>/skill-name</code>.
+      </li>
+      <li>
+        <strong>Subagents</strong> — independent Claude instances that Claude spins up internally
+        using the <code>Task</code> tool. You don't create these yourself; Claude fires them up when
+        a task is complex enough. Add <code>context: fork</code> to a skill's YAML and it will run
+        <em>inside</em> a subagent (isolated context, no cross-contamination).
+      </li>
+    </ul>
+    <p>
+      This guide covers skills. (Subagents are covered in <a href="02_subagents.html">02_subagents.html</a>.)
+    </p>
+  </div>
+
+  <!-- ════════════════ WHERE ════════════════ -->
+  <div class="section" id="where">
+    <h2>🗂️ Where do skills live?</h2>
+    <p>
+      Skills live in folders named after them. Each folder contains at minimum a <code>SKILL.md</code> file.
+      There are two places you can put them, with different scopes:
+    </p>
+
+    <h3>Option A — Project skill (shared with your team)</h3>
+    <p>
+      Put the skill inside your project's <code>.claude/skills/</code> folder, then commit it to git.
+      Everyone on the team gets the same commands automatically. No onboarding doc needed — the skill
+      <em>is</em> the documentation.
+    </p>
+    <div class="os-mac">
+      <div class="code-wrap">
+        <pre class="has-copy"><span class="c-cmt"># Create the folder for your skill</span>
+<span class="c-cmd">mkdir -p</span> <span class="c-dir">.claude/skills/my-skill</span></pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+    </div>
+    <div class="os-win">
+      <div class="code-wrap">
+        <pre class="has-copy"><span class="c-cmt"># PowerShell — create the folder for your skill</span>
+<span class="c-cmd">New-Item -ItemType Directory -Force -Path</span> <span class="c-str">".claude\skills\my-skill"</span></pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+    </div>
+    <p style="margin-top:.5rem;">Then commit it:</p>
+    <div class="code-wrap">
+      <pre class="has-copy"><span class="c-cmd">git add</span> .claude/skills/
+<span class="c-cmd">git commit -m</span> <span class="c-str">"feat: add my-skill slash command"</span></pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Option B — Personal skill (follows you everywhere)</h3>
+    <p>
+      Put the skill in your home directory. It will be available in <em>every</em> project on your machine.
+      Great for personal habits like <code>/summarize</code>, <code>/explain-like-im-five</code>,
+      or <code>/rubber-duck</code>.
+    </p>
+    <div class="os-mac">
+      <div class="code-wrap">
+        <pre class="has-copy"><span class="c-cmd">mkdir -p</span> <span class="c-dir">~/.claude/skills/my-skill</span></pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+    </div>
+    <div class="os-win">
+      <div class="code-wrap">
+        <pre class="has-copy"><span class="c-cmd">New-Item -ItemType Directory -Force -Path</span> <span class="c-str">"$env:USERPROFILE\.claude\skills\my-skill"</span></pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+    </div>
+
+    <h3>Full path reference</h3>
+    <table>
+      <thead>
+        <tr><th>Scope</th><th class="os-mac">🍎 macOS path</th><th class="os-win">🪟 Windows path</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Project</strong></td>
+          <td class="os-mac"><code>.claude/skills/SKILL-NAME/SKILL.md</code></td>
+          <td class="os-win"><code>.claude\skills\SKILL-NAME\SKILL.md</code></td>
+        </tr>
+        <tr>
+          <td><strong>Personal</strong></td>
+          <td class="os-mac"><code>~/.claude/skills/SKILL-NAME/SKILL.md</code></td>
+          <td class="os-win"><code>%USERPROFILE%\.claude\skills\SKILL-NAME\SKILL.md</code></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout info">
+      ℹ️ <strong>Priority:</strong> If both a project skill and a personal skill have the same name,
+      the <strong>project skill wins</strong>. So your team can override your personal habits. Whether that's
+      a feature or a bug is left as an exercise for the reader.
+    </div>
+
+    <h3>Full folder structure (optional extras)</h3>
+    <div class="code-wrap">
+      <pre class="has-copy"><span class="c-dir">my-skill/</span>
+├── <span class="c-file">SKILL.md</span>          <span class="c-cmt">← required: instructions + config</span>
+├── <span class="c-dir">scripts/</span>           <span class="c-opt">← optional: shell scripts to run</span>
+├── <span class="c-dir">references/</span>        <span class="c-opt">← optional: extra docs / context files</span>
+└── <span class="c-dir">examples/</span>          <span class="c-opt">← optional: example outputs to guide Claude</span></pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <p>
+      The only <em>required</em> file is <code>SKILL.md</code>. The rest are yours to add if your skill needs them.
+    </p>
+  </div>
+
+  <!-- ════════════════ ANATOMY ════════════════ -->
+  <div class="section" id="anatomy">
+    <h2>🔬 Anatomy of a SKILL.md</h2>
+    <p>
+      Every <code>SKILL.md</code> has two parts separated by <code>---</code>:
+    </p>
+
+    <h3>Part 1 — YAML frontmatter (the config)</h3>
+    <p>
+      This sits at the very top between two sets of <code>---</code> dashes. It tells Claude Code the
+      <em>metadata</em> about your skill: what it's called, when to use it, and any special behaviour flags.
+    </p>
+    <div class="code-wrap">
+      <pre class="has-copy"><span class="c-opt">---</span>
+<span class="c-key">name</span><span class="c-opt">:</span> <span class="c-val">my-skill</span>             <span class="c-cmt"># becomes /my-skill</span>
+<span class="c-key">description</span><span class="c-opt">:</span> <span class="c-val">Use this when…</span>  <span class="c-cmt"># tells Claude when to auto-invoke it</span>
+<span class="c-opt">---</span></pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Part 2 — The instructions (plain English)</h3>
+    <p>
+      Everything after the second <code>---</code> is the actual instructions Claude will follow.
+      Write it like you're briefing a very capable but literal-minded contractor. No vague vibes —
+      specific steps, clear output format, explicit edge cases.
+    </p>
+    <div class="code-wrap">
+      <pre class="has-copy"><span class="c-cmt"># What to do</span>
+
+When this skill is invoked, do the following:
+
+1. First, read the file(s) mentioned in <span class="c-arg">$ARGUMENTS</span>
+2. Then, perform your analysis
+3. Finally, present results in the format described below
+
+<span class="c-cmt"># Output format</span>
+
+- Give a score out of 10
+- List issues with file name and line number
+- Be direct. No fluff.</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>The $ARGUMENTS variable</h3>
+    <p>
+      When someone types <code>/my-skill foo bar</code>, the text after the skill name
+      (<code>foo bar</code>) is available in your instructions as <code>$ARGUMENTS</code>.
+    </p>
+    <div class="code-wrap">
+      <pre class="has-copy"><span class="c-cmd">/review</span> <span class="c-arg">src/auth.py strict</span>
+         ↓ inside your SKILL.md ↓
+<span class="c-arg">$ARGUMENTS</span> <span class="c-opt">= "src/auth.py strict"</span></pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+  </div>
+
+  <!-- ════════════════ TEMPLATE ════════════════ -->
+  <div class="section" id="template">
+    <h2>📋 The Full Template</h2>
+    <p>
+      Copy this, rename it, fill in the blanks. You're 90% done before you even start.
+    </p>
+    <div class="code-wrap">
+      <pre class="has-copy">---
+name: <span class="c-ph">your-skill-name</span>
+description: >
+  Use this skill when the user wants to <span class="c-ph">[primary use case]</span>.
+  Do NOT use this skill when <span class="c-ph">[exclusion case]</span>.
+---
+
+# <span class="c-ph">Your Skill Name</span>
+
+You are a specialist in <span class="c-ph">[domain]</span>. Your job is to <span class="c-ph">[main purpose]</span>.
+
+## When invoked
+
+1. Read the relevant files (use `$ARGUMENTS` as the target, or ask if not provided)
+2. <span class="c-ph">Step 2 — the main action</span>
+3. <span class="c-ph">Step 3 — follow-up action</span>
+4. Present your findings in the format below
+
+## Output format
+
+<span class="c-ph">Describe exactly how you want Claude to format its response.
+The more specific, the more consistent the output will be.</span>
+
+## What to check / focus on
+
+- <span class="c-ph">Point 1</span>
+- <span class="c-ph">Point 2</span>
+- <span class="c-ph">Point 3</span>
+
+## Do NOT
+
+- <span class="c-ph">Anti-pattern 1 you want to avoid</span>
+- <span class="c-ph">Anti-pattern 2</span></pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <div class="callout fun">
+      🎭 <strong>Confession:</strong> The description field is the most important and most neglected part of a skill.
+      It determines when Claude auto-triggers it. "Use when reviewing code" is bad.
+      "Use when the user explicitly asks for a code review of a specific file or function.
+      Do NOT use for general questions about code." is good. Put in the effort — it pays off every single time.
+    </div>
+  </div>
+
+  <!-- ════════════════ EXAMPLE ════════════════ -->
+  <div class="section" id="example">
+    <h2>🚀 A Real Working Example</h2>
+    <p>
+      Here's a complete skill you can copy, save, and immediately use. It does code reviews with a score,
+      specific issues, and line numbers.
+    </p>
+
+    <h3>Step 1 — Create the folder</h3>
+    <div class="os-mac">
+      <div class="code-wrap">
+        <pre class="has-copy"><span class="c-cmd">mkdir -p</span> <span class="c-dir">~/.claude/skills/review</span></pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+    </div>
+    <div class="os-win">
+      <div class="code-wrap">
+        <pre class="has-copy"><span class="c-cmd">New-Item -ItemType Directory -Force -Path</span> <span class="c-str">"$env:USERPROFILE\.claude\skills\review"</span></pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+    </div>
+
+    <h3>Step 2 — Create the SKILL.md</h3>
+    <p>
+      Save this as <span class="os-mac"><code>~/.claude/skills/review/SKILL.md</code></span><span class="os-win"><code>%USERPROFILE%\.claude\skills\review\SKILL.md</code></span>:
+    </p>
+    <div class="code-wrap">
+      <pre class="has-copy">---
+name: review
+description: >
+  Use when the user asks for a code review of a specific file, function, or snippet.
+  Reviews for correctness, security, style, and performance.
+  Do NOT use for general questions about how code works.
+---
+
+# Code Review
+
+Review the code in $ARGUMENTS (or the current file if no argument given).
+
+## Check for
+
+- **Correctness** — does it do what it claims?
+- **Security** — SQL injection, XSS, hardcoded secrets, unsafe deserialization
+- **Style** — is it readable? Would a new team member understand it in 30 seconds?
+- **Performance** — obvious bottlenecks, N+1 queries, unnecessary re-renders
+
+## Output format
+
+1. **Score** — X/10 with one sentence of justification
+2. **Critical issues** — list with file:line, severity (🔴 high / 🟡 medium / 🟢 low), and fix
+3. **Minor suggestions** — optional improvements, no pressure
+
+Be direct. Be specific. No padding.</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Step 3 — Use it</h3>
+    <div class="code-wrap">
+      <pre class="has-copy"><span class="c-cmt"># Review a specific file</span>
+<span class="c-cmd">/review</span> <span class="c-arg">src/auth.py</span>
+
+<span class="c-cmt"># Review with a focus hint</span>
+<span class="c-cmd">/review</span> <span class="c-arg">src/auth.py focus on the token validation</span>
+
+<span class="c-cmt"># Review whatever file is open / being discussed</span>
+<span class="c-cmd">/review</span></pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <div class="callout tip">
+      ✅ <strong>That's literally it.</strong> No boilerplate. No configuration files. No npm install.
+      Just a folder and a markdown file. Skills are refreshingly low-tech for something this powerful.
+    </div>
+  </div>
+
+  <!-- ════════════════ YAML OPTIONS ════════════════ -->
+  <div class="section" id="options">
+    <h2>⚙️ All YAML Options</h2>
+    <p>The frontmatter supports more than just <code>name</code> and <code>description</code>. Here's the full list:</p>
+
+    <table>
+      <thead>
+        <tr><th>Field</th><th>Required?</th><th>What it does</th><th>Example value</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>name</code></td>
+          <td><span class="badge badge-req">Required</span></td>
+          <td>The slash command. <code>name: review</code> → <code>/review</code></td>
+          <td><code>review</code></td>
+        </tr>
+        <tr>
+          <td><code>description</code></td>
+          <td><span class="badge badge-req">Required</span></td>
+          <td>When Claude should auto-invoke this skill. Be explicit.</td>
+          <td><em>"Use when user asks for code review…"</em></td>
+        </tr>
+        <tr>
+          <td><code>disable-model-invocation</code></td>
+          <td><span class="badge badge-opt">Optional</span></td>
+          <td>Set to <code>true</code> to prevent Claude from invoking it automatically. Only you can trigger it manually.</td>
+          <td><code>true</code></td>
+        </tr>
+        <tr>
+          <td><code>context</code></td>
+          <td><span class="badge badge-opt">Optional</span></td>
+          <td>Set to <code>fork</code> to run the skill inside an isolated subagent (no main context pollution).</td>
+          <td><code>fork</code></td>
+        </tr>
+        <tr>
+          <td><code>allowed-tools</code></td>
+          <td><span class="badge badge-opt">Optional</span></td>
+          <td>Restrict which tools this skill can use. Comma-separated.</td>
+          <td><code>Read, Grep</code></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>The safety combo — for dangerous skills</h3>
+    <p>Any skill that touches production, databases, or external services should use both of these:</p>
+    <div class="code-wrap">
+      <pre class="has-copy">---
+name: deploy
+description: Deploy to production. Only invoke manually, never auto-trigger.
+<span class="c-key">disable-model-invocation</span><span class="c-opt">:</span> <span class="c-val">true</span>    <span class="c-cmt"># Claude cannot auto-fire this</span>
+---
+
+Before doing anything, ask: <span class="c-str">"Are you sure you want to deploy to production? (yes/no)"</span>
+
+Only proceed if the user explicitly confirms with <span class="c-str">"yes"</span>.
+
+Then:
+1. Run tests: npm test
+2. Build: npm run build
+3. Deploy: npm run deploy:prod
+4. Confirm deployment status and report back</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>The read-only analyst combo</h3>
+    <p>For skills that should only read files — never modify anything:</p>
+    <div class="code-wrap">
+      <pre class="has-copy">---
+name: audit
+description: Audit the codebase for security issues. Read-only, no changes.
+<span class="c-key">allowed-tools</span><span class="c-opt">:</span> <span class="c-val">Read, Grep, Glob</span>   <span class="c-cmt"># strictly read-only</span>
+---
+
+Audit the codebase for security vulnerabilities.
+You may ONLY read files. Do NOT modify anything.</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+  </div>
+
+  <!-- ════════════════ TIPS ════════════════ -->
+  <div class="section" id="tips">
+    <h2>💡 Tips & Tricks</h2>
+
+    <h3>1. The personal skills folder is underrated</h3>
+    <p>
+      Skills in your home directory follow you to every project. Some personal classics worth creating:
+    </p>
+    <table>
+      <thead><tr><th>Command</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td><code>/summarize</code></td><td>Summarize what we've done in this session so far</td></tr>
+        <tr><td><code>/eli5</code></td><td>Explain the last thing like I'm 5 (no jargon)</td></tr>
+        <tr><td><code>/rubber-duck</code></td><td>Just listen while I explain a problem. Don't solve it. Ask clarifying questions.</td></tr>
+        <tr><td><code>/standup</code></td><td>Write my daily standup based on recent git commits</td></tr>
+        <tr><td><code>/refactor</code></td><td>Refactor this code. Explain every change you make.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>2. Write the description like a legal contract</h3>
+    <p>
+      "Use when reviewing code" will cause Claude to randomly invoke your review skill during conversations
+      about code. Be specific: what triggers it, what definitely does <em>not</em> trigger it.
+    </p>
+    <div class="callout">
+      ⚠️ <strong>Bad:</strong> <code>description: Use for code review</code><br/>
+      ✅ <strong>Good:</strong> <code>description: Use ONLY when user explicitly asks to review a specific file or function. Do NOT use for general questions about code quality or architecture.</code>
+    </div>
+
+    <h3>3. Reference files in your skill folder</h3>
+    <p>
+      You can put reference documents in a <code>references/</code> subdirectory and tell Claude to read them.
+      Great for style guides, API documentation, or custom coding standards your team follows.
+    </p>
+    <div class="code-wrap">
+      <pre class="has-copy"><span class="c-cmt"># In your SKILL.md instructions:</span>
+Before starting, read the file at <span class="c-ph">references/our-style-guide.md</span>
+and follow those conventions strictly.</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>4. Iterate like a recipe</h3>
+    <p>
+      Your first skill doesn't need to be perfect. Start with 5 lines, use it a few times, then add
+      instructions for the edge cases you encounter. You're teaching it like a new hire —
+      gradually, based on actual mistakes, not hypothetical ones.
+    </p>
+
+    <h3>5. Name your skill folder and the name field identically</h3>
+    <p>
+      The folder name and the <code>name:</code> field in the YAML should match. It keeps things
+      predictable and prevents the kind of subtle bugs that make you question your life choices at 11pm.
+    </p>
+    <div class="code-wrap">
+      <pre class="has-copy"><span class="c-cmt"># Good — folder name matches name field</span>
+<span class="c-dir">.claude/skills/</span><span class="c-file">review/</span><span class="c-opt">SKILL.md</span>  →  <span class="c-key">name:</span> <span class="c-val">review</span>   ✅
+
+<span class="c-cmt"># Confusing — mismatched names</span>
+<span class="c-dir">.claude/skills/</span><span class="c-file">code-check/</span><span class="c-opt">SKILL.md</span>  →  <span class="c-key">name:</span> <span class="c-val">review</span>   ❌</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>6. Check your skills into git</h3>
+    <div class="code-wrap">
+      <pre class="has-copy"><span class="c-cmd">git add</span> .claude/skills/
+<span class="c-cmd">git commit -m</span> <span class="c-str">"feat: add team skills for review, deploy, and audit"</span></pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <p>
+      Your skills are documentation, tooling, and onboarding guide all in one. Don't keep them only on your machine.
+    </p>
+  </div>
+
+  <!-- ════════════════ CHEAT SHEET ════════════════ -->
+  <div class="section">
+    <h2>🗺️ Quick Reference</h2>
+    <table>
+      <thead><tr><th>Thing</th><th class="os-mac">🍎 macOS</th><th class="os-win">🪟 Windows</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Project skill path</strong></td>
+          <td class="os-mac"><code>.claude/skills/NAME/SKILL.md</code></td>
+          <td class="os-win"><code>.claude\skills\NAME\SKILL.md</code></td>
+        </tr>
+        <tr>
+          <td><strong>Personal skill path</strong></td>
+          <td class="os-mac"><code>~/.claude/skills/NAME/SKILL.md</code></td>
+          <td class="os-win"><code>%USERPROFILE%\.claude\skills\NAME\SKILL.md</code></td>
+        </tr>
+        <tr>
+          <td><strong>Create project skill</strong></td>
+          <td class="os-mac"><code>mkdir -p .claude/skills/NAME</code></td>
+          <td class="os-win"><code>New-Item -ItemType Directory -Force -Path ".claude\skills\NAME"</code></td>
+        </tr>
+        <tr>
+          <td><strong>Create personal skill</strong></td>
+          <td class="os-mac"><code>mkdir -p ~/.claude/skills/NAME</code></td>
+          <td class="os-win"><code>New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.claude\skills\NAME"</code></td>
+        </tr>
+        <tr>
+          <td><strong>Invoke skill</strong></td>
+          <td colspan="2"><code>/NAME</code> (or <code>/NAME some arguments here</code>)</td>
+        </tr>
+        <tr>
+          <td><strong>Access arguments</strong></td>
+          <td colspan="2">Use <code>$ARGUMENTS</code> anywhere in your SKILL.md instructions</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ════════════════ FOOTER ════════════════ -->
+  <footer>
+    <p>🪄 Skills: because typing the same prompt twice is a cry for help.</p>
+    <p style="margin-top:.5rem;">Last updated: February 2026 · Part of the AI CLI Setup series</p>
+  </footer>
+
+</div>
+
+<!-- ════════════════ SCRIPTS ════════════════ -->
+<script>
+  // ── Copy button ──
+  function copyCode(btn) {
+    const pre = btn.closest('.code-wrap').querySelector('pre');
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+      btn.textContent = '✓ Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    }).catch(() => {
+      // fallback
+      const ta = document.createElement('textarea');
+      ta.value = pre.innerText;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      btn.textContent = '✓ Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  // ── Global OS toggle ──
+  function setOS(os) {
+    const body = document.body;
+    const btnMac = document.getElementById('btnMac');
+    const btnWin = document.getElementById('btnWin');
+    if (os === 'mac') {
+      body.classList.remove('win');
+      btnMac.classList.add('mac-active');
+      btnMac.classList.remove('win-active');
+      btnWin.classList.remove('mac-active', 'win-active');
+    } else {
+      body.classList.add('win');
+      btnWin.classList.add('win-active');
+      btnWin.classList.remove('mac-active');
+      btnMac.classList.remove('mac-active', 'win-active');
+    }
+  }
+
+  // ── Set copy button text on load ──
+  document.querySelectorAll('.copy-btn').forEach(btn => {
+    if (btn.textContent.trim() === '') btn.textContent = 'Copy';
+  });
+</script>
+</body>
+</html>
