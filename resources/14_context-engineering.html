@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Context Engineering</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #222536;
+      --border: #2e3250;
+      --text: #e2e4f0;
+      --muted: #8b8fa8;
+      --accent: #2dd4bf;
+      --accent-green: #34d399;
+      --accent-blue: #60a5fa;
+      --accent-purple: #a78bfa;
+      --accent-yellow: #fbbf24;
+      --accent-red: #f87171;
+      --accent-orange: #f97316;
+      --mac: #c084fc;
+      --win: #38bdf8;
+      --code-bg: #0d1117;
+      --radius: 10px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-size: 16px; line-height: 1.7; padding: 2rem 1rem;
+    }
+
+    .container { max-width: 860px; margin: 0 auto; }
+
+    .hero {
+      text-align: center; padding: 3rem 2rem 2rem;
+      background: linear-gradient(135deg, #1a1d27, #0f1f1e);
+      border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 2.5rem;
+    }
+    .hero h1 { font-size: 2.2rem; font-weight: 800; margin-bottom: .6rem; }
+    .hero p  { color: var(--muted); max-width: 620px; margin: 0 auto; font-size: 1rem; }
+    .hero .subtitle { margin-top: .5rem; font-size: .9rem; color: var(--accent); }
+
+    .os-toggle-bar {
+      display: flex; align-items: center; gap: .6rem; padding: .7rem 1rem;
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+      margin-bottom: 1.5rem; font-size: .88rem;
+    }
+    .os-toggle-bar span { color: var(--muted); }
+    .os-btn-global {
+      padding: .3rem .9rem; border-radius: 6px; border: 1px solid var(--border);
+      background: var(--surface); color: var(--muted); cursor: pointer;
+      font-size: .82rem; font-weight: 600; transition: all .15s; font-family: inherit;
+    }
+    .os-btn-global.mac-active { background: #2a1240; color: var(--mac); border-color: var(--mac); }
+    .os-btn-global.win-active { background: #0f1e30; color: var(--win); border-color: var(--win); }
+
+    .os-mac { display: block; }
+    .os-win { display: none; }
+    body.win .os-mac { display: none; }
+    body.win .os-win { display: block; }
+
+    .toc {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.2rem 1.5rem; margin-bottom: 2rem;
+    }
+    .toc h3 { margin-bottom: .8rem; font-size: .95rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+    .toc ol { padding-left: 1.3rem; }
+    .toc li { margin-bottom: .3rem; }
+    .toc a  { color: var(--accent); text-decoration: none; }
+    .toc a:hover { text-decoration: underline; }
+
+    .section {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.8rem 2rem; margin-bottom: 1.5rem;
+    }
+    .section h2 { font-size: 1.35rem; font-weight: 700; margin-bottom: 1rem; color: var(--accent); }
+    .section h3 { color: var(--muted); text-transform: uppercase; letter-spacing: .05em; font-size: .8rem; font-weight: 600; margin: 1.4rem 0 .5rem; }
+    .section p  { margin-bottom: .75rem; }
+    .section ul, .section ol { padding-left: 1.4rem; margin-bottom: .75rem; }
+    .section li { margin-bottom: .35rem; }
+
+    .code-wrap { position: relative; margin: .75rem 0; }
+    pre {
+      background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px;
+      padding: 1rem 1.2rem; overflow-x: auto;
+      font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+      font-size: .85rem; line-height: 1.6; white-space: pre;
+    }
+    .copy-btn {
+      position: absolute; top: .5rem; right: .5rem; background: var(--surface2);
+      border: 1px solid var(--border); color: var(--muted); border-radius: 6px;
+      padding: .25rem .65rem; font-size: .75rem; cursor: pointer; transition: all .15s; font-family: inherit;
+    }
+    .copy-btn:hover { background: var(--border); color: var(--text); }
+    .copy-btn.copied { color: var(--accent-green); border-color: var(--accent-green); }
+
+    code {
+      font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: .85em;
+      background: #161b22; padding: .15em .4em; border-radius: 4px; color: #c9d1d9;
+    }
+
+    .callout {
+      border-left: 3px solid var(--accent-yellow); background: #1f1c10;
+      padding: .75rem 1.1rem; border-radius: 0 8px 8px 0; margin: 1rem 0; font-size: .9rem;
+    }
+    .callout.tip    { border-color: var(--accent-green);  background: #0f1f18; }
+    .callout.info   { border-color: var(--accent-blue);   background: #0f1826; }
+    .callout.fun    { border-color: var(--accent-purple);  background: #1a1530; }
+    .callout.danger { border-color: var(--accent-red);    background: #1f0f0f; }
+    .callout.teal   { border-color: var(--accent);        background: #0a1f1e; }
+
+    .compare {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0;
+    }
+    @media (max-width: 600px) { .compare { grid-template-columns: 1fr; } }
+    .compare-box {
+      border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.1rem; font-size: .88rem;
+    }
+    .compare-box.bad  { border-color: #4a1818; background: #1a0f0f; }
+    .compare-box.good { border-color: #0f3028; background: #0a1f18; }
+    .compare-label {
+      font-size: .72rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .06em; margin-bottom: .5rem;
+    }
+    .compare-box.bad  .compare-label { color: var(--accent-red); }
+    .compare-box.good .compare-label { color: var(--accent-green); }
+    .compare-box p { color: var(--text); line-height: 1.5; margin: 0; }
+
+    .principles {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: .75rem; margin: 1rem 0;
+    }
+    .principle-card {
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: .9rem 1rem;
+    }
+    .principle-card .icon { font-size: 1.4rem; margin-bottom: .3rem; }
+    .principle-card strong { display: block; font-size: .9rem; margin-bottom: .2rem; }
+    .principle-card p { font-size: .82rem; color: var(--muted); margin: 0; }
+
+    /* window diagram */
+    .window-diagram {
+      border: 2px solid var(--accent); border-radius: 10px;
+      overflow: hidden; margin: 1rem 0; font-size: .85rem;
+    }
+    .window-diagram .win-header {
+      background: var(--accent); color: #0f1117; font-weight: 700;
+      padding: .4rem 1rem; font-size: .78rem; letter-spacing: .05em; text-transform: uppercase;
+    }
+    .win-row {
+      display: flex; align-items: stretch; border-top: 1px solid var(--border);
+    }
+    .win-label {
+      width: 130px; flex-shrink: 0; padding: .6rem .8rem;
+      font-size: .78rem; font-weight: 600; color: var(--muted);
+      background: var(--surface2); border-right: 1px solid var(--border);
+      display: flex; align-items: center;
+    }
+    .win-bar-wrap {
+      flex: 1; padding: .6rem .8rem; display: flex; align-items: center; gap: .6rem;
+    }
+    .win-bar {
+      height: 10px; border-radius: 5px; flex-shrink: 0;
+    }
+    .win-bar.sys    { background: var(--accent-purple); }
+    .win-bar.hist   { background: var(--accent-blue); }
+    .win-bar.tools  { background: var(--accent-yellow); }
+    .win-bar.rag    { background: var(--accent-green); }
+    .win-bar.user   { background: var(--accent); }
+    .win-bar-note { font-size: .78rem; color: var(--muted); }
+
+    .token-legend {
+      display: flex; flex-wrap: wrap; gap: .6rem; margin: .6rem 0;
+    }
+    .legend-item {
+      display: flex; align-items: center; gap: .35rem; font-size: .78rem; color: var(--muted);
+    }
+    .legend-dot {
+      width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0;
+    }
+
+    .c-cmt  { color: var(--muted); font-style: italic; }
+    .c-good { color: var(--accent-green); }
+    .c-bad  { color: var(--accent-red); }
+    .c-key  { color: var(--accent); }
+
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: .88rem; }
+    th { background: var(--surface2); padding: .6rem .9rem; text-align: left; font-weight: 600; color: var(--muted); font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; }
+    td { padding: .6rem .9rem; border-top: 1px solid var(--border); vertical-align: top; }
+    tr:hover td { background: #1d2030; }
+    td code { font-size: .8rem; }
+
+    a { color: var(--accent); }
+    strong { font-weight: 600; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+    footer { text-align: center; color: var(--muted); font-size: .85rem; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <div class="hero">
+    <h1>🧠 Context Engineering</h1>
+    <p>
+      Prompt engineering was so 2023. Context engineering is what actually makes agents work —
+      curating <em>everything</em> in the context window so the model has exactly what it needs
+      and none of what it doesn't.
+    </p>
+    <div class="subtitle">What the model sees is what the model does. Make it count.</div>
+  </div>
+
+  <div class="os-toggle-bar">
+    <span>I'm on</span>
+    <button class="os-btn-global mac-active" id="btnMac" onclick="setOS('mac')">🍎 macOS</button>
+    <button class="os-btn-global" id="btnWin" onclick="setOS('win')">🪟 Windows</button>
+    <span style="margin-left:auto; font-size:.78rem;">— concepts apply to all platforms</span>
+  </div>
+
+  <div class="toc">
+    <h3>📋 Contents</h3>
+    <ol>
+      <li><a href="#what-is">What is context engineering?</a></li>
+      <li><a href="#window">The context window: your AI's tiny brain</a></li>
+      <li><a href="#anatomy">Anatomy of a context</a></li>
+      <li><a href="#system-prompt">The system prompt: first impressions matter</a></li>
+      <li><a href="#history">Managing conversation history</a></li>
+      <li><a href="#rag">Retrieval: only bring what you need</a></li>
+      <li><a href="#tools">Tool results in context</a></li>
+      <li><a href="#anti-patterns">Anti-patterns that kill context quality</a></li>
+      <li><a href="#checklist">Context engineering checklist</a></li>
+    </ol>
+  </div>
+
+  <!-- WHAT IS -->
+  <div class="section" id="what-is">
+    <h2>🤔 What Is Context Engineering?</h2>
+    <p>
+      <strong>Prompt engineering</strong> is choosing the right words for one request.
+      <strong>Context engineering</strong> is designing the entire information environment
+      that the model operates in — across a whole task or conversation.
+    </p>
+    <p>
+      It's the difference between texting someone "make dinner" versus
+      leaving them a fully stocked fridge, a recipe, the right tools, and a sticky note
+      that says "guests are vegetarian and allergic to nuts."
+      Both are instructions. Only one works.
+    </p>
+
+    <div class="principles">
+      <div class="principle-card">
+        <div class="icon">📝</div>
+        <strong>Prompt engineering</strong>
+        <p>Crafting the wording of a single message.</p>
+      </div>
+      <div class="principle-card">
+        <div class="icon">🏗️</div>
+        <strong>Context engineering</strong>
+        <p>Designing everything the model sees: system prompt, history, retrieved docs, tool results, user input.</p>
+      </div>
+      <div class="principle-card">
+        <div class="icon">🎯</div>
+        <strong>Why it matters</strong>
+        <p>A model with bad context will produce confidently wrong output. A model with great context barely needs instructions.</p>
+      </div>
+    </div>
+
+    <div class="callout fun">
+      🎭 Think of the context window as a <strong>crime scene whiteboard</strong>. A great detective fills it with
+      the right clues in the right order. A bad detective tapes up 300 random newspaper clippings and wonders
+      why the model is confused.
+    </div>
+  </div>
+
+  <!-- WINDOW -->
+  <div class="section" id="window">
+    <h2>🪟 The Context Window: Your AI's Tiny Brain</h2>
+    <p>
+      Every model has a context window — the maximum amount of text it can "see" at once.
+      Modern models have large windows (200K tokens is common), but that's not an invitation
+      to fill them with garbage. <strong>More context ≠ better context.</strong>
+    </p>
+    <p>
+      A token is roughly ¾ of a word. 200K tokens is about 150,000 words — the length of two average novels.
+      Which sounds like plenty, until your codebase has 10,000 files.
+    </p>
+
+    <h3>How a typical context window is used</h3>
+    <div class="window-diagram">
+      <div class="win-header">Context Window — What the model sees (200K tokens example)</div>
+      <div class="win-row">
+        <div class="win-label">System prompt</div>
+        <div class="win-bar-wrap">
+          <div class="win-bar sys" style="width:8%"></div>
+          <span class="win-bar-note">~2K tokens · who you are, rules, persona</span>
+        </div>
+      </div>
+      <div class="win-row">
+        <div class="win-label">Retrieved docs</div>
+        <div class="win-bar-wrap">
+          <div class="win-bar rag" style="width:20%"></div>
+          <span class="win-bar-note">~10–40K tokens · RAG results, relevant files</span>
+        </div>
+      </div>
+      <div class="win-row">
+        <div class="win-label">Tool results</div>
+        <div class="win-bar-wrap">
+          <div class="win-bar tools" style="width:12%"></div>
+          <span class="win-bar-note">variable · output from tool calls</span>
+        </div>
+      </div>
+      <div class="win-row">
+        <div class="win-label">Conv. history</div>
+        <div class="win-bar-wrap">
+          <div class="win-bar hist" style="width:35%"></div>
+          <span class="win-bar-note">grows over time · the biggest sink</span>
+        </div>
+      </div>
+      <div class="win-row">
+        <div class="win-label">User message</div>
+        <div class="win-bar-wrap">
+          <div class="win-bar user" style="width:5%"></div>
+          <span class="win-bar-note">~500 tokens · the actual request</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="token-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--accent-purple)"></div> System prompt</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--accent-green)"></div> Retrieved docs</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--accent-yellow)"></div> Tool results</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--accent-blue)"></div> Conv. history</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div> User message</div>
+    </div>
+
+    <div class="callout danger">
+      ⚠️ <strong>Long context ≠ smart model.</strong> Research consistently shows that models
+      perform worse when the relevant information is buried in thousands of tokens of noise.
+      The middle of a very long context window is basically a black hole of attention.
+      If it matters, put it near the top or bottom — and cut what doesn't matter.
+    </div>
+  </div>
+
+  <!-- ANATOMY -->
+  <div class="section" id="anatomy">
+    <h2>🔬 Anatomy of a Well-Engineered Context</h2>
+    <p>
+      Every piece of information you put in context has a cost (tokens) and a benefit (relevance).
+      Context engineering is about maximizing the benefit-to-cost ratio of every token.
+    </p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Layer</th>
+          <th>What goes here</th>
+          <th>Common mistake</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>System prompt</strong></td>
+          <td>Persona, rules, output format, stable facts about the project</td>
+          <td>Dumping everything in here; it never changes even when it should</td>
+        </tr>
+        <tr>
+          <td><strong>Retrieved context</strong></td>
+          <td>The 3–5 most relevant docs, code snippets, or facts for this specific task</td>
+          <td>Retrieving 50 documents "just in case" (context stuffing)</td>
+        </tr>
+        <tr>
+          <td><strong>Tool results</strong></td>
+          <td>Structured, filtered output from tool calls — only what's needed</td>
+          <td>Dumping raw API responses with 10,000 fields when you need 3</td>
+        </tr>
+        <tr>
+          <td><strong>Conversation history</strong></td>
+          <td>The relevant parts of prior turns — summarized where possible</td>
+          <td>Keeping every message from the beginning of time verbatim</td>
+        </tr>
+        <tr>
+          <td><strong>User message</strong></td>
+          <td>The current request, with any task-specific context attached</td>
+          <td>Assuming the model remembers what you said three conversations ago</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout teal">
+      🔑 <strong>The golden rule:</strong> If removing a piece of context would not change the model's output on the current task, remove it. Every token you save is attention you redirect to what matters.
+    </div>
+  </div>
+
+  <!-- SYSTEM PROMPT -->
+  <div class="section" id="system-prompt">
+    <h2>📜 The System Prompt: First Impressions Matter</h2>
+    <p>
+      The system prompt is the model's <strong>standing orders</strong>. It runs before every message.
+      It sets the persona, the rules, the output format, and the stable facts the model should always know.
+    </p>
+    <p>
+      Most people write system prompts like terms and conditions: long, exhaustive, and ignored.
+      Write them like a good onboarding doc: short, specific, and actionable.
+    </p>
+
+    <h3>Structure of a good system prompt</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># 1. Role — who the model IS</span>
+You are a senior TypeScript engineer working on a Next.js 14 App Router project.
+
+<span class="c-cmt"># 2. Stable project facts — what it already knows</span>
+Stack: Next.js 14, Prisma, PostgreSQL, Tailwind CSS, Vitest.
+Auth is handled by NextAuth in src/lib/auth.ts.
+Never use raw SQL — always use Prisma.
+
+<span class="c-cmt"># 3. Output format — how to respond</span>
+Be concise. Return only code unless asked for explanation.
+When you write code, use the existing file structure.
+
+<span class="c-cmt"># 4. Hard constraints — what never to do</span>
+Never add new npm dependencies without asking.
+Never change the public API of existing functions.</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>What makes system prompts bad</h3>
+    <div class="compare">
+      <div class="compare-box bad">
+        <div class="compare-label">❌ Too vague</div>
+        <p>You are a helpful, harmless, and honest AI assistant. Help the user with their coding questions. Be friendly and professional.</p>
+      </div>
+      <div class="compare-box good">
+        <div class="compare-label">✅ Specific</div>
+        <p>You are a backend engineer for PaymentsCo. Stack: Go, gRPC, PostgreSQL. Always handle errors explicitly — no panics. All monetary values in cents (int64). Return only code, no explanations.</p>
+      </div>
+    </div>
+
+    <div class="compare">
+      <div class="compare-box bad">
+        <div class="compare-label">❌ 2,000 words of rules</div>
+        <p>You must always... You must never... Furthermore, it is important that you... In all cases where... Please also remember to...</p>
+      </div>
+      <div class="compare-box good">
+        <div class="compare-label">✅ 5 bullet constraints</div>
+        <p>Rules: (1) TypeScript only. (2) No new deps. (3) No raw SQL. (4) Match existing error handling patterns. (5) Prefer composition over inheritance.</p>
+      </div>
+    </div>
+
+    <div class="callout fun">
+      🎭 The system prompt is not a legal document. Nobody is reading all 47 of your constraints.
+      The model will weight them by recency and relevance, and quietly ignore the ones buried in paragraph 12.
+      If a rule is important, it deserves to be short enough to be seen.
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="section" id="history">
+    <h2>📜 Managing Conversation History</h2>
+    <p>
+      Conversation history is the vampire of context windows. It grows. It never stops growing.
+      And if you let it, it will consume everything.
+    </p>
+    <p>
+      Left unmanaged, a long agentic task fills most of the context window with old messages
+      about things that no longer matter, leaving little room for the current task.
+    </p>
+
+    <h3>Three strategies to manage history</h3>
+
+    <table>
+      <thead>
+        <tr><th>Strategy</th><th>How</th><th>Best for</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Summarization</strong></td>
+          <td>Periodically replace old messages with a compressed summary</td>
+          <td>Long conversations, multi-step tasks</td>
+        </tr>
+        <tr>
+          <td><strong>Windowing</strong></td>
+          <td>Keep only the last N turns verbatim; drop the rest</td>
+          <td>Simple chat applications</td>
+        </tr>
+        <tr>
+          <td><strong>Task isolation</strong></td>
+          <td>Start fresh for each distinct task; pass only relevant state forward</td>
+          <td>Agents, pipelines, batch jobs</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Triggering summarization</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Use a summarization prompt when history gets long</span>
+Summarize the conversation so far into a brief briefing document.
+Include:
+- What we were trying to accomplish
+- Key decisions made and why
+- Current state / what's been done
+- Any open questions or blockers
+
+Be concise. This summary will replace the full history in future context.</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>What to keep vs. drop</h3>
+    <ul>
+      <li><strong>Keep:</strong> decisions and their rationale, current task state, known constraints discovered during the conversation</li>
+      <li><strong>Drop:</strong> failed attempts and dead ends (once resolved), repetitive clarification back-and-forth, pasted code that was later superseded</li>
+      <li><strong>Compress:</strong> long code blocks where only the interface matters — keep the signature, drop the implementation</li>
+    </ul>
+
+    <div class="callout tip">
+      ✅ In Claude Code, <code>/compact</code> does this automatically — it compresses your conversation history into a summary and frees up space. Use it when a long session starts to feel sluggish or off-track.
+    </div>
+  </div>
+
+  <!-- RAG -->
+  <div class="section" id="rag">
+    <h2>🔍 Retrieval: Only Bring What You Need</h2>
+    <p>
+      RAG (Retrieval-Augmented Generation) is the practice of dynamically fetching relevant
+      information and inserting it into context at query time — rather than baking everything into
+      the system prompt or hoping the model somehow knows your internal docs.
+    </p>
+    <p>
+      The key word is <strong>relevant</strong>. RAG done badly is just context stuffing with extra steps.
+    </p>
+
+    <h3>What RAG looks like in practice</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Without RAG — hoping for the best</span>
+User: "How do I authenticate with our payment API?"
+<span class="c-bad">→ Model hallucinates credentials format based on training data. Classic.</span>
+
+<span class="c-cmt"># With RAG — grounded in actual docs</span>
+<span class="c-key">[System inserts: relevant section of internal API docs, example request, auth scheme]</span>
+User: "How do I authenticate with our payment API?"
+<span class="c-good">→ Model answers correctly, using the actual endpoint and auth format.</span></pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>RAG quality checklist</h3>
+    <ul>
+      <li><strong>Retrieve specifically, not broadly.</strong> Top 3–5 chunks beats top 50. Precision over recall.</li>
+      <li><strong>Chunk at meaningful boundaries.</strong> Split at headings and functions, not arbitrary character counts.</li>
+      <li><strong>Include metadata.</strong> Source file, date, section title — helps the model reason about reliability.</li>
+      <li><strong>Filter before inserting.</strong> A relevance threshold stops you from injecting noise.</li>
+      <li><strong>Tell the model what you retrieved.</strong> "Here are the top 3 relevant sections from the API docs:" beats silently injecting text.</li>
+    </ul>
+
+    <div class="compare">
+      <div class="compare-box bad">
+        <div class="compare-label">❌ Context stuffing</div>
+        <p>Retrieves all 200 docs related to "authentication". Inserts all 200. Context window explodes. Model answers based on whichever doc it happened to pay attention to.</p>
+      </div>
+      <div class="compare-box good">
+        <div class="compare-label">✅ Precision retrieval</div>
+        <p>Retrieves top 4 chunks with similarity &gt; 0.8, filtered to the "payments-api" namespace. Inserts 1,200 tokens of exactly relevant content. Model nails the answer.</p>
+      </div>
+    </div>
+
+    <div class="callout fun">
+      🎭 Feeding a model irrelevant retrieved documents is like forwarding someone a 400-email thread
+      when they asked a yes/no question. Technically you provided context.
+      Practically you made everything worse.
+    </div>
+  </div>
+
+  <!-- TOOLS -->
+  <div class="section" id="tools">
+    <h2>🔧 Tool Results in Context</h2>
+    <p>
+      When an AI uses tools (web search, code execution, file reads, API calls), the results land
+      in the context window. Raw tool output is often verbose, noisy, and context-expensive.
+      <strong>Filter it before it goes in.</strong>
+    </p>
+
+    <h3>The filter-before-inject pattern</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Instead of injecting a raw GitHub API response (3,000 tokens):</span>
+{
+  "id": 12345, "node_id": "MDQ6SXNzdWUxMjM0NQ==",
+  "url": "https://api.github.com/...", "repository_url": "...",
+  "html_url": "...", "number": 42, "state": "open",
+  "title": "Fix null pointer in auth middleware",
+  "body": "When the session token is missing...",
+  <span class="c-bad">... 2,900 more tokens of fields you don't need ...</span>
+}
+
+<span class="c-cmt"># Inject a structured summary (80 tokens):</span>
+<span class="c-good">GitHub issue #42 [open]: "Fix null pointer in auth middleware"
+Reported: 2024-03-01 · Labels: bug, high-priority
+Summary: Session token validation crashes when cookie is absent on /api/user</span></pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Rules for tool results</h3>
+    <ul>
+      <li><strong>Extract, don't dump.</strong> Pull out the 3 fields you need, not the entire response object.</li>
+      <li><strong>Truncate large outputs.</strong> If a tool returns 10,000 lines of logs, send the last 100 and the first error line.</li>
+      <li><strong>Structure over prose.</strong> A table of results takes fewer tokens than a paragraph describing them.</li>
+      <li><strong>Mark tool results clearly.</strong> "Search results for X:" before the content, so the model knows what it's reading.</li>
+      <li><strong>Drop stale results.</strong> If the model ran a query 8 turns ago and you've since moved on, drop it from history.</li>
+    </ul>
+
+    <div class="callout info">
+      ℹ️ Claude Code does this automatically for many tools — file reads, bash output, and search results are trimmed and labelled before being inserted into context. But if you're building your own agent, this is entirely your responsibility. The model will try to make sense of whatever you give it, and succeed less the messier it is.
+    </div>
+  </div>
+
+  <!-- ANTI-PATTERNS -->
+  <div class="section" id="anti-patterns">
+    <h2>🚫 Anti-patterns That Kill Context Quality</h2>
+
+    <h3>Context stuffing</h3>
+    <div class="compare">
+      <div class="compare-box bad">
+        <div class="compare-label">❌ Anti-pattern</div>
+        <p>"I'll just paste the entire codebase into the system prompt so the model always has everything it needs."</p>
+      </div>
+      <div class="compare-box good">
+        <div class="compare-label">✅ Better</div>
+        <p>Retrieve only the 2–3 files relevant to the current task. Use a CLAUDE.md for stable architecture facts. Fetch on demand, not upfront.</p>
+      </div>
+    </div>
+
+    <h3>Stale context</h3>
+    <div class="compare">
+      <div class="compare-box bad">
+        <div class="compare-label">❌ Anti-pattern</div>
+        <p>The system prompt says "we use MongoDB" but you migrated to PostgreSQL six months ago. The model confidently generates Mongo queries.</p>
+      </div>
+      <div class="compare-box good">
+        <div class="compare-label">✅ Better</div>
+        <p>Treat system prompts and memory files like code — they need to be updated when reality changes. Stale context causes the same bugs as stale documentation. But worse, because the model believes it.</p>
+      </div>
+    </div>
+
+    <h3>Assuming the model remembers</h3>
+    <p>
+      The model has no memory between separate conversations. "As I mentioned last time" is a
+      message into the void. The model will either hallucinate what you said last time or
+      politely note that it doesn't have that context.
+      Re-inject relevant decisions as explicit context, not as a courtesy reminder.
+    </p>
+
+    <h3>Burying the instruction</h3>
+    <div class="compare">
+      <div class="compare-box bad">
+        <div class="compare-label">❌ Anti-pattern</div>
+        <p>[500 tokens of background] ... [200 tokens of caveats] ... [100 tokens of context] ... Oh, and by the way, only change the sorting algorithm, not the data structure.</p>
+      </div>
+      <div class="compare-box good">
+        <div class="compare-label">✅ Better</div>
+        <p><strong>Task: Update the sorting algorithm only. Do not change the data structure.</strong><br>[Background and context follow]</p>
+      </div>
+    </div>
+    <p>
+      The most important instruction goes first or last — not in the middle.
+      Models, like humans, have a recency and primacy bias. Make it work for you.
+    </p>
+
+    <h3>One giant message</h3>
+    <p>
+      Sending 5,000 tokens in a single user message with 12 distinct tasks is not context engineering.
+      It's littering. Break complex work into sequential tasks with focused context per step.
+      Each message should have one job.
+    </p>
+
+    <div class="callout danger">
+      ⚠️ <strong>The sycophancy trap:</strong> If your context contains a confident-sounding wrong assumption, the model will often go along with it rather than contradict you. Context shapes not just what the model knows, but what it feels permitted to say. If you want pushback, ask for it explicitly: "Challenge my assumptions here."
+    </div>
+  </div>
+
+  <!-- CHECKLIST -->
+  <div class="section" id="checklist">
+    <h2>✅ Context Engineering Checklist</h2>
+    <p>Before running any significant AI task, run through this list.</p>
+
+    <h3>System prompt</h3>
+    <ul>
+      <li>Does it define a clear role and domain?</li>
+      <li>Does it include stable project facts (stack, constraints, conventions)?</li>
+      <li>Is it under 1,000 tokens? (If not, you're probably over-explaining.)</li>
+      <li>Is it accurate? (When did you last update it?)</li>
+    </ul>
+
+    <h3>Retrieved context</h3>
+    <ul>
+      <li>Are you retrieving for <em>this specific task</em>, not "just in case"?</li>
+      <li>Is each retrieved chunk actually relevant (not just keyword-adjacent)?</li>
+      <li>Have you labelled what you retrieved and where it came from?</li>
+      <li>Is the total retrieved content under 20% of your context budget?</li>
+    </ul>
+
+    <h3>Conversation history</h3>
+    <ul>
+      <li>Is the history still relevant, or are early turns now noise?</li>
+      <li>Have you summarized long conversations before they bloat context?</li>
+      <li>Are there superseded code blocks or resolved errors still taking up space?</li>
+    </ul>
+
+    <h3>Tool results</h3>
+    <ul>
+      <li>Have you filtered tool output to only the relevant fields?</li>
+      <li>Are large outputs (logs, diffs, search results) truncated intelligently?</li>
+      <li>Are results labelled so the model knows what it's reading?</li>
+    </ul>
+
+    <h3>The task itself</h3>
+    <ul>
+      <li>Is the key instruction at the top or the bottom — not buried in the middle?</li>
+      <li>Is there one clear task per message?</li>
+      <li>Have you stated what the model should <em>not</em> do, as well as what it should?</li>
+    </ul>
+
+    <div class="callout teal">
+      🔑 <strong>The one-sentence test:</strong> Can you describe in one sentence what the model needs to know and do? If yes, every piece of context should serve that sentence. If not, clarify the task first.
+    </div>
+
+    <hr>
+
+    <h3>Quick reference: token budgets</h3>
+    <div class="code-wrap">
+      <pre><span class="c-cmt"># Rough token budgets for a 200K-token context window</span>
+System prompt          :  500 – 2,000 tokens   (keep it tight)
+Stable project facts   :  500 – 1,500 tokens   (CLAUDE.md style)
+Retrieved context      : 5,000 – 30,000 tokens  (relevant only)
+Tool results           : 1,000 – 10,000 tokens  (filtered)
+Conversation history   : 5,000 – 50,000 tokens  (summarize often)
+User message           :  100 – 2,000 tokens   (one task)
+Model response buffer  : 4,000 – 8,000 tokens   (leave room to think)</pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+  </div>
+
+  <footer>
+    <p>🧠 Garbage in, garbage out. Precision in, precision out. This has always been true. Now it costs tokens.</p>
+    <p style="margin-top:.5rem;">Last updated: February 2026 · Part of the AI CLI Setup series</p>
+  </footer>
+
+</div>
+
+<script>
+  function copyCode(btn) {
+    const pre = btn.closest('.code-wrap').querySelector('pre');
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+      btn.textContent = '✓ Copied!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    }).catch(() => {
+      const ta = document.createElement('textarea'); ta.value = pre.innerText;
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+      btn.textContent = '✓ Copied!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  function setOS(os) {
+    const btnMac = document.getElementById('btnMac');
+    const btnWin = document.getElementById('btnWin');
+    if (os === 'mac') {
+      document.body.classList.remove('win');
+      btnMac.classList.add('mac-active'); btnMac.classList.remove('win-active');
+      btnWin.classList.remove('mac-active', 'win-active');
+    } else {
+      document.body.classList.add('win');
+      btnWin.classList.add('win-active'); btnWin.classList.remove('mac-active');
+      btnMac.classList.remove('mac-active', 'win-active');
+    }
+  }
+
+  document.querySelectorAll('.copy-btn').forEach(btn => { btn.textContent = 'Copy'; });
+</script>
+</body>
+</html>
