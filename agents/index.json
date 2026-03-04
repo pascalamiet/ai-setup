@@ -1,0 +1,95 @@
+{
+  "agents": [
+    {
+      "name": "code-reviewer",
+      "file": "code-reviewer.md",
+      "description": "Expert code review specialist. Proactively reviews code for quality, security, and maintainability.",
+      "model": "opus",
+      "color": "red",
+      "tools": ["Read", "Grep", "Glob", "Bash"],
+      "tags": ["code-quality", "security", "review", "engineering"]
+    },
+    {
+      "name": "fierce-critic",
+      "file": "fierce-critic.md",
+      "description": "Ruthlessly honest writing critic for emails, papers, posts, and any text requiring critical review.",
+      "model": "sonnet",
+      "color": "red",
+      "tools": [],
+      "tags": ["writing", "feedback", "editing", "critique", "academic-writing"]
+    },
+    {
+      "name": "gemini-assistant",
+      "file": "gemini-assistant.md",
+      "description": "Research assistant that uses Google Gemini to gather external information and fact-check claims.",
+      "model": "sonnet",
+      "color": "cyan",
+      "tools": ["Bash"],
+      "tags": ["research", "external-knowledge", "fact-checking", "web-search"],
+      "prerequisites": ["gemini CLI on PATH"]
+    },
+    {
+      "name": "mathematical-proofs-expert",
+      "file": "mathematical-proofs-expert.md",
+      "description": "Elite proof specialist for PhD-level mathematics: real analysis, topology, optimization, measure theory.",
+      "model": "opus",
+      "color": "orange",
+      "tools": [],
+      "tags": ["mathematics", "proofs", "real-analysis", "topology", "optimization", "measure-theory", "economics-math"]
+    },
+    {
+      "name": "microeconomics-expert",
+      "file": "microeconomics-expert.md",
+      "description": "Elite microeconomic theorist covering consumer theory, producer theory, general equilibrium, game theory, and mechanism design.",
+      "model": "opus",
+      "color": "green",
+      "tools": [],
+      "tags": ["microeconomics", "game-theory", "mechanism-design", "general-equilibrium", "consumer-theory", "economics"]
+    },
+    {
+      "name": "macroeconomics-expert",
+      "file": "macroeconomics-expert.md",
+      "description": "Elite macroeconomist covering DSGE models, monetary policy, growth theory, fiscal policy, and quantitative methods.",
+      "model": "opus",
+      "color": "blue",
+      "tools": [],
+      "tags": ["macroeconomics", "DSGE", "monetary-policy", "growth-theory", "business-cycles", "economics"]
+    },
+    {
+      "name": "econometrics-expert",
+      "file": "econometrics-expert.md",
+      "description": "Elite research advisor in econometrics, statistics, and machine learning for PhD-level empirical research.",
+      "model": "opus",
+      "color": "yellow",
+      "tools": [],
+      "tags": ["econometrics", "statistics", "causal-inference", "panel-data", "IV", "machine-learning", "economics"]
+    },
+    {
+      "name": "health-economics-expert",
+      "file": "health-economics-expert.md",
+      "description": "Elite health economist covering insurance markets, demand for health, provider behavior, and health policy evaluation.",
+      "model": "opus",
+      "color": "teal",
+      "tools": [],
+      "tags": ["health-economics", "insurance", "health-policy", "empirical-methods", "economics"]
+    },
+    {
+      "name": "labor-economics-expert",
+      "file": "labor-economics-expert.md",
+      "description": "Elite labor economist covering labor supply and demand, human capital, search and matching, wages, and labor policy.",
+      "model": "opus",
+      "color": "teal",
+      "tools": [],
+      "tags": ["labor-economics", "human-capital", "wages", "inequality", "labor-policy", "economics"]
+    },
+    {
+      "name": "development-economics-expert",
+      "file": "development-economics-expert.md",
+      "description": "Elite development economist covering poverty, credit markets, institutions, field experiments, and policy in developing countries.",
+      "model": "opus",
+      "color": "teal",
+      "tools": [],
+      "tags": ["development-economics", "poverty", "RCT", "institutions", "political-economy", "economics"]
+    }
+  ]
+}
