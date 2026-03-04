@@ -1,0 +1,31 @@
+{
+  "skills": [
+    {
+      "name": "academic-researcher",
+      "directory": "academic-researcher",
+      "file": "academic-researcher/SKILL.md",
+      "description": "Academic research assistant for literature reviews, paper analysis, citation formatting, and scholarly writing.",
+      "license": "MIT",
+      "allowed_tools": [],
+      "tags": ["research", "literature-review", "citations", "academic-writing", "papers"]
+    },
+    {
+      "name": "commit",
+      "directory": "commit",
+      "file": "commit/SKILL.md",
+      "description": "Execute git commits using the Conventional Commits specification with intelligent staging and message generation.",
+      "license": "MIT",
+      "allowed_tools": ["Bash"],
+      "tags": ["git", "version-control", "commits", "conventional-commits", "engineering"]
+    },
+    {
+      "name": "technical-presentations",
+      "directory": "technical-presentation",
+      "file": "technical-presentation/SKILL.md",
+      "description": "Framework for creating and delivering effective technical presentations, demos, and talks.",
+      "license": null,
+      "allowed_tools": ["Read", "Glob", "Grep"],
+      "tags": ["presentations", "slides", "demos", "public-speaking", "engineering"]
+    }
+  ]
+}
