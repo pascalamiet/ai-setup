@@ -8,6 +8,8 @@ It is also a platform where everyone who is interested can simply download the f
 
 If you are completely new to using agents, then the `resources/` folder contains some basic guides. The file `01_setup.html` is here to help you set up the most popular coding agents in your terminal. From there you can then expand your knowledge by looking at the guides `02_subagents.html` and `03_skills.html` or by asking your AI agent of choice directly.
 
+To practice hands-on, open `resources/workshop.html` — a task-based workshop that walks you through initializing a workspace, searching the web, creating files, spawning subagents, and writing your own custom skills, all step by step.
+
 ## 👥 Collaboration
 
 If you want to collaborate with us and be able to modify files, reach out to us and we can add you as a collaborator. 
