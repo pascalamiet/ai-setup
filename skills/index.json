@@ -64,6 +64,42 @@
       "tags": ["visualization", "figures", "ggplot2", "matplotlib", "Stata", "R", "Python", "academic-writing", "economics"]
     },
     {
+      "name": "docx",
+      "directory": "docx",
+      "file": "docx/SKILL.md",
+      "description": "Skill for reading, editing, and manipulating Word (.docx) documents, including tracked changes and comments.",
+      "license": "MIT",
+      "allowed_tools": ["Bash"],
+      "tags": ["docx", "word", "office", "documents", "editing"]
+    },
+    {
+      "name": "pdf",
+      "directory": "pdf",
+      "file": "pdf/SKILL.md",
+      "description": "Skill for working with PDF files: reading, form filling, annotation, and conversion.",
+      "license": "MIT",
+      "allowed_tools": ["Bash"],
+      "tags": ["pdf", "forms", "documents", "office"]
+    },
+    {
+      "name": "pptx",
+      "directory": "pptx",
+      "file": "pptx/SKILL.md",
+      "description": "Skill for creating and editing PowerPoint (.pptx) presentations programmatically.",
+      "license": "MIT",
+      "allowed_tools": ["Bash"],
+      "tags": ["pptx", "powerpoint", "presentations", "office", "slides"]
+    },
+    {
+      "name": "xlsx",
+      "directory": "xlsx",
+      "file": "xlsx/SKILL.md",
+      "description": "Skill for reading, writing, and manipulating Excel (.xlsx) spreadsheets.",
+      "license": "MIT",
+      "allowed_tools": ["Bash"],
+      "tags": ["xlsx", "excel", "spreadsheets", "office", "data"]
+    },
+    {
       "name": "debug",
       "directory": "debug",
       "file": "debug/SKILL.md",

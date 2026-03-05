@@ -56,8 +56,8 @@
       "tags": ["microeconomics", "macroeconomics", "game-theory", "mechanism-design", "general-equilibrium", "consumer-theory", "DSGE", "monetary-policy", "growth-theory", "business-cycles", "information-economics", "economics"]
     },
     {
-      "name": "econometrics-expert",
-      "file": "econometrics-expert.md",
+      "name": "econometrician",
+      "file": "econometrician.md",
       "description": "Elite research advisor in econometrics, statistics, and machine learning for PhD-level empirical research.",
       "model": "opus",
       "color": "yellow",
