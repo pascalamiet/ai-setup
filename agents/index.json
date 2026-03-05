@@ -29,6 +29,15 @@
       "prerequisites": ["gemini CLI on PATH"]
     },
     {
+      "name": "philosopher-of-science",
+      "file": "philosopher-of-science.md",
+      "description": "Expert in philosophy of science, scientific methodology, epistemology of causal inference, and philosophy of economics. Covers theories of causation, the demarcation problem, Bayesian vs. frequentist foundations, the nature of economic models, scientific realism, and the philosophy of social science.",
+      "model": "opus",
+      "color": "orange",
+      "tools": [],
+      "tags": ["philosophy", "methodology", "causation", "epistemology", "scientific-realism", "causal-inference", "foundations-of-economics", "statistics"]
+    },
+    {
       "name": "mathematical-proofs-expert",
       "file": "mathematical-proofs-expert.md",
       "description": "Elite proof specialist for PhD-level mathematics: real analysis, topology, optimization, measure theory.",

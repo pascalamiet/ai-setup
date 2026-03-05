@@ -55,6 +55,15 @@
       "tags": ["empirical-economics", "Stata", "R", "Python", "regression", "causal-inference", "tables", "data-cleaning"]
     },
     {
+      "name": "data-viz",
+      "directory": "data-viz",
+      "file": "data-viz/SKILL.md",
+      "description": "Guide for publication-quality figures in R (ggplot2), Python (matplotlib/seaborn), and Stata. Covers chart type selection, color, axes, error bars, journal formatting, event study plots, coefficient plots, and export settings.",
+      "license": "MIT",
+      "allowed_tools": [],
+      "tags": ["visualization", "figures", "ggplot2", "matplotlib", "Stata", "R", "Python", "academic-writing", "economics"]
+    },
+    {
       "name": "debug",
       "directory": "debug",
       "file": "debug/SKILL.md",
