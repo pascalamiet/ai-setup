@@ -12,7 +12,7 @@ To practice hands-on, open `resources/workshop.html` — a task-based workshop t
 
 ## 👥 Collaboration
 
-If you want to collaborate with us and be able to modify files, reach out to us and we can add you as a collaborator. 
+If you want to collaborate with us and be able to modify files, reach out to us and we can add you as a collaborator. Alternatively, you can always fork the repository and create a pull request if you want to contribute changes or improvements.
 
 ## 📦 Resources
 
