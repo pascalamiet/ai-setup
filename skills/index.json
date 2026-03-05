@@ -26,6 +26,42 @@
       "license": null,
       "allowed_tools": ["Read", "Glob", "Grep"],
       "tags": ["presentations", "slides", "demos", "public-speaking", "engineering"]
+    },
+    {
+      "name": "referee-report",
+      "directory": "referee-report",
+      "file": "referee-report/SKILL.md",
+      "description": "Structured workflow for writing peer review reports for academic economics journals: reading protocol, evaluation dimensions, report structure, and language guidance.",
+      "license": "MIT",
+      "allowed_tools": [],
+      "tags": ["peer-review", "referee-report", "academic-writing", "economics", "journals"]
+    },
+    {
+      "name": "prose-editor",
+      "directory": "prose-editor",
+      "file": "prose-editor/SKILL.md",
+      "description": "Actively rewrite and improve prose for clarity, economy, and precision. Produces revised text, not just critique. Covers academic papers, introductions, abstracts, emails, and reports.",
+      "license": "MIT",
+      "allowed_tools": [],
+      "tags": ["writing", "editing", "prose", "academic-writing", "clarity"]
+    },
+    {
+      "name": "empirical-workflow",
+      "directory": "empirical-workflow",
+      "file": "empirical-workflow/SKILL.md",
+      "description": "Scaffold and guide empirical economics projects: project structure, data cleaning checklists, regression specification, table shells, and robustness checklists. Covers Stata, R, and Python.",
+      "license": "MIT",
+      "allowed_tools": [],
+      "tags": ["empirical-economics", "Stata", "R", "Python", "regression", "causal-inference", "tables", "data-cleaning"]
+    },
+    {
+      "name": "debug",
+      "directory": "debug",
+      "file": "debug/SKILL.md",
+      "description": "Systematic debugging protocol: reproduce, isolate, hypothesize, verify, fix. Covers error message interpretation, common bug patterns, and debugging tools for Python, R, Stata, and Bash.",
+      "license": "MIT",
+      "allowed_tools": [],
+      "tags": ["debugging", "Python", "R", "Stata", "errors", "engineering"]
     }
   ]
 }

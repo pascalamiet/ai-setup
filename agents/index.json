@@ -38,22 +38,13 @@
       "tags": ["mathematics", "proofs", "real-analysis", "topology", "optimization", "measure-theory", "economics-math"]
     },
     {
-      "name": "microeconomics-expert",
-      "file": "microeconomics-expert.md",
-      "description": "Elite microeconomic theorist covering consumer theory, producer theory, general equilibrium, game theory, and mechanism design.",
+      "name": "economic-theorist",
+      "file": "economic-theorist.md",
+      "description": "Elite economic theorist covering the full spectrum of micro and macro theory: consumer and producer theory, general equilibrium, game theory, mechanism design, information economics, DSGE models, monetary policy, growth theory, fiscal policy, and quantitative macroeconomics.",
       "model": "opus",
-      "color": "green",
+      "color": "purple",
       "tools": [],
-      "tags": ["microeconomics", "game-theory", "mechanism-design", "general-equilibrium", "consumer-theory", "economics"]
-    },
-    {
-      "name": "macroeconomics-expert",
-      "file": "macroeconomics-expert.md",
-      "description": "Elite macroeconomist covering DSGE models, monetary policy, growth theory, fiscal policy, and quantitative methods.",
-      "model": "opus",
-      "color": "blue",
-      "tools": [],
-      "tags": ["macroeconomics", "DSGE", "monetary-policy", "growth-theory", "business-cycles", "economics"]
+      "tags": ["microeconomics", "macroeconomics", "game-theory", "mechanism-design", "general-equilibrium", "consumer-theory", "DSGE", "monetary-policy", "growth-theory", "business-cycles", "information-economics", "economics"]
     },
     {
       "name": "econometrics-expert",
@@ -65,31 +56,13 @@
       "tags": ["econometrics", "statistics", "causal-inference", "panel-data", "IV", "machine-learning", "economics"]
     },
     {
-      "name": "health-economics-expert",
-      "file": "health-economics-expert.md",
-      "description": "Elite health economist covering insurance markets, demand for health, provider behavior, and health policy evaluation.",
+      "name": "applied-economist",
+      "file": "applied-economist.md",
+      "description": "Elite applied microeconomist covering the full spectrum of applied fields: labor, health, development, behavioral, experimental, environmental, energy, urban, and economics of religion — with deep expertise in causal inference and structural estimation.",
       "model": "opus",
       "color": "teal",
       "tools": [],
-      "tags": ["health-economics", "insurance", "health-policy", "empirical-methods", "economics"]
-    },
-    {
-      "name": "labor-economics-expert",
-      "file": "labor-economics-expert.md",
-      "description": "Elite labor economist covering labor supply and demand, human capital, search and matching, wages, and labor policy.",
-      "model": "opus",
-      "color": "teal",
-      "tools": [],
-      "tags": ["labor-economics", "human-capital", "wages", "inequality", "labor-policy", "economics"]
-    },
-    {
-      "name": "development-economics-expert",
-      "file": "development-economics-expert.md",
-      "description": "Elite development economist covering poverty, credit markets, institutions, field experiments, and policy in developing countries.",
-      "model": "opus",
-      "color": "teal",
-      "tools": [],
-      "tags": ["development-economics", "poverty", "RCT", "institutions", "political-economy", "economics"]
+      "tags": ["labor-economics", "health-economics", "development-economics", "behavioral-economics", "experimental-economics", "environmental-economics", "energy-economics", "urban-economics", "economics-of-religion", "causal-inference", "RCT", "IV", "DiD", "RDD", "structural-estimation", "economics"]
     }
   ]
 }
