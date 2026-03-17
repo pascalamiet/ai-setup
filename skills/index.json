@@ -19,31 +19,31 @@
       "tags": ["git", "version-control", "commits", "conventional-commits", "engineering"]
     },
     {
-      "name": "technical-presentations",
-      "directory": "technical-presentation",
-      "file": "technical-presentation/SKILL.md",
-      "description": "Framework for creating and delivering effective technical presentations, demos, and talks.",
-      "license": null,
-      "allowed_tools": ["Read", "Glob", "Grep"],
-      "tags": ["presentations", "slides", "demos", "public-speaking", "engineering"]
-    },
-    {
-      "name": "referee-report",
-      "directory": "referee-report",
-      "file": "referee-report/SKILL.md",
-      "description": "Structured workflow for writing peer review reports for academic economics journals: reading protocol, evaluation dimensions, report structure, and language guidance.",
+      "name": "data-viz",
+      "directory": "data-viz",
+      "file": "data-viz/SKILL.md",
+      "description": "Guide for publication-quality figures in R (ggplot2), Python (matplotlib/seaborn), and Stata. Covers chart type selection, color, axes, error bars, journal formatting, event study plots, coefficient plots, and export settings.",
       "license": "MIT",
       "allowed_tools": [],
-      "tags": ["peer-review", "referee-report", "academic-writing", "economics", "journals"]
+      "tags": ["visualization", "figures", "ggplot2", "matplotlib", "Stata", "R", "Python", "academic-writing", "economics"]
     },
     {
-      "name": "prose-editor",
-      "directory": "prose-editor",
-      "file": "prose-editor/SKILL.md",
-      "description": "Actively rewrite and improve prose for clarity, economy, and precision. Produces revised text, not just critique. Covers academic papers, introductions, abstracts, emails, and reports.",
+      "name": "debug",
+      "directory": "debug",
+      "file": "debug/SKILL.md",
+      "description": "Systematic debugging protocol: reproduce, isolate, hypothesize, verify, fix. Covers error message interpretation, common bug patterns, and debugging tools for Python, R, Stata, and Bash.",
       "license": "MIT",
       "allowed_tools": [],
-      "tags": ["writing", "editing", "prose", "academic-writing", "clarity"]
+      "tags": ["debugging", "Python", "R", "Stata", "errors", "engineering"]
+    },
+    {
+      "name": "docx",
+      "directory": "docx",
+      "file": "docx/SKILL.md",
+      "description": "Skill for reading, editing, and manipulating Word (.docx) documents, including tracked changes and comments.",
+      "license": "MIT",
+      "allowed_tools": ["Bash"],
+      "tags": ["docx", "word", "office", "documents", "editing"]
     },
     {
       "name": "empirical-workflow",
@@ -55,22 +55,13 @@
       "tags": ["empirical-economics", "Stata", "R", "Python", "regression", "causal-inference", "tables", "data-cleaning"]
     },
     {
-      "name": "data-viz",
-      "directory": "data-viz",
-      "file": "data-viz/SKILL.md",
-      "description": "Guide for publication-quality figures in R (ggplot2), Python (matplotlib/seaborn), and Stata. Covers chart type selection, color, axes, error bars, journal formatting, event study plots, coefficient plots, and export settings.",
-      "license": "MIT",
-      "allowed_tools": [],
-      "tags": ["visualization", "figures", "ggplot2", "matplotlib", "Stata", "R", "Python", "academic-writing", "economics"]
-    },
-    {
-      "name": "docx",
-      "directory": "docx",
-      "file": "docx/SKILL.md",
-      "description": "Skill for reading, editing, and manipulating Word (.docx) documents, including tracked changes and comments.",
+      "name": "new-project",
+      "directory": "new-project",
+      "file": "new-project/SKILL.md",
+      "description": "Scaffold a new empirical research project with a standard directory structure, a CLAUDE.md copied from the permanent template, and a generated README.md.",
       "license": "MIT",
       "allowed_tools": ["Bash"],
-      "tags": ["docx", "word", "office", "documents", "editing"]
+      "tags": ["project-setup", "scaffold", "empirical-economics", "research", "directory-structure"]
     },
     {
       "name": "pdf",
@@ -91,6 +82,78 @@
       "tags": ["pptx", "powerpoint", "presentations", "office", "slides"]
     },
     {
+      "name": "presentation-generator",
+      "directory": "presentation-generator",
+      "file": "presentation-generator/SKILL.md",
+      "description": "Generate academic Beamer slide decks from existing content with multi-agent review. Covers creating or restructuring LaTeX/Beamer presentations, integrating R/Python/Stata figures, and the iterative compile-review-fix workflow.",
+      "license": "MIT",
+      "allowed_tools": ["Bash", "Read", "Write", "Edit"],
+      "tags": ["presentations", "beamer", "LaTeX", "slides", "academic-writing", "R", "Python", "Stata"]
+    },
+    {
+      "name": "presentation-rhetoric",
+      "directory": "presentation-rhetoric",
+      "file": "presentation-rhetoric/SKILL.md",
+      "description": "Framework for the rhetoric, narrative structure, and visual grammar of effective slide decks. Covers argument structure, cognitive load, assertion titles, visual hierarchy, and audience persuasion in academic or professional contexts.",
+      "license": "MIT",
+      "allowed_tools": [],
+      "tags": ["presentations", "rhetoric", "slides", "narrative", "academic-writing", "persuasion"]
+    },
+    {
+      "name": "prose-editor",
+      "directory": "prose-editor",
+      "file": "prose-editor/SKILL.md",
+      "description": "Actively rewrite and improve prose for clarity, economy, and precision. Produces revised text, not just critique. Covers academic papers, introductions, abstracts, emails, and reports.",
+      "license": "MIT",
+      "allowed_tools": [],
+      "tags": ["writing", "editing", "prose", "academic-writing", "clarity"]
+    },
+    {
+      "name": "referee-report",
+      "directory": "referee-report",
+      "file": "referee-report/SKILL.md",
+      "description": "Structured workflow for writing peer review reports for academic economics journals: reading protocol, evaluation dimensions, report structure, and language guidance.",
+      "license": "MIT",
+      "allowed_tools": [],
+      "tags": ["peer-review", "referee-report", "academic-writing", "economics", "journals"]
+    },
+    {
+      "name": "session-end",
+      "directory": "session-end",
+      "file": "session-end/SKILL.md",
+      "description": "Close a Claude Code session by documenting what was accomplished, updating CLAUDE.md with the current project structure, a session log entry, and a forward-looking todo list.",
+      "license": "MIT",
+      "allowed_tools": ["Read", "Write", "Edit", "Bash"],
+      "tags": ["session", "continuity", "progress-log", "project-management", "CLAUDE.md"]
+    },
+    {
+      "name": "session-start",
+      "directory": "session-start",
+      "file": "session-start/SKILL.md",
+      "description": "Open a Claude Code session by reading all relevant .md files and reconstructing project context from CLAUDE.md, README.md, memory files, and recent git history.",
+      "license": "MIT",
+      "allowed_tools": ["Read", "Bash", "Glob"],
+      "tags": ["session", "continuity", "context", "project-management", "CLAUDE.md"]
+    },
+    {
+      "name": "split-pdf",
+      "directory": "split-pdf",
+      "file": "split-pdf/SKILL.md",
+      "description": "Deep-read an academic paper by splitting it into 4-page chunks and extracting structured notes across 8 dimensions: research question, audience, method, data, statistical methods, findings, contributions, and replication feasibility.",
+      "license": "MIT",
+      "allowed_tools": ["Bash", "Read", "WebSearch"],
+      "tags": ["pdf", "academic-reading", "notes", "research", "papers", "economics"]
+    },
+    {
+      "name": "technical-presentation",
+      "directory": "technical-presentation",
+      "file": "technical-presentation/SKILL.md",
+      "description": "Framework for creating and delivering effective technical presentations, demos, and talks.",
+      "license": null,
+      "allowed_tools": ["Read", "Glob", "Grep"],
+      "tags": ["presentations", "slides", "demos", "public-speaking", "engineering"]
+    },
+    {
       "name": "xlsx",
       "directory": "xlsx",
       "file": "xlsx/SKILL.md",
@@ -98,15 +161,6 @@
       "license": "MIT",
       "allowed_tools": ["Bash"],
       "tags": ["xlsx", "excel", "spreadsheets", "office", "data"]
-    },
-    {
-      "name": "debug",
-      "directory": "debug",
-      "file": "debug/SKILL.md",
-      "description": "Systematic debugging protocol: reproduce, isolate, hypothesize, verify, fix. Covers error message interpretation, common bug patterns, and debugging tools for Python, R, Stata, and Bash.",
-      "license": "MIT",
-      "allowed_tools": [],
-      "tags": ["debugging", "Python", "R", "Stata", "errors", "engineering"]
     }
   ]
 }
