@@ -1,0 +1,205 @@
+% ============================================================
+%  PAPER TEMPLATE
+%  Replace all ALLCAPS placeholders with project-specific content.
+%  Sections marked [OPTIONAL] can be deleted if not needed.
+% ============================================================
+
+\documentclass[english, 12pt, a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{natbib}
+\usepackage[english]{babel}
+\usepackage{lmodern}
+%\usepackage{subfigure}
+\usepackage[top=1.25in, bottom=1.25in, left=1.25in, right=1.25in]{geometry}
+\usepackage[pdftex]{graphicx}
+\usepackage{verbatim}
+%\usepackage[width=0.8\textwidth]{caption}
+\usepackage{amsmath,amssymb,amsopn,amsthm,dsfont,mathrsfs,bm}
+\usepackage{float,placeins,flafter,longtable,array,booktabs}
+\usepackage{color}
+\usepackage{booktabs}
+\usepackage{threeparttable}
+\usepackage{blindtext}
+\usepackage[hidelinks]{hyperref}
+
+\usepackage{xr}
+\makeatletter
+
+% ----------------------------------------------------------------
+% THEOREM ENVIRONMENTS
+% ----------------------------------------------------------------
+\newtheorem{thm}{Theorem}
+\newtheorem{cor}{Corollary}
+\newtheorem{prop}{Proposition}
+\newtheorem{lem}{Lemma}
+\newtheorem{hyp}{Assumption}
+\newtheorem{mydef}{Definition}
+\newtheorem{remark}{Remark}[section]
+
+% ----------------------------------------------------------------
+% MATH MACROS  (add project-specific macros below the line)
+% ----------------------------------------------------------------
+\vfuzz2pt
+\hfuzz2pt
+
+\newcommand{\norm}[1]{\left\Vert#1\right\Vert}
+\newcommand{\abs}[1]{\left\vert#1\right\vert}
+\newcommand{\set}[1]{\left\{#1\right\}}
+\newcommand{\interieur}[1]{\stackrel{\circ}{#1}}
+\newcommand{\ind}[1]{\mathds{1}\left\{#1\right\}}
+\renewcommand{\S}{\mathcal{S}}
+\newcommand{\B}{\mathcal{B}}
+\newcommand{\C}{\mathcal{C}}
+\newcommand{\E}{E}
+\newcommand{\V}{V}
+\newcommand{\R}{\mathbb R}
+\newcommand{\N}{\mathbb N}
+\newcommand{\Z}{\mathbb Z}
+\newcommand{\eps}{\varepsilon}
+\newcommand{\deriv}[2]{\partial #1/\partial #2}
+\newcommand{\Deriv}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\convL}{\stackrel{d}{\longrightarrow}}
+\newcommand{\M}{\mathcal{M}}
+\newcommand{\cl}{\text{cl}}
+\newcommand{\sgn}{\text{sgn}}
+\newcommand{\tr}{\text{tr}}
+\newcommand{\Cov}{\text{Cov}}
+\newcommand{\Corr}{\text{Corr}}
+\newcommand{\Supp}{\text{Supp}}
+\newcommand{\indep}{\perp \!\!\! \perp}
+\def\CI{\text{CI}_{1-\alpha}}
+\def\CR{\text{CR}_{1-\alpha}}
+\newcommand{\bleu}[1]{\textcolor{blue}{#1}}
+\newcommand{\convP}{\stackrel{P}{\longrightarrow}}
+\newcommand{\convAS}{\stackrel{a.s.}{\longrightarrow}}
+\newcommand{\convD}{\stackrel{d}{\longrightarrow}}
+\newcommand{\convNor}[1]{\stackrel{d}{\longrightarrow} \mathcal{N}\left(0,#1\right)}
+\allowdisplaybreaks
+
+% PROJECT-SPECIFIC MACROS -- add here
+% \newcommand{\ATT}{\text{ATT}}
+% \newcommand{\DML}{\text{DML}}
+
+% ----------------------------------------------------------------
+
+\setlength{\parindent}{0pt}
+\linespread{1.3}
+\bibliographystyle{chicago}
+\date{\today}
+
+\begin{document}
+
+% ----------------------------------------------------------------
+% TITLE PAGE
+% ----------------------------------------------------------------
+
+\title{PAPER TITLE\thanks{ACKNOWLEDGEMENTS.}}
+
+\author{AUTHOR ONE \and AUTHOR TWO \and AUTHOR THREE}
+
+\maketitle
+%~\vspace{-1cm}
+%\hspace{5cm} \large{\textit{Preliminary and Incomplete}}
+
+%\vspace{2cm}
+\begin{abstract}
+ABSTRACT TEXT.
+\smallskip
+
+\textbf{Keywords:} KEYWORD ONE, KEYWORD TWO, KEYWORD THREE
+
+\end{abstract}
+
+\newpage
+
+% ----------------------------------------------------------------
+% INTRODUCTION
+% ----------------------------------------------------------------
+\section{Introduction}
+
+INTRODUCTION TEXT. The starting point is related to \cite{gentzkow2019measuring}.  % replace AuthorYEAR with actual cite key
+
+% ----------------------------------------------------------------
+% SETUP / MODEL
+% ----------------------------------------------------------------
+\section{Setup}
+
+\subsection{Setting}
+
+DESCRIBE THE ECONOMIC OR STATISTICAL SETTING.
+
+\subsection{Estimand}
+
+DEFINE THE OBJECT OF INTEREST.
+
+% ----------------------------------------------------------------
+% MAIN RESULTS
+% ----------------------------------------------------------------
+\section{Main Results}
+
+\subsection{RESULT ONE TITLE}
+
+RESULT ONE TEXT.
+
+\begin{thm}[THEOREM NAME]
+    \label{thm:main}
+    THEOREM STATEMENT.
+\end{thm}
+
+\begin{proof}
+    See Appendix~\ref{proof:main}.
+\end{proof}
+
+\subsection{RESULT TWO TITLE}
+
+RESULT TWO TEXT.
+
+% ----------------------------------------------------------------
+% SIMULATIONS  [OPTIONAL]
+% ----------------------------------------------------------------
+\section{Simulations}   % [OPTIONAL]
+
+SIMULATION SETUP AND FINDINGS.
+
+% ----------------------------------------------------------------
+% EMPIRICAL APPLICATION  [OPTIONAL]
+% ----------------------------------------------------------------
+\section{Empirical Application}   % [OPTIONAL]
+
+DESCRIBE DATA, SETTING, AND FINDINGS.
+
+% ----------------------------------------------------------------
+% CONCLUSION
+% ----------------------------------------------------------------
+\section{Conclusion}
+
+CONCLUSION TEXT.
+
+% ----------------------------------------------------------------
+% REFERENCES
+% ----------------------------------------------------------------
+\newpage
+\bibliography{references}
+
+% ----------------------------------------------------------------
+% APPENDIX
+% ----------------------------------------------------------------
+\appendix
+
+\newpage
+\setcounter{page}{1}
+\begin{center}
+    {\huge Online Appendix}
+\end{center}
+
+\section{Proofs}
+\label{proof:main}
+
+PROOF OF THEOREM~\ref{thm:main}.
+
+\section{Additional Results}   % [OPTIONAL]
+
+ADDITIONAL TABLES, FIGURES, OR ROBUSTNESS CHECKS.
+
+\end{document}
