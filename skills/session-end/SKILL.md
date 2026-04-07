@@ -63,7 +63,7 @@ project/
 
 ### Step 4: Write CLAUDE.md
 
-Write or update `CLAUDE.md` in the project root. Preserve all prior session entries. The file should follow this structure:
+Write or update `CLAUDE.md` in the project root. Keep only the most recent session entry — delete all older log entries to save tokens. The file should follow this structure:
 
 ---
 
@@ -103,9 +103,6 @@ Write or update `CLAUDE.md` in the project root. Preserve all prior session entr
 **Todos added:**
 - [new todo items that came up this session]
 
----
-
-[prior session entries below, oldest at bottom]
 ```
 
 ---
@@ -124,6 +121,5 @@ Tell the user:
 
 - **Project structure**: always regenerated fresh from the actual directory — never stale
 - **Todos**: carry all unchecked `[ ]` items forward; mark completed items `[x]` for one session, then drop them
-- **Session log**: prepend new entries (newest first); keep all prior entries intact
+- **Session log**: write only the current session entry — delete all prior entries to keep the file lean
 - **Project overview**: update only if the project's scope or stack has changed
-- **Do not truncate**: never delete prior session entries — they are the project memory
