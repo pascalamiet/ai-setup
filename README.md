@@ -26,6 +26,7 @@ If you want to collaborate with us and be able to modify files, reach out to us 
 **MCP Servers:**
 - [mcp.so](https://mcp.so/) — Community-driven directory of 17,000+ MCP servers
 - [MCP Market](https://mcpmarket.com/) — Directory of MCP servers and agent skills for Claude, Cursor, and other AI tools
+- [OpenEcon Data](https://github.com/hanlulong/openecon-data) — Give your agent direct access to data from FRED, BLS, World Bank, and Census. 
 
 **AI Coding Agents:**
 - [Claude Code](https://claude.com/product/claude-code) — Anthropic's terminal-based AI coding agent, the main tool this repo is built around
