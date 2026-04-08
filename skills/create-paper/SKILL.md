@@ -55,6 +55,12 @@ title and infer a draft abstract from it — tell the user what you assumed.
 mkdir -p <path>
 ```
 
+Copy the Makefile template:
+
+```bash
+cp ~/.claude/skills/create-paper/Makefile <path>/Makefile
+```
+
 ---
 
 ## Step 3 — Copy and fill `main.tex`
@@ -311,7 +317,8 @@ Remind the user to:
 - Fill any remaining `% TODO` stubs in `references.bib`
 - Add project-specific macros near the `% PROJECT-SPECIFIC MACROS` comment
 - Delete `[OPTIONAL]` sections they don't need
-- Run `latexmk -pdf main.tex` (or open in their LaTeX editor) to compile
+- Run `make` to compile, `make watch` to auto-recompile on save, `make open`
+  to compile and open the PDF (or use their LaTeX editor directly)
 
 ---
 
@@ -323,3 +330,12 @@ Remind the user to:
   `\indep`, `\convP`, `\convD`, `\norm{}`, `\abs{}`, `\set{}`.
 - Line spacing is 1.3; paragraph indent is off — use `\medskip` / `\bigskip` between paragraphs if needed.
 - Color helper: `\bleu{text}` renders in blue — useful for draft comments.
+- **Build commands**: `make` (compile + bibliography), `make watch` (auto-recompile
+  on save), `make open` (compile + open PDF), `make clean` (remove aux files).
+  latexmk handles the bibtex/biber passes automatically.
+- **TikZ diagrams**: ready-to-paste snippets for DAGs, event study timelines,
+  DiD 2×2 tables, methodology pipelines, and RD cutoff diagrams live in
+  `tikz-snippets.tex` in the same directory as this SKILL.md. Copy the relevant
+  snippet into `main.tex`. Each snippet notes the `\usetikzlibrary{...}` calls
+  it requires — add them to the preamble if not already present. Also add
+  `\usepackage{tikz}` to the preamble if inserting any TikZ diagram.

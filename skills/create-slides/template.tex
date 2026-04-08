@@ -1,0 +1,561 @@
+% =============================================================================
+% BEAMER SLIDE TEMPLATE
+%
+% HOW TO USE:
+%   Replace every \ph{NAME} call with real content.
+%   \ph{} renders as bold [NAME] in the compiled PDF — easy to spot.
+%   Also replace the color values on lines marked COLOR below.
+%   Uncomment \includegraphics lines once the figure files exist.
+%
+%   Figures go in a figures/ subdirectory next to this file.
+% =============================================================================
+
+\documentclass[t,pdf,aspectratio=169]{beamer}
+
+\usepackage[activate={true,nocompatibility}]{microtype}
+\usepackage{lmodern}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{breqn}
+\usepackage{nicefrac}
+\usepackage{dirtytalk}
+\usepackage{caption}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage{bm}
+\usepackage{bbm}
+\usepackage{amsmath,amssymb,amsopn,dsfont,mathrsfs,bm}
+
+% ---- Placeholder helper (delete once all placeholders are filled) -----------
+\newcommand{\ph}[1]{[#1]}
+
+% ---- Theorem environments ---------------------------------------------------
+\newtheorem{thm}{Theorem}
+\newtheorem{pf}{Proof}
+\newtheorem{dfn}{Definition}
+
+\BeforeBeginEnvironment{definition}{%
+    \setbeamercolor{block title}{fg=white,bg=PRIMARY}
+    \setbeamercolor{block body}{fg=black, bg=PRIMARY!20!white}
+}
+\AfterEndEnvironment{definition}{
+    \setbeamercolor{block title}{use=structure,fg=white,bg=structure.fg!75!black}
+    \setbeamercolor{block body}{parent=normal text,use=block title,bg=block title.bg!10!bg}
+}
+\BeforeBeginEnvironment{theorem}{%
+    \setbeamercolor{block title}{fg=white,bg=PRIMARY}
+    \setbeamercolor{block body}{fg=black, bg=PRIMARY!20!white}
+}
+\AfterEndEnvironment{theorem}{
+    \setbeamercolor{block title}{use=structure,fg=white,bg=structure.fg!75!black}
+    \setbeamercolor{block body}{parent=normal text,use=block title,bg=block title.bg!10!bg}
+}
+\AtBeginEnvironment{thm}{%
+    \setbeamercolor{block body}{bg=white, fg=black}
+    \setbeamercolor{block title}{bg=PRIMARY, fg=white}
+}
+
+% ---- Appendix frame counter -------------------------------------------------
+\newcommand{\backupbegin}{
+   \newcounter{finalframe}
+   \setcounter{finalframe}{\value{framenumber}}
+}
+\newcommand{\backupend}{
+   \setcounter{framenumber}{\value{finalframe}}
+}
+
+% ---- Math helpers -----------------------------------------------------------
+\newcommand{\indep}{\perp\!\!\!\perp}
+\newcommand{\ind}[1]{\mathds{1}\left\{#1\right\}}
+
+% ---- Theme and colors -------------------------------------------------------
+\usetheme{Madrid}
+\usecolortheme{default}
+
+% COLOR: primary brand color as RGB in [0,1] — e.g. (64,92,126) -> (0.251,0.361,0.494)
+\definecolor{PRIMARY}{rgb}{0.25098039, 0.36078431, 0.49411765}
+% COLOR: lighter accent — e.g. (165,192,231) -> (0.647,0.753,0.906)
+\definecolor{PRIMARY-light}{rgb}{0.647058823529412, 0.752941176470588, 0.905882352941176}
+
+\setbeamercolor*{palette primary}{bg=PRIMARY, fg=white}
+\setbeamercolor*{palette secondary}{bg=white, fg=PRIMARY}
+\setbeamercolor*{palette tertiary}{bg=PRIMARY-light, fg=black}
+\setbeamercolor*{palette quaternary}{bg=PRIMARY, fg=white}
+\setbeamercolor{section number projected}{bg=PRIMARY}
+\setbeamercolor{button}{fg=white, bg=PRIMARY-light}
+
+\hypersetup{colorlinks, citecolor=PRIMARY, filecolor=PRIMARY,
+            linkcolor=PRIMARY, urlcolor=PRIMARY}
+
+\mode<presentation>{}
+\setbeamertemplate{itemize item}{\color{black}$\bullet$}
+\setbeamertemplate{itemize subitem}{\color{black}\scriptsize$\bullet$}
+
+% =============================================================================
+% TITLE BLOCK
+% =============================================================================
+
+\title[\ph{Short title}]{\ph{Full title}}
+\subtitle{\ph{Subtitle}}          % remove line if no subtitle
+
+\author[\ph{Short author(s)}]{
+  \textbf{\ph{Author One}}\inst{1} \and
+  \textbf{\ph{Author Two}}\inst{1} \and
+  \textbf{\ph{Author Three}}\inst{2}
+  % add/remove authors as needed
+}
+\institute[]{
+  \inst{1} \ph{Institution One} \\
+  \inst{2} \ph{Institution Two}
+  % add/remove institutions as needed
+}
+
+\date[\ph{Short date}]{\ph{Venue} \\ \ph{Full date, e.g. April 8, 2026}}
+
+% =============================================================================
+\begin{document}
+% =============================================================================
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+% Uncomment for table of contents:
+% \begin{frame}{Overview}
+%   \tableofcontents
+% \end{frame}
+
+% =============================================================================
+\section{Introduction}
+% =============================================================================
+
+% --- Section title card ------------------------------------------------------
+\begin{frame}
+  \vfill
+  \begin{center}
+    \color{PRIMARY}{\huge{Introduction}}
+  \end{center}
+  \vfill
+\end{frame}
+
+% --- Research question -------------------------------------------------------
+\begin{frame}{Introduction}
+  \framesubtitle{Research Question}
+  \vfill
+  \begin{center}
+    \textcolor{PRIMARY}{
+      \Large
+      \textbf{\ph{Research question line 1} \\
+      \medskip \ph{Research question line 2}}
+    }
+  \end{center}
+  \vfill
+\end{frame}
+
+% --- Motivation --------------------------------------------------------------
+\begin{frame}{Introduction}
+  \framesubtitle{Motivation}
+  \vfill
+  \begin{itemize}
+    \item \ph{Motivation item 1}
+    \item \ph{Motivation item 2}
+    \item \ph{Motivation item 3}
+    \item \ph{Motivation item 4}
+  \end{itemize}
+  \vfill
+\end{frame}
+
+% --- Optional: motivating figure (two-panel) ---------------------------------
+% \begin{frame}{Introduction}
+%   \framesubtitle{\ph{Figure slide subtitle}}
+%   \vfill
+%   \begin{center}
+%   \begin{minipage}{0.49\textwidth}
+%     \begin{figure}[htb]
+%       \centering
+%       \includegraphics[width=7cm]{figures/FIGURE_LEFT}
+%     \end{figure}
+%   \end{minipage}
+%   \begin{minipage}{0.49\textwidth}
+%     \begin{figure}[htb]
+%       \centering
+%       \includegraphics[width=7cm]{figures/FIGURE_RIGHT}
+%     \end{figure}
+%   \end{minipage}
+%   \end{center}
+%   \vfill
+% \end{frame}
+
+% --- Contribution ------------------------------------------------------------
+\begin{frame}{Introduction}
+  \framesubtitle{Contribution}
+  \vfill
+  We want to:
+  \begin{itemize}
+    \item \ph{Contribution 1}
+    \item \ph{Contribution 2}
+    \item \ph{Contribution 3}
+    \item \ph{Contribution 4}
+    \item \ph{Contribution 5}
+  \end{itemize}
+  \vfill
+\end{frame}
+
+% --- Literature --------------------------------------------------------------
+\begin{frame}{Introduction}
+  \framesubtitle{Literature}
+  \vfill
+
+  \textcolor{PRIMARY}{\textbf{\ph{Literature topic 1}}}
+  \scriptsize
+  \begin{itemize}
+    \item[-] \ph{Author(s) (Year, Journal) -- description}
+    \item[-] \ph{Author(s) (Year, Journal) -- description}
+    \item[-] \ph{Author(s) (Year, Journal) -- description}
+  \end{itemize}
+  \medskip
+
+  \normalsize
+  \textcolor{PRIMARY}{\textbf{\ph{Literature topic 2}}}
+  \scriptsize
+  \begin{itemize}
+    \item[-] \ph{Author(s) (Year, Journal) -- description}
+    \item[-] \ph{Author(s) (Year, Journal) -- description}
+  \end{itemize}
+  \medskip
+
+  \normalsize
+  \textcolor{PRIMARY}{\textbf{\ph{Literature topic 3}}}
+  \scriptsize
+  \begin{itemize}
+    \item[-] \ph{Author(s) (Year, Journal) -- description}
+    \item[-] \ph{Author(s) (Year, Journal) -- description}
+  \end{itemize}
+
+  \vfill
+\end{frame}
+
+
+% =============================================================================
+\section{Methodology}
+% =============================================================================
+
+\begin{frame}
+  \vfill
+  \begin{center}
+    \color{PRIMARY}{\huge{Methodology}}
+  \end{center}
+  \vfill
+\end{frame}
+
+% --- Pipeline overview figure ------------------------------------------------
+\begin{frame}{Methodology}
+  \framesubtitle{\ph{Method overview subtitle}}
+  \hypertarget{method-back}{}
+  \begin{figure}[htb]
+    \centering
+    % \includegraphics[width=10cm]{figures/METHOD_OVERVIEW_FIGURE}
+  \end{figure}
+  \vfill
+  % \hyperlink{method-detail}{\beamergotobutton{Details}}
+\end{frame}
+
+% --- Core math / notation ----------------------------------------------------
+\begin{frame}{Methodology}
+  \framesubtitle{\ph{Method detail subtitle}}
+  \vfill
+
+  \ph{Introductory text for the key equation.}
+
+  \begin{equation}
+    \text{\ph{KEY\_EQUATION}}   % replace with actual LaTeX math
+  \end{equation}
+
+  \ph{Text after the equation, e.g. what each term means.}
+
+  \vfill
+\end{frame}
+
+% --- Challenges (all highlighted) --------------------------------------------
+\begin{frame}{Methodology}
+  \framesubtitle{Challenges}
+  \vfill
+
+  \textbf{\textcolor{PRIMARY}{\ph{Challenge 1 title}}}
+  \scriptsize
+  \begin{itemize}
+    \item[-] \ph{Challenge 1, item 1}
+    \item[-] \ph{Challenge 1, item 2}
+    \item[-] \ph{Challenge 1, item 3}
+  \end{itemize}
+  \medskip
+  \normalsize
+
+  \textbf{\textcolor{PRIMARY}{\ph{Challenge 2 title}}}
+  \scriptsize
+  \begin{itemize}
+    \item[-] \ph{Challenge 2, item 1}
+    \item[-] \ph{Challenge 2, item 2}
+  \end{itemize}
+  \medskip
+  \normalsize
+
+  \textbf{\textcolor{PRIMARY}{\ph{Challenge 3 title}}}
+  \scriptsize
+  \begin{itemize}
+    \item[-] \ph{Challenge 3, item 1}
+    \item[-] \ph{Challenge 3, item 2}
+  \end{itemize}
+  \vfill
+\end{frame}
+
+% --- Theorem -----------------------------------------------------------------
+\begin{frame}{Methodology}
+  \framesubtitle{\ph{Theorem slide subtitle}}
+  \vfill
+  \begin{theorem}[\ph{Theorem name}]
+    \ph{Theorem statement}
+  \end{theorem}
+  \vfill
+  \ph{Discussion / construction that follows the theorem.}
+  \vfill
+\end{frame}
+
+% --- Illustrative figure -----------------------------------------------------
+\begin{frame}{Methodology}
+  \framesubtitle{\ph{Figure subtitle}}
+  \vfill
+  \begin{figure}[htb]
+    \centering
+    % \includegraphics[width=10.5cm]{figures/METHOD_FIGURE}
+    % \caption*{{\scriptsize Source: \ph{Source citation}}}
+  \end{figure}
+  \vfill
+\end{frame}
+
+% --- Simulation / power curve ------------------------------------------------
+\begin{frame}{Methodology}
+  \framesubtitle{\ph{Power curve subtitle}}
+  \vfill
+  \begin{figure}[h]
+    \centering
+    % \includegraphics[width=0.5\linewidth]{figures/POWER_FIGURE}
+    % \caption{\ph{Caption for the power curve.}}
+  \end{figure}
+  \textcolor{PRIMARY-light}{\textit{Note: \ph{Details on simulation setup.}}}
+  \vfill
+\end{frame}
+
+% --- Alternative approaches --------------------------------------------------
+\begin{frame}{Methodology}
+  \framesubtitle{Other Approaches}
+  \vfill
+  \textcolor{PRIMARY}{\textbf{\ph{Approach 1 title}}}
+  \scriptsize
+  \begin{itemize}
+    \item[-] \ph{Approach 1, item 1}
+    \item[-] \ph{Approach 1, item 2}
+    \item[-] \ph{Approach 1, item 3}
+  \end{itemize}
+  \bigskip
+  \normalsize
+  \textcolor{PRIMARY}{\textbf{\ph{Approach 2 title}}}
+  \scriptsize
+  \begin{itemize}
+    \item[-] \ph{Approach 2, item 1}
+    \item[-] \ph{Approach 2, item 2}
+  \end{itemize}
+  \vfill
+\end{frame}
+
+
+% =============================================================================
+\section{Results}
+% =============================================================================
+
+\begin{frame}
+  \vfill
+  \begin{center}
+    \color{PRIMARY}{\huge{Results}}
+  \end{center}
+  \vfill
+\end{frame}
+
+% --- Main results figure -----------------------------------------------------
+\begin{frame}{Results}
+  \framesubtitle{\ph{Results subtitle}}
+  \vfill
+  \begin{figure}[h]
+    \centering
+    % \includegraphics[width=0.7\linewidth]{figures/RESULTS_FIGURE}
+    % \caption{\ph{Results caption.}}
+  \end{figure}
+  \vfill
+\end{frame}
+
+% --- Two-column comparison ---------------------------------------------------
+\begin{frame}{Results}
+  \framesubtitle{\ph{Comparison subtitle}}
+  \vfill
+  \begin{columns}[t]
+    \begin{column}{0.48\textwidth}
+      \textbf{\ph{Group / condition 1}}
+      \begin{itemize}
+        \item[-] \ph{Item 1}
+        \item[-] \ph{Item 2}
+        \item[-] \ph{Item 3}
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \textbf{\ph{Group / condition 2}}
+      \begin{itemize}
+        \item[-] \ph{Item 1}
+        \item[-] \ph{Item 2}
+        \item[-] \ph{Item 3}
+      \end{itemize}
+    \end{column}
+  \end{columns}
+  \vfill
+\end{frame}
+
+
+% =============================================================================
+\section{Next Steps}
+% =============================================================================
+
+\begin{frame}
+  \vfill
+  \begin{center}
+    \color{PRIMARY}{\huge{Next Steps}}
+  \end{center}
+  \vfill
+\end{frame}
+
+\begin{frame}{Next Steps}
+  \framesubtitle{\ph{Next steps subtitle}}
+  \vfill
+  \textcolor{PRIMARY}{\textbf{\ph{Next step 1 title}}}
+  \scriptsize
+  \begin{itemize}
+    \item[-] \ph{Item 1}
+    \item[-] \ph{Item 2}
+    \item[-] \ph{Item 3}
+  \end{itemize}
+  \medskip
+  \normalsize
+  \textcolor{PRIMARY}{\textbf{\ph{Next step 2 title}}}
+  \scriptsize
+  \begin{itemize}
+    \item[-] \ph{Item 1}
+    \item[-] \ph{Item 2}
+  \end{itemize}
+  \medskip
+  \normalsize
+  \textcolor{PRIMARY}{\textbf{\ph{Next step 3 title}}}
+  \scriptsize
+  \begin{itemize}
+    \item[-] \ph{Item 1}
+    \item[-] \ph{Item 2}
+  \end{itemize}
+  \vfill
+\end{frame}
+
+% --- Closing slide -----------------------------------------------------------
+\begin{frame}
+  \vfill
+  \begin{center}
+    \color{PRIMARY}{\huge{Thank you for your attention!}}
+  \end{center}
+  \vfill
+\end{frame}
+
+
+% =============================================================================
+% APPENDIX — frame numbers reset; do not count past the main deck
+% =============================================================================
+
+\backupbegin
+
+\begin{frame}
+  \vfill
+  \begin{center}
+    \color{PRIMARY}{\huge{Appendix}}
+  \end{center}
+  \vfill
+\end{frame}
+
+% --- Appendix: concept / background ------------------------------------------
+\begin{frame}{Appendix}
+  \framesubtitle{\ph{Appendix slide 1 subtitle}}
+  \hypertarget{appendix-1}{}
+  \vfill
+  \begin{minipage}{0.49\textwidth}
+    \begin{itemize}
+      \item \ph{Item 1}
+      \item \ph{Item 2}
+      \item \ph{Item 3}
+    \end{itemize}
+  \end{minipage}
+  \begin{minipage}{0.49\textwidth}
+    \begin{figure}[htb]
+      \centering
+      % \includegraphics[width=7cm]{figures/APPENDIX_1_FIGURE}
+      % \caption*{{\scriptsize Source: \ph{Source}}}
+    \end{figure}
+  \end{minipage}
+  \vfill
+  \hyperlink{appendix-1-back}{\beamergotobutton{Back}}
+\end{frame}
+
+% --- Appendix: math / theory 1 -----------------------------------------------
+\begin{frame}{Appendix}
+  \framesubtitle{\ph{Appendix slide 2 subtitle}}
+  \hypertarget{appendix-2}{}
+  \vfill
+
+  \textcolor{PRIMARY}{\textbf{\ph{Theorem / problem name:}}}
+  \ph{Introductory text.}
+
+  \begin{equation}
+    \text{\ph{EQUATION}}   % replace with actual LaTeX math
+  \end{equation}
+
+  \ph{Follow-up text or additional equations.}
+
+  \vfill
+  \hyperlink{appendix-2-back}{\beamergotobutton{Back}}
+\end{frame}
+
+% --- Appendix: definition ----------------------------------------------------
+\begin{frame}{Appendix}
+  \framesubtitle{\ph{Appendix slide 3 subtitle}}
+  \hypertarget{appendix-3}{}
+  \vfill
+  \begin{definition}[\ph{Definition name}]
+    \ph{Definition body.}
+  \end{definition}
+  \vfill
+  \hyperlink{appendix-3-back}{\beamergotobutton{Back}}
+\end{frame}
+
+% --- Appendix: example texts (two-column) ------------------------------------
+\begin{frame}{\ph{Example slide title}}
+  \begin{columns}[t]
+    \begin{column}{0.48\textwidth}
+      \textbf{\ph{Group 1 label}}
+      \begin{itemize}
+        \item \ph{Example text from group 1.}
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \textbf{\ph{Group 2 label}}
+      \begin{itemize}
+        \item \ph{Example text from group 2.}
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\backupend
+
+\end{document}

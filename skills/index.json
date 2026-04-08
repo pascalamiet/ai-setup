@@ -19,6 +19,24 @@
       "tags": ["git", "version-control", "commits", "conventional-commits", "engineering"]
     },
     {
+      "name": "create-paper",
+      "directory": "create-paper",
+      "file": "create-paper/SKILL.md",
+      "description": "Scaffold a new LaTeX economics paper from a standard template with pre-loaded math macros, theorem environments, bibliography style, and a skeleton structure.",
+      "license": "MIT",
+      "allowed_tools": ["Bash", "Read", "Write", "Edit"],
+      "tags": ["LaTeX", "paper", "scaffold", "academic-writing", "economics", "research"]
+    },
+    {
+      "name": "create-slides",
+      "directory": "create-slides",
+      "file": "create-slides/SKILL.md",
+      "description": "Scaffold a new LaTeX Beamer slide deck from a standard template. Covers rhetoric design, iterative compile-review-fix workflow, and multi-agent quality review.",
+      "license": "MIT",
+      "allowed_tools": ["Bash", "Read", "Write", "Edit"],
+      "tags": ["presentations", "beamer", "LaTeX", "slides", "academic-writing", "scaffold", "economics"]
+    },
+    {
       "name": "data-viz",
       "directory": "data-viz",
       "file": "data-viz/SKILL.md",
@@ -46,6 +64,15 @@
       "tags": ["docx", "word", "office", "documents", "editing"]
     },
     {
+      "name": "econ-write",
+      "directory": "econ-write",
+      "file": "econ-write/SKILL.md",
+      "description": "Expert economics paper writing assistant synthesizing advice from 50+ top guides by Cochrane, McCloskey, Shapiro, Head, Bellemare, Goldin, Glaeser, Kremer, and other leading economists. Covers all paper types, sections, LaTeX formatting, and referee responses.",
+      "license": "MIT",
+      "allowed_tools": [],
+      "tags": ["academic-writing", "economics", "papers", "editing", "prose", "LaTeX"]
+    },
+    {
       "name": "empirical-workflow",
       "directory": "empirical-workflow",
       "file": "empirical-workflow/SKILL.md",
@@ -55,6 +82,15 @@
       "tags": ["empirical-economics", "Stata", "R", "Python", "regression", "causal-inference", "tables", "data-cleaning"]
     },
     {
+      "name": "initialize",
+      "directory": "initialize",
+      "file": "initialize/SKILL.md",
+      "description": "Create a CLAUDE.md file in the current working directory by inspecting the project and generating a populated, accurate project context file.",
+      "license": "MIT",
+      "allowed_tools": ["Read", "Write", "Bash", "Glob"],
+      "tags": ["project-setup", "CLAUDE.md", "session", "context", "scaffold"]
+    },
+    {
       "name": "new-project",
       "directory": "new-project",
       "file": "new-project/SKILL.md",
@@ -62,6 +98,15 @@
       "license": "MIT",
       "allowed_tools": ["Bash"],
       "tags": ["project-setup", "scaffold", "empirical-economics", "research", "directory-structure"]
+    },
+    {
+      "name": "notebooklm",
+      "directory": "notebooklm",
+      "file": "notebooklm/SKILL.md",
+      "description": "Complete API for Google NotebookLM — create notebooks, add sources, generate podcasts/videos/quizzes/flashcards/infographics/slide decks, and download results. Includes install, auth, and Co-work integration.",
+      "license": null,
+      "allowed_tools": ["Bash"],
+      "tags": ["notebooklm", "google", "podcast", "research", "documents", "ai"]
     },
     {
       "name": "pdf",
@@ -80,15 +125,6 @@
       "license": "MIT",
       "allowed_tools": ["Bash"],
       "tags": ["pptx", "powerpoint", "presentations", "office", "slides"]
-    },
-    {
-      "name": "presentation-generator",
-      "directory": "presentation-generator",
-      "file": "presentation-generator/SKILL.md",
-      "description": "Generate academic Beamer slide decks from existing content with multi-agent review. Covers creating or restructuring LaTeX/Beamer presentations, integrating R/Python/Stata figures, and the iterative compile-review-fix workflow.",
-      "license": "MIT",
-      "allowed_tools": ["Bash", "Read", "Write", "Edit"],
-      "tags": ["presentations", "beamer", "LaTeX", "slides", "academic-writing", "R", "Python", "Stata"]
     },
     {
       "name": "presentation-rhetoric",
@@ -143,15 +179,6 @@
       "license": "MIT",
       "allowed_tools": ["Bash", "Read", "WebSearch"],
       "tags": ["pdf", "academic-reading", "notes", "research", "papers", "economics"]
-    },
-    {
-      "name": "technical-presentation",
-      "directory": "technical-presentation",
-      "file": "technical-presentation/SKILL.md",
-      "description": "Framework for creating and delivering effective technical presentations, demos, and talks.",
-      "license": null,
-      "allowed_tools": ["Read", "Glob", "Grep"],
-      "tags": ["presentations", "slides", "demos", "public-speaking", "engineering"]
     },
     {
       "name": "xlsx",
