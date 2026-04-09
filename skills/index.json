@@ -136,6 +136,15 @@
       "tags": ["presentations", "rhetoric", "slides", "narrative", "academic-writing", "persuasion"]
     },
     {
+      "name": "promptify",
+      "directory": "promptify",
+      "file": "promptify/SKILL.md",
+      "description": "Rewrite rough voice-typed English into a polished, paste-ready prompt for Claude Code, Codex, or similar AI workflows.",
+      "license": "MIT",
+      "allowed_tools": [],
+      "tags": ["prompts", "editing", "voice-dictation", "writing", "productivity"]
+    },
+    {
       "name": "prose-editor",
       "directory": "prose-editor",
       "file": "prose-editor/SKILL.md",
