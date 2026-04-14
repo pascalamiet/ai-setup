@@ -1,19 +1,19 @@
-# skill-sync
+# local-sync
 
 Pulls skills and subagent definitions from the
 [ai-setup](https://github.com/pascalamiet/ai-setup) repository and installs
 them into the local config directories of Claude Code, Gemini CLI, or Codex CLI.
 This way, in one clean command you have all your agents equipped with the latest skills and
-subagents instead of copying manually. 
+subagents instead of copying manually.
 
 ## What gets synced
 
 | Source | Destination (global) | Destination (project) |
 |---|---|---|
-| `skills/<name>/SKILL.md` | `~/.claude/skills/<name>.md` | `.claude/skills/<name>.md` |
+| `skills/<name>/` *(all files)* | `~/.claude/skills/<name>/` | `.claude/skills/<name>/` |
 | `agents/<name>.md` | `~/.claude/agents/<name>.md` | `.claude/agents/<name>.md` |
-| `skills/<name>/SKILL.md` | `~/.gemini/skills/<name>.md` *(if enabled)* | `.gemini/skills/<name>.md` |
-| `skills/<name>/SKILL.md` | `~/.codex/skills/<name>.md` *(if enabled)* | `.codex/skills/<name>.md` |
+| `skills/<name>/` *(all files)* | `~/.gemini/skills/<name>/` *(if enabled)* | `.gemini/skills/<name>/` |
+| `skills/<name>/` *(all files)* | `~/.codex/skills/<name>/` *(if enabled)* | `.codex/skills/<name>/` |
 
 Skill files are written as-is, including their YAML frontmatter. Agents are
 written to Claude only (Gemini and Codex have no equivalent concept).
@@ -27,10 +27,31 @@ written to Claude only (Gemini and Codex have no equivalent concept).
 | pip | any |
 | git | any |
 
+## Platform support
+
+| Platform | `sync.py` | `install.sh` |
+|---|---|---|
+| macOS | ✔ | ✔ |
+| Linux | ✔ | ✔ |
+| Windows | ✔ | ✖ |
+
+`sync.py` is pure Python and works on all platforms. `install.sh` is a Bash
+script and requires macOS or Linux (or WSL on Windows). On Windows, run the
+setup steps manually:
+
+```powershell
+pip install pyyaml
+python sync.py --dry-run   # preview
+python sync.py             # run
+```
+
+To auto-sync on Windows, add a task in **Task Scheduler** pointing to
+`python path\to\sync.py`.
+
 ## First-time setup
 
 ```bash
-cd skill-sync
+cd local-sync
 bash install.sh
 ```
 
@@ -40,6 +61,30 @@ The installer will:
 3. Show a dry-run preview of what will be synced
 4. Ask whether to run the actual sync
 5. Optionally register a daily cron job (09:00) so skills stay up to date automatically
+
+## Global command
+
+The installer offers to create a `local-sync` symlink in `~/.local/bin/` so you
+can run the script from anywhere without typing the full path:
+
+```bash
+local-sync                  # same as python3 /path/to/sync.py
+local-sync --project        # project-local sync
+local-sync --dry-run        # preview
+```
+
+To set it up manually instead:
+
+```bash
+mkdir -p ~/.local/bin
+ln -s /path/to/local-sync/sync.py ~/.local/bin/local-sync
+```
+
+Make sure `~/.local/bin` is on your `PATH` (add to `~/.bashrc` or `~/.zshrc` if not):
+
+```bash
+export PATH="$HOME/.local/bin:$PATH"
+```
 
 ## Manual usage
 
@@ -114,7 +159,7 @@ targets:
 
 ## How it works
 
-1. **Fetch** — the repo is cloned into `~/.skill-sync/cache/ai-setup` on first
+1. **Fetch** — the repo is cloned into `~/.local-sync/cache/ai-setup` on first
    run, then updated via `git pull` on subsequent runs.
 2. **Collect** — `skills/index.json` and `agents/index.json` are read to
    discover all available files.
@@ -126,13 +171,13 @@ targets:
 If you chose to set up a cron job during installation, sync runs daily at 09:00:
 
 ```
-0 9 * * * cd /path/to/skill-sync && python3 sync.py >> ~/.skill-sync/sync.log 2>&1
+0 9 * * * cd /path/to/local-sync && python3 sync.py >> ~/.local-sync/sync.log 2>&1
 ```
 
 To remove it:
 
 ```bash
-crontab -e   # delete the line containing "skill-sync"
+crontab -e   # delete the line containing "local-sync"
 ```
 
 To change the schedule, run `crontab -e` and edit the time expression directly.

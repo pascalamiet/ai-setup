@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-skill-sync — pull skills and agents from the ai-setup GitHub repo and install
+local-sync — pull skills and agents from the ai-setup GitHub repo and install
 them into the local config directories of Claude Code, Gemini CLI, or Codex CLI.
 
 Usage:
@@ -31,7 +31,7 @@ except ImportError:
 
 DEFAULT_REPO   = "https://github.com/pascalamiet/ai-setup.git"
 DEFAULT_BRANCH = "master"
-DEFAULT_CACHE  = Path.home() / ".skill-sync" / "cache"
+DEFAULT_CACHE  = Path.home() / ".local-sync" / "cache"
 
 # ---------------------------------------------------------------------------
 # Path resolution — global (~/) vs. project-local (./)
@@ -105,7 +105,12 @@ def fetch_source(repo_url: str, branch: str, cache_dir: Path) -> Path:
 # ---------------------------------------------------------------------------
 
 def collect_skills(source_dir: Path) -> list[dict]:
-    """Read all skills indexed in skills/index.json."""
+    """Read all skills indexed in skills/index.json.
+
+    Each skill carries a 'files' dict mapping relative paths (e.g. 'SKILL.md',
+    'template.tex') to their text content — every file in the skill's directory
+    is included, not just SKILL.md.
+    """
     index_path = source_dir / "skills" / "index.json"
     if not index_path.exists():
         print("  Warning: skills/index.json not found", file=sys.stderr)
@@ -116,16 +121,24 @@ def collect_skills(source_dir: Path) -> list[dict]:
 
     skills = []
     for entry in index.get("skills", []):
-        skill_path = source_dir / "skills" / entry["file"]
-        if not skill_path.exists():
-            print(f"  Warning: skill file missing: {entry['file']}", file=sys.stderr)
+        skill_dir = source_dir / "skills" / entry["directory"]
+        if not skill_dir.exists():
+            print(f"  Warning: skill directory missing: {entry['directory']}", file=sys.stderr)
             continue
-        content = skill_path.read_text()
+
+        # Collect every file in the skill folder (recursive), keyed by path
+        # relative to the skill directory (e.g. "SKILL.md", "assets/fig.png")
+        files: dict[str, bytes] = {}
+        for fpath in sorted(skill_dir.rglob("*")):
+            if fpath.is_file():
+                rel = fpath.relative_to(skill_dir)
+                files[str(rel)] = fpath.read_bytes()
+
         skills.append({
             "name":        entry["name"],
             "description": entry.get("description", ""),
             "tags":        entry.get("tags", []),
-            "content":     content,     # full SKILL.md, YAML header included
+            "files":       files,   # {relative_path: bytes}
         })
 
     return skills
@@ -171,7 +184,7 @@ def sync_claude(
 ) -> int:
     """
     Claude Code:
-      skills → <base>/.claude/skills/<name>.md   (full SKILL.md, YAML header kept)
+      skills → <base>/.claude/skills/<name>/     (full skill folder, all files)
       agents → <base>/.claude/agents/<name>.md   (full file as-is)
 
     <base> is ~/.claude when project_dir is None, else <project_dir>/.claude
@@ -181,15 +194,18 @@ def sync_claude(
     count = 0
 
     if cfg.get("sync_skills", True):
-        if not dry_run:
-            skills_dir.mkdir(parents=True, exist_ok=True)
         for skill in skills:
-            dest = skills_dir / f"{skill['name']}.md"
+            skill_dest = skills_dir / skill["name"]
             if dry_run:
-                print(f"    [skills] {dest}")
+                for rel in skill["files"]:
+                    print(f"    [skills] {skill_dest / rel}")
             else:
-                dest.write_text(skill["content"])
-                count += 1
+                skill_dest.mkdir(parents=True, exist_ok=True)
+                for rel, data in skill["files"].items():
+                    dest = skill_dest / rel
+                    dest.parent.mkdir(parents=True, exist_ok=True)
+                    dest.write_bytes(data)
+                    count += 1
 
     if cfg.get("sync_agents", True):
         if not dry_run:
@@ -214,22 +230,25 @@ def sync_gemini(
 ) -> int:
     """
     Google Gemini CLI:
-      skills → <base>/.gemini/skills/<name>.md   (full SKILL.md, YAML header kept)
+      skills → <base>/.gemini/skills/<name>/     (full skill folder, all files)
       Gemini CLI has no native agent concept — agents are skipped.
     """
     skills_dir = resolve_path(cfg.get("skills_dir", "~/.gemini/skills"), project_dir)
     count = 0
 
     if cfg.get("sync_skills", True):
-        if not dry_run:
-            skills_dir.mkdir(parents=True, exist_ok=True)
         for skill in skills:
-            dest = skills_dir / f"{skill['name']}.md"
+            skill_dest = skills_dir / skill["name"]
             if dry_run:
-                print(f"    [skills] {dest}")
+                for rel in skill["files"]:
+                    print(f"    [skills] {skill_dest / rel}")
             else:
-                dest.write_text(skill["content"])
-                count += 1
+                skill_dest.mkdir(parents=True, exist_ok=True)
+                for rel, data in skill["files"].items():
+                    dest = skill_dest / rel
+                    dest.parent.mkdir(parents=True, exist_ok=True)
+                    dest.write_bytes(data)
+                    count += 1
 
     return count
 
@@ -243,22 +262,25 @@ def sync_codex(
 ) -> int:
     """
     OpenAI Codex CLI:
-      skills → <base>/.codex/skills/<name>.md    (full SKILL.md, YAML header kept)
+      skills → <base>/.codex/skills/<name>/      (full skill folder, all files)
       Codex CLI has no native agent concept — agents are skipped.
     """
     skills_dir = resolve_path(cfg.get("skills_dir", "~/.codex/skills"), project_dir)
     count = 0
 
     if cfg.get("sync_skills", True):
-        if not dry_run:
-            skills_dir.mkdir(parents=True, exist_ok=True)
         for skill in skills:
-            dest = skills_dir / f"{skill['name']}.md"
+            skill_dest = skills_dir / skill["name"]
             if dry_run:
-                print(f"    [skills] {dest}")
+                for rel in skill["files"]:
+                    print(f"    [skills] {skill_dest / rel}")
             else:
-                dest.write_text(skill["content"])
-                count += 1
+                skill_dest.mkdir(parents=True, exist_ok=True)
+                for rel, data in skill["files"].items():
+                    dest = skill_dest / rel
+                    dest.parent.mkdir(parents=True, exist_ok=True)
+                    dest.write_bytes(data)
+                    count += 1
 
     return count
 
@@ -393,7 +415,7 @@ Examples:
 
     # Fetch source
     scope_label = str(project_dir) if project_dir else "global (~)"
-    print("=== skill-sync ===")
+    print("=== local-sync ===")
     print(f"Source: {repo_url} ({branch})")
     print(f"Scope:  {scope_label}")
     source_dir = fetch_source(repo_url, branch, cache_dir)
@@ -408,7 +430,8 @@ Examples:
     if args.list:
         print(f"\nSkills ({len(skills)}):")
         for s in skills:
-            print(f"  {s['name']:<28}  {s['description'][:65]}")
+            nfiles = len(s["files"])
+            print(f"  {s['name']:<28}  {nfiles} file(s)   {s['description'][:50]}")
         print(f"\nAgents ({len(agents)}):")
         for a in agents:
             print(f"  {a['name']:<28}  {a['description'][:65]}")

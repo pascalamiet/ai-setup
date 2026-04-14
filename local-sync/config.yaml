@@ -1,4 +1,4 @@
-# skill-sync configuration
+# local-sync configuration
 # Run: python3 sync.py --help for all options
 
 source:
@@ -6,7 +6,7 @@ source:
   branch: master
 
 # Local directory where the repo is cached between runs
-cache_dir: ~/.skill-sync/cache
+cache_dir: ~/.local-sync/cache
 
 targets:
 
