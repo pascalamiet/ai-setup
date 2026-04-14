@@ -1,8 +1,6 @@
 # 🤖 AI Setup 
 
-This repo contains files and instructions for our local AI setup. It gives markdownfiles for subagents and skills, as well as setup instructions, general AI information and other stuff we find useful and want to be able to replicate easily on different systems. It's a way to share and exchange these files easily. 
-
-It is also a platform where everyone who is interested can simply download the files and use it by themselves. It is especially useful for people from the Institute of Economics and Econometrics at the University of Geneva, since many skills are formatted using the respective colors and logos. 
+This repo contains files and instructions for our local AI setup. It gives markdownfiles for subagents and skills, as well as setup instructions, general AI information and other stuff we find useful and want to be able to replicate easily on different systems. It's a way to share and exchange these files easily. It is also a platform where everyone who is interested can simply download the files and use it by themselves.
 
 ## 🔄 local-sync
 
