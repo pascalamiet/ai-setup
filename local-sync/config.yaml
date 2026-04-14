@@ -1,0 +1,39 @@
+# skill-sync configuration
+# Run: python3 sync.py --help for all options
+
+source:
+  repo: https://github.com/pascalamiet/ai-setup.git
+  branch: master
+
+# Local directory where the repo is cached between runs
+cache_dir: ~/.skill-sync/cache
+
+targets:
+
+  # Claude Code
+  #   Global:  ~/.claude/skills/<name>.md  and  ~/.claude/agents/<name>.md
+  #   Project: <dir>/.claude/skills/<name>.md   (when --project is passed)
+  claude:
+    enabled: true
+    skills_dir: ~/.claude/skills
+    agents_dir: ~/.claude/agents
+    sync_skills: true
+    sync_agents: true
+
+  # Google Gemini CLI
+  #   Global:  ~/.gemini/skills/<name>.md
+  #   Project: <dir>/.gemini/skills/<name>.md   (when --project is passed)
+  gemini:
+    enabled: false
+    skills_dir: ~/.gemini/skills
+    sync_skills: true
+    sync_agents: false   # Gemini CLI has no agent concept
+
+  # OpenAI Codex CLI
+  #   Global:  ~/.codex/skills/<name>.md
+  #   Project: <dir>/.codex/skills/<name>.md    (when --project is passed)
+  codex:
+    enabled: false
+    skills_dir: ~/.codex/skills
+    sync_skills: true
+    sync_agents: false   # Codex CLI has no agent concept
