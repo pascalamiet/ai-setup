@@ -1,6 +1,16 @@
 {
   "agents": [
     {
+      "name": "claude-assistant",
+      "file": "claude-assistant.md",
+      "description": "Delegates advanced reasoning and complex coding tasks to Claude via its headless CLI. For use in non-Claude environments (Gemini, Codex) when the task demands Claude's analytical depth.",
+      "model": "sonnet",
+      "color": "purple",
+      "tools": ["Bash"],
+      "tags": ["reasoning", "coding", "analysis", "debugging", "mathematics"],
+      "prerequisites": ["claude CLI on PATH"]
+    },
+    {
       "name": "code-reviewer",
       "file": "code-reviewer.md",
       "description": "Expert code review specialist. Proactively reviews code for quality, security, and maintainability.",
