@@ -1,12 +1,11 @@
-# local-sync
+# 🔄 local-sync
 
 Pulls skills and subagent definitions from the
 [ai-setup](https://github.com/pascalamiet/ai-setup) repository and installs
 them into the local config directories of Claude Code, Gemini CLI, or Codex CLI.
-This way, in one clean command you have all your agents equipped with the latest skills and
-subagents instead of copying manually.
+Because life is too short to copy-paste markdown files by hand.
 
-## What gets synced
+## 📦 What gets synced
 
 | Source | Destination (global) | Destination (project) |
 |---|---|---|
@@ -18,7 +17,7 @@ subagents instead of copying manually.
 Skill files are written as-is, including their YAML frontmatter. Agents are
 written to Claude only (Gemini and Codex have no equivalent concept).
 
-## Requirements
+## 📋 Requirements
 
 | Tool | Minimum version |
 |---|---|
@@ -27,7 +26,7 @@ written to Claude only (Gemini and Codex have no equivalent concept).
 | pip | any |
 | git | any |
 
-## Platform support
+## 💻 Platform support
 
 | Platform | `sync.py` | `install.sh` |
 |---|---|---|
@@ -37,7 +36,7 @@ written to Claude only (Gemini and Codex have no equivalent concept).
 
 `sync.py` is pure Python and works on all platforms. `install.sh` is a Bash
 script and requires macOS or Linux (or WSL on Windows). On Windows, run the
-setup steps manually:
+setup steps manually — consider it a character-building exercise:
 
 ```powershell
 pip install pyyaml
@@ -48,12 +47,28 @@ python sync.py             # run
 To auto-sync on Windows, add a task in **Task Scheduler** pointing to
 `python path\to\sync.py`.
 
-## First-time setup
+## 🚀 First-time setup
+
+Run this from any terminal — zsh, bash, fish, it doesn't matter. The command
+explicitly invokes bash to execute the script, so your current shell is irrelevant:
 
 ```bash
 cd local-sync
 bash install.sh
 ```
+
+**macOS note:** macOS ships with Bash 3.2, a relic from 2007 that Apple keeps
+around for legal reasons. It's too old for this script (requires 4.0+). If the
+installer fails with a Bash version error, install a modern bash via Homebrew first:
+
+```bash
+brew install bash         # installs to /opt/homebrew/bin/bash (Apple Silicon)
+                          #                /usr/local/bin/bash  (Intel)
+/opt/homebrew/bin/bash install.sh   # Apple Silicon
+/usr/local/bin/bash install.sh      # Intel
+```
+
+**Linux:** the system bash is almost always 4.x or newer — `bash install.sh` works as-is.
 
 The installer will:
 1. Check all requirements and print a clear error if anything is missing
@@ -62,7 +77,7 @@ The installer will:
 4. Ask whether to run the actual sync
 5. Optionally register a daily cron job (09:00) so skills stay up to date automatically
 
-## Global command
+## ⚡ Global command
 
 The installer offers to create a `local-sync` symlink in `~/.local/bin/` so you
 can run the script from anywhere without typing the full path:
@@ -86,7 +101,7 @@ Make sure `~/.local/bin` is on your `PATH` (add to `~/.bashrc` or `~/.zshrc` if 
 export PATH="$HOME/.local/bin:$PATH"
 ```
 
-## Manual usage
+## 🛠️ Manual usage
 
 ```bash
 # Sync to global ~/.claude/skills  (default)
@@ -111,14 +126,15 @@ python3 sync.py --list
 python3 sync.py --no-agents
 ```
 
-### Global vs. project-local
+### 🌍 Global vs. project-local
 
 By default, skills are installed into your **home directory** (`~/.claude/skills`),
 making them available in every Claude Code session you open.
 
 Pass `--project` to install into the **current folder's** `.claude/skills` instead.
 This is useful when you want a project-specific set of skills that colleagues can
-also pick up by running `sync.py --project` inside the same repo.
+also pick up by running `sync.py --project` inside the same repo — assuming they
+actually read the README, which is optimistic but appreciated.
 
 ```
 my-project/
@@ -128,7 +144,7 @@ my-project/
 └── ...
 ```
 
-## Configuration
+## ⚙️ Configuration
 
 Targets are **opt-in**: the script does not auto-detect which AI tools you have
 installed. It only syncs to targets that are explicitly set to `enabled: true`
@@ -157,18 +173,19 @@ targets:
     skills_dir: ~/.codex/skills
 ```
 
-## How it works
+## 🔍 How it works
 
 1. **Fetch** — the repo is cloned into `~/.local-sync/cache/ai-setup` on first
-   run, then updated via `git pull` on subsequent runs.
+   run, then updated via `git pull` on subsequent runs. No internet, no skills — sorry.
 2. **Collect** — `skills/index.json` and `agents/index.json` are read to
    discover all available files.
 3. **Write** — for each enabled target, skill and agent files are written to
    the appropriate directory. Each file is written verbatim from the source.
 
-## Automatic updates (cron)
+## 🕘 Automatic updates (cron)
 
-If you chose to set up a cron job during installation, sync runs daily at 09:00:
+If you chose to set up a cron job during installation, sync runs daily at 09:00
+so your skills are always fresh before you've even had your coffee:
 
 ```
 0 9 * * * cd /path/to/local-sync && python3 sync.py >> ~/.local-sync/sync.log 2>&1
