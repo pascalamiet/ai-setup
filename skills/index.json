@@ -190,6 +190,15 @@
       "tags": ["pdf", "academic-reading", "notes", "research", "papers", "economics"]
     },
     {
+      "name": "wiki-init",
+      "directory": "wiki-init",
+      "file": "wiki-init/SKILL.md",
+      "description": "Initialize an LLM-maintained wiki knowledge base: creates wiki/_raw_/, wiki/_schema_/, wiki/_wiki_/, SCHEMA.md, index.md, and log.md. Patches CLAUDE.md with a wiki reference instruction.",
+      "license": "MIT",
+      "allowed_tools": ["Read", "Write", "Edit", "Bash"],
+      "tags": ["wiki", "knowledge-base", "scaffold", "research", "project-setup"]
+    },
+    {
       "name": "xlsx",
       "directory": "xlsx",
       "file": "xlsx/SKILL.md",
