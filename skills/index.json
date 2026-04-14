@@ -1,6 +1,15 @@
 {
   "skills": [
     {
+      "name": "bibtex",
+      "directory": "bibtex",
+      "file": "bibtex/SKILL.md",
+      "description": "Manage, clean, and format BibTeX bibliography files. Creates entries from DOIs or raw text, deduplicates, fixes key inconsistencies, checks required fields, and handles special characters.",
+      "license": "MIT",
+      "allowed_tools": [],
+      "tags": ["bibtex", "bibliography", "citations", "LaTeX", "references", "academic-writing"]
+    },
+    {
       "name": "academic-researcher",
       "directory": "academic-researcher",
       "file": "academic-researcher/SKILL.md",
@@ -91,6 +100,15 @@
       "tags": ["project-setup", "CLAUDE.md", "session", "context", "scaffold"]
     },
     {
+      "name": "literature-search",
+      "directory": "literature-search",
+      "file": "literature-search/SKILL.md",
+      "description": "Systematic literature search for economics research: generates ranked reading lists from IDEAS/RePec, NBER, SSRN, and Google Scholar, produces BibTeX output, and drafts a positioning note for the introduction.",
+      "license": "MIT",
+      "allowed_tools": ["WebSearch", "WebFetch"],
+      "tags": ["literature-review", "bibliography", "research", "citations", "academic-writing", "economics"]
+    },
+    {
       "name": "new-project",
       "directory": "new-project",
       "file": "new-project/SKILL.md",
@@ -161,6 +179,15 @@
       "license": "MIT",
       "allowed_tools": [],
       "tags": ["peer-review", "referee-report", "academic-writing", "economics", "journals"]
+    },
+    {
+      "name": "response-to-referees",
+      "directory": "response-to-referees",
+      "file": "response-to-referees/SKILL.md",
+      "description": "Structured workflow for writing R&R responses to referee reports: classifies comments by type, drafts point-by-point responses with quoted changes and page stamps, and produces a cover letter to the editor.",
+      "license": "MIT",
+      "allowed_tools": [],
+      "tags": ["peer-review", "referee-response", "R&R", "academic-writing", "economics", "journals"]
     },
     {
       "name": "session-end",
