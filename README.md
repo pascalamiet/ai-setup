@@ -10,6 +10,18 @@ If you are completely new to using agents, then the `resources/` folder contains
 
 To practice hands-on, open `resources/workshop.html` — a task-based workshop that walks you through initializing a workspace, searching the web, creating files, spawning subagents, and writing your own custom skills, all step by step.
 
+## 🔄 local-sync
+
+Want all the skills and subagents on your machine without copying files manually?
+The `local-sync/` folder contains a small Python script that clones this repo and
+installs everything into your local AI tool config directories in one command:
+
+```bash
+cd local-sync && bash install.sh
+```
+
+Supports Claude Code, Gemini CLI, and Codex. See [`local-sync/README.md`](local-sync/README.md) for full setup instructions.
+
 ## 👥 Collaboration
 
 If you want to collaborate with us and be able to modify files, reach out to us and we can add you as a collaborator. Alternatively, you can always fork the repository and create a pull request if you want to contribute changes or improvements.
