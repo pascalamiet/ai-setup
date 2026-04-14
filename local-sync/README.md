@@ -30,9 +30,9 @@ written to Claude only (Gemini and Codex have no equivalent concept).
 
 | Platform | `sync.py` | `install.sh` |
 |---|---|---|
-| macOS | ✔ | ✔ |
-| Linux | ✔ | ✔ |
-| Windows | ✔ | ✖ |
+| macOS | ✅ | ✅ |
+| Linux | ✅ | ✅ |
+| Windows | ✅ | ❌ |
 
 `sync.py` is pure Python and works on all platforms. `install.sh` is a Bash
 script and requires macOS or Linux (or WSL on Windows). On Windows, run the
