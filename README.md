@@ -2,7 +2,7 @@
 
 This repo contains files and instructions for our local AI setup. It gives markdownfiles for subagents and skills, as well as setup instructions, general AI information and other stuff we find useful and want to be able to replicate easily on different systems. It's a way to share and exchange these files easily. It is also a platform where everyone who is interested can simply download the files and use it by themselves.
 
-## 🔄 local-sync
+## 🔄 Sync Locally 
 
 Want all the skills and subagents on your machine without copying files manually?
 The `local-sync/` folder contains a small Python script that clones this repo and
