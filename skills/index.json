@@ -253,6 +253,15 @@
       "tags": ["wiki", "knowledge-base", "scaffold", "research", "project-setup"]
     },
     {
+      "name": "writing-setup",
+      "directory": "writing-setup",
+      "file": "writing-setup/SKILL.md",
+      "description": "Build a writing-style workflow from prior .tex files to keep tone and structure consistent across drafts, with optional markdown evaluation reports.",
+      "license": "MIT",
+      "allowed_tools": [],
+      "tags": ["writing", "academic-writing", "style-guide", "LaTeX", "editing", "feedback"]
+    },
+    {
       "name": "xlsx",
       "directory": "xlsx",
       "file": "xlsx/SKILL.md",
