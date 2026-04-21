@@ -32,6 +32,7 @@ except ImportError:
 DEFAULT_REPO   = "https://github.com/pascalamiet/ai-setup.git"
 DEFAULT_BRANCH = "master"
 DEFAULT_CACHE  = Path.home() / ".local-sync" / "cache"
+SCRIPT_DIR     = Path(__file__).resolve().parent
 
 # ---------------------------------------------------------------------------
 # Path resolution — global (~/) vs. project-local (./)
@@ -376,7 +377,7 @@ Examples:
 """,
     )
     parser.add_argument(
-        "--config", default=str(Path(__file__).parent / "config.yaml"),
+        "--config", default=str(SCRIPT_DIR / "config.yaml"),
         help="Path to config.yaml (default: config.yaml next to this script)",
     )
     parser.add_argument("--repo",   help="Override source repo URL")
