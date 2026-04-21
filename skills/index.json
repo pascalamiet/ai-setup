@@ -109,33 +109,6 @@
       "tags": ["gemini", "research", "fact-checking", "papers", "external-knowledge", "analysis"]
     },
     {
-      "name": "hpc-job",
-      "directory": "hpc-job",
-      "file": "hpc-job/SKILL.md",
-      "description": "Interactively create a Slurm job script (job.sh) for the UNIGE HPC clusters (Baobab, Yggdrasil, Bamboo). Asks focused questions and writes a ready-to-submit script from a template.",
-      "license": "MIT",
-      "allowed_tools": ["Read", "Write", "Bash"],
-      "tags": ["hpc", "slurm", "cluster", "job-script", "UNIGE"]
-    },
-    {
-      "name": "hpc-module",
-      "directory": "hpc-module",
-      "file": "hpc-module/SKILL.md",
-      "description": "Find the correct `module load` line for any software on the UNIGE HPC clusters. Searches the Lmod module system via SSH and returns the exact command to paste into a job script or interactive session.",
-      "license": "MIT",
-      "allowed_tools": ["Bash"],
-      "tags": ["hpc", "modules", "lmod", "cluster", "UNIGE"]
-    },
-    {
-      "name": "hpc-resources",
-      "directory": "hpc-resources",
-      "file": "hpc-resources/SKILL.md",
-      "description": "Analyse the efficiency of a completed Slurm job and recommend better resource requests (--time, --cpus-per-task, --mem-per-cpu) for the next run. Reads seff output via SSH or accepts pasted output.",
-      "license": "MIT",
-      "allowed_tools": ["Bash", "Read", "Edit"],
-      "tags": ["hpc", "slurm", "cluster", "resources", "performance", "UNIGE"]
-    },
-    {
       "name": "initialize",
       "directory": "initialize",
       "file": "initialize/SKILL.md",
