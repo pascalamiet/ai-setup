@@ -19,6 +19,15 @@
       "tags": ["research", "literature-review", "citations", "academic-writing", "papers"]
     },
     {
+      "name": "claude",
+      "directory": "claude",
+      "file": "claude/SKILL.md",
+      "description": "Use Claude CLI for reasoning-heavy and coding-heavy tasks such as algorithm design, hard debugging, code review, architecture analysis, derivations, and technical explanation.",
+      "license": "MIT",
+      "allowed_tools": ["Bash"],
+      "tags": ["claude", "reasoning", "coding", "debugging", "architecture", "analysis"]
+    },
+    {
       "name": "commit",
       "directory": "commit",
       "file": "commit/SKILL.md",
@@ -89,6 +98,15 @@
       "license": "MIT",
       "allowed_tools": [],
       "tags": ["empirical-economics", "Stata", "R", "Python", "regression", "causal-inference", "tables", "data-cleaning"]
+    },
+    {
+      "name": "gemini",
+      "directory": "gemini",
+      "file": "gemini/SKILL.md",
+      "description": "Use Gemini CLI as an external research tool for fact-checking, background research, recent developments, paper discovery, and concept clarification beyond the current local context.",
+      "license": "MIT",
+      "allowed_tools": ["Bash"],
+      "tags": ["gemini", "research", "fact-checking", "papers", "external-knowledge", "analysis"]
     },
     {
       "name": "hpc-job",
