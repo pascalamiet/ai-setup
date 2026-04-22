@@ -1,4 +1,6 @@
 # skill-sync configuration
+# This file is the bundled template. At runtime, skill-sync copies it to
+# ~/.skill-sync/config.yaml on first run unless --config is passed explicitly.
 # Run: skill-sync --help (or python3 sync.py --help) for all options
 
 source:
