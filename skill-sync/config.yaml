@@ -1,12 +1,12 @@
-# local-sync configuration
-# Run: python3 sync.py --help for all options
+# skill-sync configuration
+# Run: skill-sync --help (or python3 sync.py --help) for all options
 
 source:
   repo: https://github.com/pascalamiet/ai-setup.git
   branch: master
 
 # Local directory where the repo is cached between runs
-cache_dir: ~/.local-sync/cache
+cache_dir: ~/.skill-sync/cache
 
 targets:
 

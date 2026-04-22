@@ -1,4 +1,4 @@
-# 🔄 local-sync
+# 🔄 skill-sync
 
 Pulls skills and subagent definitions from the
 [ai-setup](https://github.com/pascalamiet/ai-setup) repository and installs
@@ -53,7 +53,7 @@ Run this from any terminal — zsh, bash, fish, it doesn't matter. The command
 explicitly invokes bash to execute the script, so your current shell is irrelevant:
 
 ```bash
-cd local-sync
+cd skill-sync
 bash install.sh
 ```
 
@@ -79,20 +79,20 @@ The installer will:
 
 ## ⚡ Global command
 
-The installer offers to create a `local-sync` symlink in `~/.local/bin/` so you
+The installer offers to create a `skill-sync` symlink in `~/.local/bin/` so you
 can run the script from anywhere without typing the full path:
 
 ```bash
-local-sync                  # same as python3 /path/to/sync.py
-local-sync --project        # project-local sync
-local-sync --dry-run        # preview
+skill-sync                  # same as /path/to/skill-sync/skill-sync
+skill-sync --project        # project-local sync
+skill-sync --dry-run        # preview
 ```
 
 To set it up manually instead:
 
 ```bash
 mkdir -p ~/.local/bin
-ln -s /path/to/local-sync/sync.py ~/.local/bin/local-sync
+ln -s /path/to/skill-sync/skill-sync ~/.local/bin/skill-sync
 ```
 
 Make sure `~/.local/bin` is on your `PATH` (add to `~/.bashrc` or `~/.zshrc` if not):
@@ -104,26 +104,29 @@ export PATH="$HOME/.local/bin:$PATH"
 ## 🛠️ Manual usage
 
 ```bash
-# Sync to global ~/.claude/skills  (default)
+# From inside the skill-sync directory
+bash ./skill-sync
+
+# Global command after running the installer
+skill-sync
+
+# Sync to global ~/.claude/skills without installing the symlink
 python3 sync.py
 
 # Sync into the current project folder  →  ./.claude/skills/
-python3 sync.py --project
-
-# Sync into a specific project folder
-python3 sync.py --project ~/my-project
+skill-sync --project
 
 # Sync only Claude Code (skip Gemini / Codex)
-python3 sync.py --target claude
+skill-sync --target claude
 
 # Preview without writing anything
-python3 sync.py --dry-run
+skill-sync --dry-run
 
 # List all available skills and agents
-python3 sync.py --list
+skill-sync --list
 
 # Skip agents, sync skills only
-python3 sync.py --no-agents
+skill-sync --no-agents
 ```
 
 ### 🌍 Global vs. project-local
@@ -133,7 +136,7 @@ making them available in every Claude Code session you open.
 
 Pass `--project` to install into the **current folder's** `.claude/skills` instead.
 This is useful when you want a project-specific set of skills that colleagues can
-also pick up by running `sync.py --project` inside the same repo — assuming they
+also pick up by running `skill-sync --project` inside the same repo — assuming they
 actually read the README, which is optimistic but appreciated.
 
 ```
@@ -175,7 +178,7 @@ targets:
 
 ## 🔍 How it works
 
-1. **Fetch** — the repo is cloned into `~/.local-sync/cache/ai-setup` on first
+1. **Fetch** — the repo is cloned into `~/.skill-sync/cache/ai-setup` on first
    run, then updated via `git pull` on subsequent runs. No internet, no skills — sorry.
 2. **Collect** — `skills/index.json` and `agents/index.json` are read to
    discover all available files.
@@ -188,13 +191,13 @@ If you chose to set up a cron job during installation, sync runs daily at 09:00
 so your skills are always fresh before you've even had your coffee:
 
 ```
-0 9 * * * cd /path/to/local-sync && python3 sync.py >> ~/.local-sync/sync.log 2>&1
+0 9 * * * cd /path/to/skill-sync && python3 sync.py >> ~/.skill-sync/sync.log 2>&1
 ```
 
 To remove it:
 
 ```bash
-crontab -e   # delete the line containing "local-sync"
+crontab -e   # delete the line containing "skill-sync"
 ```
 
 To change the schedule, run `crontab -e` and edit the time expression directly.

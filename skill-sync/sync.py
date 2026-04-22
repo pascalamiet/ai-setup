@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 """
-local-sync — pull skills and agents from the ai-setup GitHub repo and install
+skill-sync — pull skills and agents from the ai-setup GitHub repo and install
 them into the local config directories of Claude Code, Gemini CLI, or Codex CLI.
 
 Usage:
-    python3 sync.py                      # sync to global ~/.claude/skills, etc.
-    python3 sync.py --project            # sync into .claude/skills in current folder
-    python3 sync.py --project /some/dir  # sync into /some/dir/.claude/skills
-    python3 sync.py --target claude      # sync only Claude
-    python3 sync.py --dry-run            # print what would happen
-    python3 sync.py --list               # list available skills and agents
-    python3 sync.py --help               # show all options
+    skill-sync                      # sync to global ~/.claude/skills, etc.
+    skill-sync --project            # sync into .claude/skills in current folder
+    skill-sync --project /some/dir  # sync into /some/dir/.claude/skills
+    skill-sync --target claude      # sync only Claude
+    skill-sync --dry-run            # print what would happen
+    skill-sync --list               # list available skills and agents
+    skill-sync --help               # show all options
 """
 
 import argparse
@@ -31,7 +31,7 @@ except ImportError:
 
 DEFAULT_REPO   = "https://github.com/pascalamiet/ai-setup.git"
 DEFAULT_BRANCH = "master"
-DEFAULT_CACHE  = Path.home() / ".local-sync" / "cache"
+DEFAULT_CACHE  = Path.home() / ".skill-sync" / "cache"
 SCRIPT_DIR     = Path(__file__).resolve().parent
 
 # ---------------------------------------------------------------------------
@@ -354,6 +354,7 @@ def load_config(config_path: Path) -> dict:
 
 def main():
     parser = argparse.ArgumentParser(
+        prog="skill-sync",
         description="Sync skills and agents from the ai-setup repo to local AI tool configs.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
@@ -366,14 +367,14 @@ Scope:
   inside a specific project.
 
 Examples:
-  python3 sync.py                      Sync to global ~/.claude/skills
-  python3 sync.py --project            Sync to ./.claude/skills (current folder)
-  python3 sync.py --project ~/myproj   Sync to ~/myproj/.claude/skills
-  python3 sync.py --target claude      Sync only Claude Code
-  python3 sync.py --target gemini      Sync only Gemini CLI
-  python3 sync.py --dry-run            Print what would be written (no changes)
-  python3 sync.py --list               List available skills and agents
-  python3 sync.py --no-agents          Skip agent sync
+  skill-sync                      Sync to global ~/.claude/skills
+  skill-sync --project            Sync to ./.claude/skills (current folder)
+  skill-sync --project ~/myproj   Sync to ~/myproj/.claude/skills
+  skill-sync --target claude      Sync only Claude Code
+  skill-sync --target gemini      Sync only Gemini CLI
+  skill-sync --dry-run            Print what would be written (no changes)
+  skill-sync --list               List available skills and agents
+  skill-sync --no-agents          Skip agent sync
 """,
     )
     parser.add_argument(
@@ -416,7 +417,7 @@ Examples:
 
     # Fetch source
     scope_label = str(project_dir) if project_dir else "global (~)"
-    print("=== local-sync ===")
+    print("=== skill-sync ===")
     print(f"Source: {repo_url} ({branch})")
     print(f"Scope:  {scope_label}")
     source_dir = fetch_source(repo_url, branch, cache_dir)

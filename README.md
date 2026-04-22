@@ -5,14 +5,14 @@ This repo contains files and instructions for our local AI setup. It gives markd
 ## 🔄 Sync Locally 
 
 Want all the skills and subagents on your machine without copying files manually?
-The `local-sync/` folder contains a small Python script that clones this repo and
+The `skill-sync/` folder contains a small Python script that clones this repo and
 installs everything into your local AI tool config directories in one command:
 
 ```bash
-cd local-sync && bash install.sh
+cd skill-sync && bash install.sh
 ```
 
-Supports Claude Code, Gemini CLI, and Codex. See [`local-sync/README.md`](local-sync/README.md) for full setup instructions.
+Supports Claude Code, Gemini CLI, and Codex. See [`skill-sync/README.md`](skill-sync/README.md) for full setup instructions.
 
 ## 👥 Collaboration
 

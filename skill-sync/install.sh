@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# install.sh — first-time setup for local-sync
+# install.sh — first-time setup for skill-sync
 #
 # Steps:
 #   1. Check system requirements (bash, python, pip, git)
@@ -12,7 +12,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SYNC_PY="$SCRIPT_DIR/sync.py"
-LOG_FILE="$HOME/.local-sync/sync.log"
+SYNC_CMD="$SCRIPT_DIR/skill-sync"
+LOG_FILE="$HOME/.skill-sync/sync.log"
 
 # ── Formatting helpers ────────────────────────────────────────────────────────
 RED='\033[0;31m'; YELLOW='\033[1;33m'; GREEN='\033[0;32m'
@@ -90,7 +91,7 @@ ok "git $(git --version | awk '{print $3}')"
 if [[ ! -f "$SYNC_PY" ]]; then
     fail "sync.py not found at $SYNC_PY"
     require_fail "sync.py" \
-        "Make sure you are running install.sh from inside the local-sync directory."
+        "Make sure you are running install.sh from inside the skill-sync directory."
 fi
 ok "sync.py found"
 
@@ -132,9 +133,9 @@ if [[ "${SETUP_CRON,,}" == "y" ]]; then
         warn "crontab not available on this system — skipping."
     else
         mkdir -p "$(dirname "$LOG_FILE")"
-        CRON_ENTRY="0 9 * * * cd \"$SCRIPT_DIR\" && python3 \"$SYNC_PY\" >> \"$LOG_FILE\" 2>&1  # local-sync"
-        if crontab -l 2>/dev/null | grep -q "local-sync"; then
-            warn "Cron job already registered — skipping."
+        CRON_ENTRY="0 9 * * * cd \"$SCRIPT_DIR\" && python3 \"$SYNC_PY\" >> \"$LOG_FILE\" 2>&1  # skill-sync"
+        if crontab -l 2>/dev/null | grep -Eq "skill-sync|local-sync"; then
+            warn "Cron job already registered (skill-sync or legacy local-sync) — skipping."
         else
             (crontab -l 2>/dev/null; echo "$CRON_ENTRY") | crontab -
             ok "Cron job added (daily at 09:00)"
@@ -144,7 +145,7 @@ if [[ "${SETUP_CRON,,}" == "y" ]]; then
 fi
 
 # ── 6. Global symlink ─────────────────────────────────────────────────────────
-read -rp "$(echo -e "${BOLD}Create a global 'local-sync' command?${RESET} [y/N] ")" SETUP_LINK
+read -rp "$(echo -e "${BOLD}Create a global 'skill-sync' command?${RESET} [y/N] ")" SETUP_LINK
 if [[ "${SETUP_LINK,,}" == "y" ]]; then
     # Prefer ~/.local/bin (no sudo); fall back to /usr/local/bin
     if echo "$PATH" | tr ':' '\n' | grep -q "$HOME/.local/bin"; then
@@ -158,7 +159,7 @@ if [[ "${SETUP_LINK,,}" == "y" ]]; then
         echo -e "       ${BOLD}export PATH=\"\$HOME/.local/bin:\$PATH\"${RESET}"
     fi
 
-    LINK_PATH="$LINK_DIR/local-sync"
+    LINK_PATH="$LINK_DIR/skill-sync"
     mkdir -p "$LINK_DIR"
 
     if [[ -L "$LINK_PATH" ]]; then
@@ -170,9 +171,9 @@ if [[ "${SETUP_LINK,,}" == "y" ]]; then
     fi
 
     if [[ -n "$LINK_PATH" ]]; then
-        ln -s "$SYNC_PY" "$LINK_PATH"
-        ok "Symlink created: $LINK_PATH → $SYNC_PY"
-        echo -e "       You can now run: ${BOLD}local-sync [options]${RESET}"
+        ln -s "$SYNC_CMD" "$LINK_PATH"
+        ok "Symlink created: $LINK_PATH → $SYNC_CMD"
+        echo -e "       You can now run: ${BOLD}skill-sync [options]${RESET}"
     fi
 fi
 
