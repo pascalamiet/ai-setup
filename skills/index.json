@@ -37,6 +37,15 @@
       "tags": ["git", "version-control", "commits", "conventional-commits", "engineering"]
     },
     {
+      "name": "codex",
+      "directory": "codex",
+      "file": "codex/SKILL.md",
+      "description": "Use Codex CLI in headless mode via `codex exec` for non-interactive coding, repository edits, code review, automation, structured output, and one-shot task execution from the shell.",
+      "license": "MIT",
+      "allowed_tools": ["Bash"],
+      "tags": ["codex", "headless", "automation", "coding", "cli", "analysis"]
+    },
+    {
       "name": "create-paper",
       "directory": "create-paper",
       "file": "create-paper/SKILL.md",
