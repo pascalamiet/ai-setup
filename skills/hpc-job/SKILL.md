@@ -3,7 +3,7 @@ name: create-slurm-job
 description: |
   Interactively create a Slurm job script (job.sh) for the UNIGE HPC clusters.
   Asks the user a short series of questions, then writes a ready-to-submit
-  job.sh in the current directory using skills/create-slurm-job/job.template.sh.
+  job.sh in the current directory using skills/hpc-job/job.template.sh.
   Use when: user wants to create, generate, or set up a Slurm job script.
 license: MIT
 allowed-tools: Read, Write, Bash
@@ -15,7 +15,7 @@ You are helping the user generate a `job.sh` file for the UNIGE HPC clusters
 (Baobab, Yggdrasil, or Bamboo). Your job is to ask a short series of focused
 questions, then produce a clean, ready-to-submit script.
 
-**Template location:** `skills/create-slurm-job/job.template.sh`
+**Template location:** `skills/hpc-job/job.template.sh`
 Read the template first so you understand all the placeholders before you
 start asking questions.
 
@@ -23,7 +23,7 @@ start asking questions.
 
 ## Step 0 — Read the template
 
-Before asking anything, read `skills/create-slurm-job/job.template.sh`.
+Before asking anything, read `skills/hpc-job/job.template.sh`.
 This is the file you will copy and fill in. Every `__PLACEHOLDER__` in that
 file corresponds to one or more questions below.
 
@@ -121,7 +121,7 @@ correct something, apply the correction and confirm again.
 
 ## Step 3 — Write job.sh
 
-Read the template at `skills/create-slurm-job/job.template.sh`, then write
+Read the template at `skills/hpc-job/job.template.sh`, then write
 `job.sh` in the current working directory with all placeholders replaced.
 
 ### Placeholder substitution rules

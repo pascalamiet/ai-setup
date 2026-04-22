@@ -14,6 +14,28 @@ cd skill-sync && bash install.sh
 
 Supports Claude Code, Gemini CLI, and Codex. See [`skill-sync/README.md`](skill-sync/README.md) for full setup instructions.
 
+## 🧭 Project Initialization
+
+The repository now includes an `initialize` skill that can set up shared project
+context for multiple coding agents at once.
+
+Instead of writing separate context files by hand, the skill creates:
+
+- `.ai/AI.md` as the shared project context
+- `.ai/config.toml` as the per-project config file
+- root-level symlinks like `CLAUDE.md`, `AGENTS.md`, and `GEMINI.md` pointing to `.ai/AI.md` when enabled
+
+The bundled defaults live in `skills/initialize/config.toml`. They control:
+
+- which agent symlinks should exist
+- where the shared context file lives
+- behavior flags for creating or removing symlinks safely
+- optional sections included in the generated context file
+- soft limits such as todo count and target file length
+
+This keeps one canonical project context file while still supporting the
+filename conventions expected by different agents.
+
 ## 👥 Collaboration
 
 If you want to collaborate with us and be able to modify files, reach out to us and we can add you as a collaborator. Alternatively, you can always fork the repository and create a pull request if you want to contribute changes or improvements.
