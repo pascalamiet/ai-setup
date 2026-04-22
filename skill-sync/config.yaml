@@ -24,7 +24,7 @@ targets:
   #   Global:  ~/.gemini/skills/<name>.md
   #   Project: <dir>/.gemini/skills/<name>.md   (when --project is passed)
   gemini:
-    enabled: false
+    enabled: true
     skills_dir: ~/.gemini/skills
     sync_skills: true
     sync_agents: false   # Gemini CLI has no agent concept
@@ -33,7 +33,7 @@ targets:
   #   Global:  ~/.codex/skills/<name>.md
   #   Project: <dir>/.codex/skills/<name>.md    (when --project is passed)
   codex:
-    enabled: false
+    enabled: true
     skills_dir: ~/.codex/skills
     sync_skills: true
     sync_agents: false   # Codex CLI has no agent concept
