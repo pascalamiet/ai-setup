@@ -14,7 +14,10 @@ Usage:
 """
 
 import argparse
+from datetime import datetime
 import json
+import re
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -31,8 +34,137 @@ except ImportError:
 
 DEFAULT_REPO   = "https://github.com/pascalamiet/ai-setup.git"
 DEFAULT_BRANCH = "master"
+DEFAULT_CONFIG = Path.home() / ".skill-sync" / "config.yaml"
 DEFAULT_CACHE  = Path.home() / ".skill-sync" / "cache"
 SCRIPT_DIR     = Path(__file__).resolve().parent
+VERSION        = "0.1.0"
+
+ANSI_RESET  = "\033[0m"
+ANSI_BOLD   = "\033[1m"
+ANSI_RED    = "\033[0;31m"
+ANSI_GREEN  = "\033[0;32m"
+ANSI_YELLOW = "\033[1;33m"
+ANSI_CYAN   = "\033[0;36m"
+ANSI_RE     = re.compile(r"\x1b\[[0-9;]*m")
+OUTPUT_INDENT = ""
+
+# ---------------------------------------------------------------------------
+# Terminal display helpers
+# ---------------------------------------------------------------------------
+
+def is_interactive_terminal() -> bool:
+    """Return True when both stdin and stdout are attached to a terminal."""
+    return sys.stdin.isatty() and sys.stdout.isatty()
+
+
+def clear_terminal() -> None:
+    """Clear the current terminal using ANSI escape codes."""
+    sys.stdout.write("\033[2J\033[H")
+    sys.stdout.flush()
+
+
+def center_text(line: str, width: int) -> str:
+    if not line:
+        return ""
+    visible_width = len(ANSI_RE.sub("", line))
+    padding = max((width - visible_width) // 2, 0)
+    return (" " * padding) + line
+
+
+def compute_centered_block_padding(lines: list[str]) -> int:
+    """Return the left padding needed to center a left-aligned block."""
+    width = shutil.get_terminal_size(fallback=(80, 24)).columns
+    block_width = max(len(ANSI_RE.sub("", line)) for line in lines) if lines else 0
+    return max((width - block_width) // 2, 0)
+
+
+def print_centered_status_block(lines: list[str]) -> None:
+    """Print a centered, left-aligned status block for interactive terminals."""
+    left_padding = compute_centered_block_padding(lines)
+    for line in lines:
+        print((" " * left_padding) + line)
+
+
+def print_centered_divider() -> None:
+    """Print a centered horizontal divider in interactive terminals."""
+    width = shutil.get_terminal_size(fallback=(80, 24)).columns
+    print(center_text("─" * min(100, max(width - 8, 24)), width))
+
+
+def style_text(text: str, color: str, bold: bool = False) -> str:
+    """Apply ANSI styling in interactive terminals only."""
+    if not is_interactive_terminal():
+        return text
+    prefix = (ANSI_BOLD if bold else "") + color
+    return f"{prefix}{text}{ANSI_RESET}"
+
+
+def format_display_path(path: str | Path) -> str:
+    """Render paths more compactly by replacing the home prefix with ~."""
+    text = str(path)
+    home = str(Path.home())
+    if text == home:
+        return "~"
+    if text.startswith(home + "/"):
+        return "~/" + text[len(home) + 1:]
+    return text
+
+
+def format_status(label: str, value: str) -> str:
+    """Format a single aligned status line."""
+    label_text = f"{label + ':':<9}"
+    if is_interactive_terminal():
+        label_text = style_text(label_text, ANSI_CYAN, bold=True)
+    return f"{label_text} {value}"
+
+
+def set_output_indent(spaces: int) -> None:
+    """Set the shared indent used for main body output."""
+    global OUTPUT_INDENT
+    OUTPUT_INDENT = " " * max(spaces, 0)
+
+
+def print_status(label: str, value: str) -> None:
+    """Print an aligned status line in normal flow output."""
+    print(f"{OUTPUT_INDENT}{format_status(label, value)}")
+
+
+def print_success(message: str) -> None:
+    """Print a green success line."""
+    print(f"{OUTPUT_INDENT}{style_text(f'✔ {message}', ANSI_GREEN, bold=True)}")
+
+
+def print_warning(message: str) -> None:
+    """Print a yellow warning line."""
+    print(f"{OUTPUT_INDENT}{style_text(f'⚠ {message}', ANSI_YELLOW, bold=True)}", file=sys.stderr)
+
+
+def print_failure(message: str) -> None:
+    """Print a red failure line to stderr."""
+    print("", file=sys.stderr)
+    print(f"{OUTPUT_INDENT}{style_text(f'✖ {message}', ANSI_RED, bold=True)}", file=sys.stderr)
+
+
+def print_startup_banner() -> None:
+    """Render the SKILL-SYNC banner in interactive terminals."""
+    if not is_interactive_terminal():
+        return
+
+    clear_terminal()
+    width = shutil.get_terminal_size(fallback=(80, 24)).columns
+
+    banner_lines = [
+        " ███████╗██╗  ██╗██╗██╗     ██╗        ███████╗██╗   ██╗███╗   ██╗ ██████╗",
+        " ██╔════╝██║ ██╔╝██║██║     ██║        ██╔════╝╚██╗ ██╔╝████╗  ██║██╔════╝",
+        " ███████╗█████╔╝ ██║██║     ██║        ███████╗ ╚████╔╝ ██╔██╗ ██║██║     ",
+        " ╚════██║██╔═██╗ ██║██║     ██║        ╚════██║  ╚██╔╝  ██║╚██╗██║██║     ",
+        " ███████║██║  ██╗██║███████╗███████╗   ███████║   ██║   ██║ ╚████║╚██████╗",
+        " ╚══════╝╚═╝  ╚═╝╚═╝╚══════╝╚══════╝   ╚══════╝   ╚═╝   ╚═╝  ╚═══╝ ╚═════╝",
+    ]
+
+    for line in banner_lines:
+        print(center_text(f"{ANSI_BOLD}{line}{ANSI_RESET}", width))
+    print("")
 
 # ---------------------------------------------------------------------------
 # Path resolution — global (~/) vs. project-local (./)
@@ -80,24 +212,34 @@ def fetch_source(repo_url: str, branch: str, cache_dir: Path) -> Path:
     local_path = cache_dir / repo_name
 
     if local_path.exists():
-        print(f"  Updating cached repo ({repo_name})...")
+        print_status("Cache", f"Updating {repo_name}")
         r = subprocess.run(
             ["git", "pull", "--ff-only"],
             cwd=local_path, capture_output=True, text=True,
         )
         if r.returncode != 0:
-            print(f"  Warning: git pull failed — {r.stderr.strip()}", file=sys.stderr)
-            print(f"  Using existing cached copy.", file=sys.stderr)
+            detail = r.stderr.strip() or r.stdout.strip() or "unknown git error"
+            print_failure("Sync failed!")
+            print(f"Error: git pull failed — {detail}", file=sys.stderr)
+            print("", file=sys.stderr)
+            print("skill-sync refuses to continue with a stale cache.", file=sys.stderr)
+            print(f"Cached repo: {format_display_path(local_path)}", file=sys.stderr)
+            print("If this is caused by an edited cache config, move your settings to ~/.skill-sync/config.yaml", file=sys.stderr)
+            print(f"and remove the stale cache with: rm -rf {format_display_path(local_path)}", file=sys.stderr)
+            sys.exit(1)
+        print_status("Cache", f"Ready at {format_display_path(local_path)}")
     else:
-        print(f"  Cloning {repo_url}...")
+        print_status("Cache", f"Cloning {repo_name}")
         cache_dir.mkdir(parents=True, exist_ok=True)
         r = subprocess.run(
             ["git", "clone", "--branch", branch, "--depth", "1", repo_url, str(local_path)],
             capture_output=True, text=True,
         )
         if r.returncode != 0:
+            print_failure("Sync failed!")
             print(f"Error: git clone failed:\n{r.stderr.strip()}", file=sys.stderr)
             sys.exit(1)
+        print_status("Cache", f"Ready at {format_display_path(local_path)}")
 
     return local_path
 
@@ -114,7 +256,7 @@ def collect_skills(source_dir: Path) -> list[dict]:
     """
     index_path = source_dir / "skills" / "index.json"
     if not index_path.exists():
-        print("  Warning: skills/index.json not found", file=sys.stderr)
+        print_warning("skills/index.json not found")
         return []
 
     with open(index_path) as f:
@@ -124,7 +266,7 @@ def collect_skills(source_dir: Path) -> list[dict]:
     for entry in index.get("skills", []):
         skill_dir = source_dir / "skills" / entry["directory"]
         if not skill_dir.exists():
-            print(f"  Warning: skill directory missing: {entry['directory']}", file=sys.stderr)
+            print_warning(f"skill directory missing: {entry['directory']}")
             continue
 
         # Collect every file in the skill folder (recursive), keyed by path
@@ -149,7 +291,7 @@ def collect_agents(source_dir: Path) -> list[dict]:
     """Read all agents indexed in agents/index.json."""
     index_path = source_dir / "agents" / "index.json"
     if not index_path.exists():
-        print("  Warning: agents/index.json not found", file=sys.stderr)
+        print_warning("agents/index.json not found")
         return []
 
     with open(index_path) as f:
@@ -159,7 +301,7 @@ def collect_agents(source_dir: Path) -> list[dict]:
     for entry in index.get("agents", []):
         agent_path = source_dir / "agents" / entry["file"]
         if not agent_path.exists():
-            print(f"  Warning: agent file missing: {entry['file']}", file=sys.stderr)
+            print_warning(f"agent file missing: {entry['file']}")
             continue
         agents.append({
             "name":        entry["name"],
@@ -296,7 +438,7 @@ ADAPTERS: dict[str, callable] = {
 # Config
 # ---------------------------------------------------------------------------
 
-DEFAULT_CONFIG = {
+DEFAULT_CONFIG_TEMPLATE = {
     "source": {
         "repo":   DEFAULT_REPO,
         "branch": DEFAULT_BRANCH,
@@ -326,15 +468,46 @@ DEFAULT_CONFIG = {
 }
 
 
+def resolve_config_path(config_arg: str | None) -> Path:
+    if config_arg:
+        return Path(config_arg).expanduser()
+    return DEFAULT_CONFIG
+
+
+def ensure_user_config(config_path: Path) -> None:
+    """Create the user config from the bundled template on first run.
+
+    This keeps user settings out of the tracked repo so cache updates can fast-
+    forward cleanly.
+    """
+    if config_path.exists():
+        return
+
+    template_path = SCRIPT_DIR / "config.yaml"
+
+    if not template_path.exists():
+        return
+
+    try:
+        config_path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(template_path, config_path)
+    except OSError as exc:
+        print(f"Error: could not create default config at {config_path}: {exc}", file=sys.stderr)
+        print("Pass --config /path/to/config.yaml or fix permissions on the target directory.", file=sys.stderr)
+        sys.exit(1)
+
+
 def load_config(config_path: Path) -> dict:
+    ensure_user_config(config_path)
+
     if not config_path.exists():
-        return DEFAULT_CONFIG
+        return DEFAULT_CONFIG_TEMPLATE
     with open(config_path) as f:
         user_cfg = yaml.safe_load(f) or {}
 
     # Deep-merge user config on top of defaults
     import copy
-    merged = copy.deepcopy(DEFAULT_CONFIG)
+    merged = copy.deepcopy(DEFAULT_CONFIG_TEMPLATE)
     if "source" in user_cfg:
         merged["source"].update(user_cfg["source"])
     if "cache_dir" in user_cfg:
@@ -378,8 +551,8 @@ Examples:
 """,
     )
     parser.add_argument(
-        "--config", default=str(SCRIPT_DIR / "config.yaml"),
-        help="Path to config.yaml (default: config.yaml next to this script)",
+        "--config",
+        help="Path to config.yaml (default: ~/.skill-sync/config.yaml)",
     )
     parser.add_argument("--repo",   help="Override source repo URL")
     parser.add_argument("--branch", help="Override source branch")
@@ -401,8 +574,12 @@ Examples:
     parser.add_argument("--list",      action="store_true", help="List available skills and agents, then exit")
     parser.add_argument("--no-skills", action="store_true", help="Skip skills sync")
     parser.add_argument("--no-agents", action="store_true", help="Skip agents sync")
+    parser.add_argument("--no-banner", action="store_true", help="Disable the startup banner and terminal clear")
     parser.add_argument("--cache-dir", help="Override local cache directory")
     args = parser.parse_args()
+
+    if not args.no_banner:
+        print_startup_banner()
 
     # Resolve project_dir (None = global home-based install)
     project_dir: Path | None = None
@@ -410,59 +587,98 @@ Examples:
         project_dir = Path(args.project).expanduser().resolve()
 
     # Load and merge config
-    config    = load_config(Path(args.config))
+    config_path = resolve_config_path(args.config)
+    config    = load_config(config_path)
     repo_url  = args.repo   or config["source"]["repo"]
     branch    = args.branch or config["source"]["branch"]
     cache_dir = Path(args.cache_dir or config["cache_dir"]).expanduser()
+    run_time  = datetime.now().strftime("%Y-%m-%d %H:%M")
 
     # Fetch source
-    scope_label = str(project_dir) if project_dir else "global (~)"
-    print("=== skill-sync ===")
-    print(f"Source: {repo_url} ({branch})")
-    print(f"Scope:  {scope_label}")
+    scope_label = format_display_path(project_dir) if project_dir else "global (~)"
+    status_lines = [
+        format_status("Source", f"{repo_url} ({branch})"),
+        format_status("Config", format_display_path(config_path)),
+        format_status("Scope", scope_label),
+        format_status("Version", VERSION),
+        format_status("Run", run_time),
+    ]
+    if is_interactive_terminal():
+        set_output_indent(compute_centered_block_padding(status_lines))
+        print_centered_status_block(status_lines)
+        print("")
+        print_centered_divider()
+        print("")
+    else:
+        set_output_indent(0)
+        for line in status_lines:
+            print(line)
     source_dir = fetch_source(repo_url, branch, cache_dir)
 
     # Collect items
-    print("Collecting skills and agents...")
+    print_status("Catalog", "Reading skills and agents")
     skills = [] if args.no_skills else collect_skills(source_dir)
     agents = [] if args.no_agents else collect_agents(source_dir)
-    print(f"  Found {len(skills)} skills, {len(agents)} agents")
+    print_status("Found", f"{len(skills)} skills | {len(agents)} agents")
 
     # --list mode
     if args.list:
-        print(f"\nSkills ({len(skills)}):")
+        print("")
+        print(f"{OUTPUT_INDENT}Skills ({len(skills)}):")
         for s in skills:
             nfiles = len(s["files"])
-            print(f"  {s['name']:<28}  {nfiles} file(s)   {s['description'][:50]}")
-        print(f"\nAgents ({len(agents)}):")
+            print(f"{OUTPUT_INDENT}  {s['name']:<28}  {nfiles} file(s)   {s['description'][:50]}")
+        print("")
+        print(f"{OUTPUT_INDENT}Agents ({len(agents)}):")
         for a in agents:
-            print(f"  {a['name']:<28}  {a['description'][:65]}")
+            print(f"{OUTPUT_INDENT}  {a['name']:<28}  {a['description'][:65]}")
+        if is_interactive_terminal():
+            print("")
+            print_centered_divider()
+            print("")
         return
 
     # Sync targets
     total = 0
+    target_summary: list[str] = []
     for target_name, adapter_fn in ADAPTERS.items():
         target_cfg = config["targets"].get(target_name, {})
 
         # Skip if not selected or not enabled
         if args.target != "all" and args.target != target_name:
+            if args.target == "all":
+                target_summary.append(f"{target_name.capitalize()}: skipped")
             continue
         if args.target == "all" and not target_cfg.get("enabled", False):
+            target_summary.append(f"{target_name.capitalize()}: skipped")
             continue
 
-        print(f"\nSyncing to {target_name}...")
+        print("")
+        print_status("Target", target_name)
         if args.dry_run:
-            print("  (dry-run — no files will be written)")
+            print_status("Mode", style_text("Dry run", ANSI_YELLOW, bold=True))
 
         count = adapter_fn(skills, agents, target_cfg, dry_run=args.dry_run, project_dir=project_dir)
         if not args.dry_run:
-            print(f"  Wrote {count} file(s)")
+            print_status("Wrote", f"{count} file(s)")
+            target_summary.append(f"{target_name.capitalize()}: {count} file(s)")
+        else:
+            target_summary.append(f"{target_name.capitalize()}: preview ready")
         total += count
 
     if args.dry_run:
-        print("\nDry-run complete. No files were written.")
+        print("")
+        print_status("Result", style_text("Dry run complete; no files written", ANSI_YELLOW, bold=True))
+        print("")
+        print_warning("Dry run complete")
     else:
-        print(f"\nDone. Total files synced: {total}")
+        print("")
+        print_status("Result", f"Done; total files synced: {total}")
+        print("")
+        print_success("Sync complete!")
+
+    if is_interactive_terminal():
+        print("")
 
 
 if __name__ == "__main__":

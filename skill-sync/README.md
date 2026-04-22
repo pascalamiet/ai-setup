@@ -1,3 +1,12 @@
+```text
+ ███████╗██╗  ██╗██╗██╗     ██╗        ███████╗██╗   ██╗███╗   ██╗ ██████╗
+ ██╔════╝██║ ██╔╝██║██║     ██║        ██╔════╝╚██╗ ██╔╝████╗  ██║██╔════╝
+ ███████╗█████╔╝ ██║██║     ██║        ███████╗ ╚████╔╝ ██╔██╗ ██║██║     
+ ╚════██║██╔═██╗ ██║██║     ██║        ╚════██║  ╚██╔╝  ██║╚██╗██║██║     
+ ███████║██║  ██╗██║███████╗███████╗   ███████║   ██║   ██║ ╚████║╚██████╗
+ ╚══════╝╚═╝  ╚═╝╚═╝╚══════╝╚══════╝   ╚══════╝   ╚═╝   ╚═╝  ╚═══╝ ╚═════╝
+```
+
 # 🔄 skill-sync
 
 Pulls skills and subagent definitions from the
@@ -151,10 +160,12 @@ my-project/
 
 Targets are **opt-in**: the script does not auto-detect which AI tools you have
 installed. It only syncs to targets that are explicitly set to `enabled: true`
-in `config.yaml`. If you have Gemini or Codex installed, flip the corresponding
-flag to start syncing to them.
+in `~/.skill-sync/config.yaml` by default. If you have Gemini or Codex
+installed, flip the corresponding flag to start syncing to them.
 
-Edit `config.yaml` to change targets, directories, or the source branch.
+Edit `~/.skill-sync/config.yaml` to change targets, directories, or the source
+branch. On first run, `skill-sync` copies the bundled template there
+automatically. You can still override this with `--config /path/to/config.yaml`.
 
 ```yaml
 source:
@@ -179,7 +190,8 @@ targets:
 ## 🔍 How it works
 
 1. **Fetch** — the repo is cloned into `~/.skill-sync/cache/ai-setup` on first
-   run, then updated via `git pull` on subsequent runs. No internet, no skills — sorry.
+   run, then updated via `git pull --ff-only` on subsequent runs. If the cache
+   cannot be updated, `skill-sync` stops instead of silently using stale files.
 2. **Collect** — `skills/index.json` and `agents/index.json` are read to
    discover all available files.
 3. **Write** — for each enabled target, skill and agent files are written to
