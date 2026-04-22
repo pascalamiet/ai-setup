@@ -121,10 +121,10 @@
       "name": "initialize",
       "directory": "initialize",
       "file": "initialize/SKILL.md",
-      "description": "Create a CLAUDE.md file in the current working directory by inspecting the project and generating a populated, accurate project context file.",
+      "description": "Create a shared AI project context file, then generate only the enabled agent-specific symlinks from a TOML config that also controls paths, behavior, optional sections, and limits.",
       "license": "MIT",
       "allowed_tools": ["Read", "Write", "Bash", "Glob"],
-      "tags": ["project-setup", "CLAUDE.md", "session", "context", "scaffold"]
+      "tags": ["project-setup", "AI.md", "CLAUDE.md", "AGENTS.md", "GEMINI.md", "session", "context", "scaffold", "symlink", "toml", "config"]
     },
     {
       "name": "literature-search",

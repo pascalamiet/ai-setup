@@ -1,39 +1,67 @@
 ---
 name: initialize
 description: |
-  Create a CLAUDE.md file in the current working directory by inspecting the
-  project and generating a populated, accurate project context file.
-  Use when: starting Claude Code in a directory that has no CLAUDE.md, or when
-  the user says /initialize or asks to initialize / set up the session file.
+  Create a shared .ai/AI.md context file in the current working directory by
+  inspecting the project, then create only the agent-specific symlinks the user
+  needs (for example CLAUDE.md, AGENTS.md, GEMINI.md) based on a TOML config
+  that also controls paths, behavior, content sections, and limits. Use when:
+  starting an AI-assisted project, when the user says /initialize, or when they
+  ask to set up persistent agent context files.
 license: MIT
 metadata:
   author: custom
-  version: "1.0.0"
+  version: "1.2.0"
 ---
 
-# initialize — Create CLAUDE.md for This Project
+# initialize — Create Shared AI Context for This Project
 
-When invoked, inspect the current project and produce a `CLAUDE.md` that gives future Claude sessions an accurate, immediately useful briefing.
+When invoked, inspect the current project and produce a shared `.ai/AI.md` that gives future agent sessions an accurate, immediately useful briefing. Then create only the root-level symlinks needed for the enabled agents, pointing each of them at the configured shared context path.
 
 ## When to Apply
 
 - `/initialize` is typed explicitly
-- The user says "initialize this project", "set up CLAUDE.md", "create a session file", etc.
-- `session-start` is run and finds no `CLAUDE.md`
+- The user says "initialize this project", "set up AGENTS/CLAUDE/GEMINI files", "create a session file", etc.
+- An agent-start workflow finds no usable project context file
 
 ---
 
 ## Execution
 
-### Step 1: Gather project context (run all in parallel)
+### Step 1: Resolve enabled agents
+
+1. Read `skills/initialize/config.toml` and use it as the default source of truth for this skill.
+2. Ensure the project has a `.ai/` directory.
+3. If `.ai/config.toml` does not exist in the project and `behavior.create_if_missing = true`, create it by copying `skills/initialize/config.toml`.
+4. Read `.ai/config.toml` and use it as the project-local source of truth for which symlinks to create, where to point them, what sections to include, and what limits to respect.
+5. Do not ask the user which agents they use. The config file controls this behavior.
+
+Only these agents are currently supported by this skill:
+
+| Agent | Root symlink |
+|------|--------------|
+| Claude | `CLAUDE.md` |
+| Codex | `AGENTS.md` |
+| Gemini | `GEMINI.md` |
+
+Config sections currently supported:
+
+| Section | Purpose |
+|------|---------|
+| `[agents]` | Which root-level symlinks should exist |
+| `[paths]` | Where the shared context file lives |
+| `[behavior]` | Creation, overwrite, cleanup, and file-protection rules |
+| `[sections]` | Which optional content blocks to include in `.ai/AI.md` |
+| `[limits]` | Soft limits for todo count and target file length |
+
+### Step 2: Gather project context (run all in parallel)
 
 1. **Directory tree** — list top-level structure and key subdirectories (exclude `.git`, `node_modules`, `__pycache__`, build artifacts)
 2. **README.md** — read if present
 3. **Git history** — `git log --oneline -10` and `git status` (skip gracefully if not a git repo)
 4. **Key config / manifest files** — read the first relevant one found: `pyproject.toml`, `setup.py`, `package.json`, `Makefile`, `*.Rproj`, `environment.yml` — just enough to infer stack and purpose
-5. **Memory files** — read `~/.claude/projects/[project-path]/memory/` if they exist, to surface any user preferences or prior decisions
+5. **Memory files** — read any relevant agent memory directories that exist (for example `~/.claude/projects/[project-path]/memory/`) to surface user preferences or prior decisions
 
-### Step 2: Infer project type
+### Step 3: Infer project type
 
 Classify the project into one of:
 
@@ -46,24 +74,34 @@ Classify the project into one of:
 
 The project type determines which optional sections to include (see Step 4).
 
-### Step 3: Ask the user one focused question
+### Step 4: Ask the user one focused question
 
 If the project purpose is unclear from inspection alone, ask:
 
-> "Quick question before I write CLAUDE.md — what is this project about in one sentence? (I can infer the structure but want to get the goal right.)"
+> "Quick question before I write `.ai/AI.md` — what is this project about in one sentence? (I can infer the structure but want to get the goal right.)"
 
 If the purpose is obvious from README or files, skip this and proceed.
 
-### Step 4: Write CLAUDE.md
+### Step 5: Write the shared context file
 
-Write `CLAUDE.md` in the current directory using the template below. Fill every section from what you gathered — never leave placeholder text if real content is available.
+Use `paths.shared_context` as the output path for the shared context file. The default is `.ai/AI.md`. This file should contain the content that would normally go into the main project agent file. Fill every section from what you gathered — never leave placeholder text if real content is available.
+
+Honor the config when deciding what to include:
+
+- If `sections.include_stack = false`, omit `## Stack & Tools`
+- If `sections.include_conventions = false`, omit `## Conventions`
+- If `sections.include_core_ideas = false`, omit `## Core Ideas / Framework`
+- If `sections.include_gemini_cli = false`, omit `## Using Gemini CLI for Large Context Analysis`
+- If `sections.include_session_log = false`, omit `## Session Log`
+- Cap inferred todos to roughly `limits.max_todos`
+- Aim to keep the file near `limits.target_max_lines`
 
 ---
 
 ```markdown
-# CLAUDE.md
+# AI.md
 
-*Auto-maintained by /session-end. Read by /session-start.*
+*Shared project context for Claude, Codex, Gemini, and other coding agents.*
 
 ## Project Overview
 
@@ -115,10 +153,10 @@ gemini --all_files -p "Analyze the project structure"             # alternative 
 
 ### [YYYY-MM-DD] — Session 1 (init)
 
-**Summary:** Initialized CLAUDE.md from project inspection.
+**Summary:** Initialized shared AI context from project inspection.
 
 **Accomplished:**
-- Created CLAUDE.md
+- Created `.ai/AI.md`
 
 **Issues solved:**
 - (none)
@@ -129,11 +167,69 @@ gemini --all_files -p "Analyze the project structure"             # alternative 
 
 ---
 
-### Step 5: Report to the user
+### Step 6: Create or remove symlinks from `.ai/config.toml`
+
+If `.ai/config.toml` did not exist, initialize it from `skills/initialize/config.toml`. The default bundled config is:
+
+```toml
+[agents]
+claude = true
+codex = true
+gemini = false
+
+[paths]
+shared_context = ".ai/AI.md"
+
+[behavior]
+create_if_missing = true
+remove_disabled_symlinks = true
+overwrite_existing_symlinks = true
+protect_regular_files = true
+
+[sections]
+include_stack = true
+include_conventions = true
+include_core_ideas = true
+include_session_log = true
+include_gemini_cli = true
+
+[limits]
+max_todos = 8
+target_max_lines = 180
+```
+
+Interpret `.ai/config.toml` as follows:
+
+- `paths.shared_context` is the symlink target path for enabled agents
+- If `agents.claude = true`, ensure `CLAUDE.md` exists as a symlink to `paths.shared_context`
+- If `agents.codex = true`, ensure `AGENTS.md` exists as a symlink to `paths.shared_context`
+- If `agents.gemini = true`, ensure `GEMINI.md` exists as a symlink to `paths.shared_context`
+- If any value is `false` and `behavior.remove_disabled_symlinks = true`, remove the corresponding root symlink if it exists and points to `paths.shared_context`
+
+Use symlinks, not file copies. Prefer commands equivalent to:
+
+```bash
+mkdir -p .ai
+ln -sfn .ai/AI.md CLAUDE.md
+ln -sfn .ai/AI.md AGENTS.md
+ln -sfn .ai/AI.md GEMINI.md
+```
+
+Honor the behavior flags:
+
+- If `behavior.protect_regular_files = true`, do not overwrite a non-symlink context file that already contains user content
+- If `behavior.overwrite_existing_symlinks = true`, you may repoint existing symlinks to `paths.shared_context`
+- If `behavior.create_if_missing = false`, do not create `.ai/config.toml`; use the bundled config only for this run
+
+If `CLAUDE.md`, `AGENTS.md`, or `GEMINI.md` already exists as a regular file and `behavior.protect_regular_files = true`, stop and ask the user before replacing it.
+
+### Step 7: Report to the user
 
 Tell the user:
-- That CLAUDE.md was written
+- That the shared context file was written, and where
+- Which symlinks were created or removed
 - How many todos are listed
+- That the agent toggle file was read from or initialized into `.ai/config.toml`
 - One sentence on what's missing or what they should fill in manually (e.g., "The core framework section is a placeholder — fill in your model once you've settled on it.")
 
 ---
@@ -147,4 +243,6 @@ Tell the user:
 - **Stack section** — omit entirely if the project has no code yet (pure ideas stage).
 - **Conventions section** — omit for pure theory/ideas projects; include for any project with code or data.
 - **Core Ideas section** — include for research projects; omit for pure software projects.
-- Keep the file under ~180 lines. Long CLAUDE.md files are harder to maintain and slower to load.
+- Keep the shared context file near `limits.target_max_lines`. Long context files are harder to maintain and slower to load.
+- `skills/initialize/config.toml` defines the bundled defaults. `.ai/config.toml` is the per-project switchboard after initialization. Respect `.ai/config.toml` on every initialize run.
+- The shared content in `.ai/AI.md` must remain agent-neutral. Do not add agent-specific instructions unless the user explicitly asks for them.
