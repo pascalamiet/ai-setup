@@ -19,6 +19,15 @@
       "tags": ["research", "literature-review", "citations", "academic-writing", "papers"]
     },
     {
+      "name": "caveman",
+      "directory": "caveman",
+      "file": "caveman/SKILL.md",
+      "description": "Ultra-compressed communication mode. Cuts token usage by speaking tersely while preserving technical accuracy, with multiple intensity levels.",
+      "license": null,
+      "allowed_tools": [],
+      "tags": ["brevity", "token-efficiency", "writing", "communication", "style"]
+    },
+    {
       "name": "claude",
       "directory": "claude",
       "file": "claude/SKILL.md",
