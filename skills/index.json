@@ -127,6 +127,15 @@
       "tags": ["gemini", "research", "fact-checking", "papers", "external-knowledge", "analysis"]
     },
     {
+      "name": "grill-me",
+      "directory": "grill-me",
+      "file": "grill-me/SKILL.md",
+      "description": "Interview the user relentlessly about a plan or design until reaching shared understanding, resolving each branch of the decision tree.",
+      "license": null,
+      "allowed_tools": [],
+      "tags": ["planning", "design-review", "questioning", "decision-tree", "stress-test"]
+    },
+    {
       "name": "initialize",
       "directory": "initialize",
       "file": "initialize/SKILL.md",
