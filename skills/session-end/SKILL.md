@@ -1,7 +1,7 @@
 ---
 name: session-end
 description: |
-  Close a Claude Code session by documenting what was accomplished, updating CLAUDE.md with
+  Close an agent session by documenting what was accomplished, updating .ai/AI.md with
   the current project structure, a session log entry, and a forward-looking todo list.
   Use at the end of any working session to maintain continuity across conversations.
 license: MIT
@@ -12,13 +12,13 @@ metadata:
 
 # Session End
 
-You are a session scribe. Your job is to close this working session cleanly by writing a structured record into CLAUDE.md so that the next session can pick up exactly where this one left off.
+You are a session scribe. Your job is to close this working session cleanly by writing a structured record into .ai/AI.md so that the next session can pick up exactly where this one left off.
 
 ## When to Apply
 
 Use this skill at the end of a working session to:
 - Document what was accomplished and how problems were solved
-- Update the project structure in CLAUDE.md to reflect current state
+- Update the project structure in .ai/AI.md to reflect current state
 - Carry forward any unfinished todos and add new ones
 - Leave a useful briefing for the next session
 
@@ -31,7 +31,7 @@ Use this skill at the end of a working session to:
 Run the following in parallel to understand the current state:
 - `git log --oneline -15` — recent commits to summarize what changed
 - `git status` — any uncommitted work to note
-- Read the existing `CLAUDE.md` if it exists (to preserve prior sessions and todos)
+- Read the existing `.ai/AI.md` if it exists (to preserve prior sessions and todos)
 - Read `README.md` if it exists (for project overview)
 
 ### Step 2: Ask the user
@@ -57,18 +57,18 @@ project/
 │   ├── raw/       — never modified
 │   └── final/     — analysis-ready
 ├── output/        — tables and figures
-├── CLAUDE.md      — session log and project state
+├── .ai/AI.md      — session log and project state
 └── README.md      — project overview
 ```
 
-### Step 4: Write CLAUDE.md
+### Step 4: Write .ai/AI.md
 
-Write or update `CLAUDE.md` in the project root. Keep only the most recent session entry — delete all older log entries to save tokens. The file should follow this structure:
+Write or update `.ai/AI.md` in the project root. Keep only the most recent session entry — delete all older log entries to save tokens. The file should follow this structure:
 
 ---
 
 ```markdown
-# CLAUDE.md — [Project Name]
+# .ai/AI.md — [Project Name]
 
 *Auto-maintained by /session-end. Read by /session-start.*
 
@@ -110,14 +110,14 @@ Write or update `CLAUDE.md` in the project root. Keep only the most recent sessi
 ### Step 5: Confirm
 
 Tell the user:
-- Where CLAUDE.md was written
+- Where .ai/AI.md was written
 - The session number and date
 - How many todos are active
 - One sentence: what the next session should start with
 
 ---
 
-## CLAUDE.md Maintenance Rules
+## .ai/AI.md Maintenance Rules
 
 - **Project structure**: always regenerated fresh from the actual directory — never stale
 - **Todos**: carry all unchecked `[ ]` items forward; mark completed items `[x]` for one session, then drop them

@@ -26,7 +26,7 @@ targets:
   #   Global:  ~/.gemini/skills/<name>.md
   #   Project: <dir>/.gemini/skills/<name>.md   (when --project is passed)
   gemini:
-    enabled: true
+    enabled: false
     skills_dir: ~/.gemini/skills
     sync_skills: true
     sync_agents: false   # Gemini CLI has no agent concept
